@@ -1,6 +1,5 @@
 -- Figure 1
 import HaskellSpec.Names
-import HaskellSpec.Expressions
 import HaskellSpec.NonEmptyList
 
 /--
@@ -133,31 +132,67 @@ mutual
 
   /--
   ```text
-  cx ∈ Context → (class₁,...,classₖ)
-                 k ≥ 0
+  class ∈ ClassAssertion → C (u t₁ … tₖ)   k ≥ 0
   ```
-  --/
-  def Context : Type := List Class_Assertion
+  -/
+  inductive ClassAssertion : Type where
+    | classAssert : Class_Name -> Type_Variable -> List Type_Expression -> ClassAssertion
 
-  inductive Class_Assertion : Type where
+  /--
+  ```text
+  conDecl ∈ ConstructorDecl → J t₁ … tₙ                 k ≥ 0
+                            | J { v₁ ∷ t₁ … vₙ ∷ tₙ }   k ≥ 0
+  ```
+  -/
+  inductive ConstructorDecl : Type where
+    | conDecl_simple: Constructor -> List Type_Expression -> ConstructorDecl
+    | conDecl_record: Constructor -> List (QVariable × Type_Expression) -> ConstructorDecl
 
-  inductive Constructor_Decls : Type where
+  /--
+  ```text
+  conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
+  ```
+  -/
+  inductive ConstructorDecls : Type where
+    | conDecls : NonEmptyList ConstructorDecl -> ConstructorDecls
 
-  inductive Constructor_Decl : Type where
+  /--
+  ```text
+  instDecl ∈ InstanceDecl → instance cx => C t where bind₁; …; bindₙ    n ≥ 0
+  ```
+  -/
+  inductive InstanceDecl : Type where
+    -- | instDecl : Context -> Class_Name -> Type_Expression -> List Binding -> InstanceDecl
 
-  inductive Instance_Decls : Type where
+  /--
+  ```text
+  instDecls ∈ InstanceDecls → instDecl₁; …; instDeclₙ   n ≥ 0
+  ```
+  -/
+  inductive InstanceDecls : Type where
+    | instDecls : List InstanceDecl -> InstanceDecls
 
-  inductive Instance_Decl : Type where
-
-  inductive Signatures : Type where
-
+  /--
+  ```text
+  sig ∈ Signature → v :: cx => t
+  ```
+  -/
   inductive Signature : Type where
+    | sig : QVariable -> Context -> Type_Expression -> Signature
+
+  /--
+  ```text
+  sigs ∈ Signatures → sig₁; …; sigₙ   n ≥ 0
+  ```
+  -/
+  inductive Signatures : Type where
+    | sigs : List Signature -> Signatures
 end
 
--- inductive Plus : Type where
---   | add : Nat → Nat → Plus
--- open Plus
-
--- notation a "⊕" b => add a b
-
--- def test2 : Plus := 2 ⊕ 2
+/--
+```text
+cx ∈ Context → (class₁,...,classₖ)
+                k ≥ 0
+```
+--/
+def Context : Type := List ClassAssertion
