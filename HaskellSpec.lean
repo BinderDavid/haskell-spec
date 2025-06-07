@@ -1,4 +1,3 @@
-import HaskellSpec.Declarations
-import HaskellSpec.Expressions
+import HaskellSpec.Source.SourceLang
 import HaskellSpec.Names
 import HaskellSpec.SemanticTypes
