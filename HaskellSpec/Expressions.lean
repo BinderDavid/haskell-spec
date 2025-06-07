@@ -1,25 +1,70 @@
+import HaskellSpec.Names
+import HaskellSpec.Declarations
 -- Figure 2
 
-inductive Binds : Type where
+inductive Literal : Type where
+  | lit_dummy : Int -> Literal
 
-inductive Bind_Group : Type where
+mutual
+  inductive Pattern : Type where
+    | pat_var : QVariable -> Pattern
+    | pat_constr_pat : QConstructor -> List Pattern -> Pattern
+    | pat_constr_fieldPat : QConstructor -> List FieldPattern -> Pattern
+    | pat_at : Variable -> Pattern -> Pattern
+    | pat_lazy : Pattern -> Pattern
+    | pat_wildcard : Pattern
+    | pat_lit : Literal -> Pattern
+    | pat_plus : Variable -> Int -> Pattern
 
-inductive Binding : Type where
+  inductive FieldPattern : Type where
+    | fp_pat: Variable -> Pattern -> FieldPattern
+end
 
-inductive Match : Type where
+mutual
+  inductive Binds : Type where
+    | binds_binds : Signatures -> BindGroup -> Binds -> Binds
 
-inductive Guarded_Exprs : Type where
+  inductive BindGroup : Type where
+    | bind_group : Binding -> List Binding -> BindGroup
 
-inductive Guarded_Exp : Type where
+  inductive Binding : Type where
+    | bind_match : QVariable -> Match -> List Match -> Binding
+    | bind_pat : Pattern -> GuardedExprs -> Binding
 
-inductive Expression : Type where
+  inductive Match : Type where
+    | match_match : Pattern -> List Pattern -> GuardedExprs -> Match
 
-inductive Statements : Type where
+  inductive GuardedExprs : Type where
+    | gExp_where : GuardedExp -> List GuardedExp -> Binds -> GuardedExprs
 
-inductive Qualifiers : Type where
+  inductive GuardedExp : Type where
+    | gExp_eq : Expression -> Expression -> GuardedExp
 
-inductive Field_Binding : Type where
+  inductive Expression : Type where
+    | expr_var : QVariable -> Expression
+    | expr_lit : Literal -> Expression
+    | expr_constr : QConstructor -> Expression
+    | expr_abs : Pattern -> List Pattern -> Expression -> Expression
+    | expr_app : Expression -> Expression -> Expression
+    | expr_let : Binds -> Expression -> Expression
+    | expr_case : Expression -> Match -> List Match -> Expression
+    | expr_do : Statements -> Expression
+    | expr_listComp : Expression -> Qualifiers -> Expression
+    | expr_listRange : Expression -> Option Expression -> Option Expression -> Expression
+    | expr_recUpd : Expression -> List FieldBinding -> Expression
+    | expr_recConstr : QConstructor -> List FieldBinding -> Expression
 
-inductive Pattern : Type where
+  inductive Statement : Type where
+    | stmt_arr : Pattern -> Expression -> Statement
+    | stmt_let : Binds -> Statement
+    | stmt_expr : Expression -> Statement
 
-inductive FieldPattern : Type where
+  inductive Statements : Type where
+    | stmt_list : List Statement -> Expression -> Statements
+
+  inductive Qualifiers : Type where
+    | qal_list : List Statement -> Qualifiers
+
+  inductive FieldBinding : Type where
+    | fb_bind : QVariable -> Expression -> FieldBinding
+end
