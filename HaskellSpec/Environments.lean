@@ -56,6 +56,11 @@ Full Environment
 inductive FE : Type where
 
 /--
+Entity Environment
+-/
+inductive EE : Type where
+
+/--
 Module Environment
 -/
 inductive ME : Type where
