@@ -31,44 +31,42 @@ inductive Entity : Type where
   | ent_classall : QClassName → Entity
   | ent_module   : Module_Name → Entity -- use QModule_Name
 
-mutual
-  /--
-  ```text
-  mod ∈ Module → module M (ent₁,..., entₖ) where imp₁;...;impₙ;body
-                 k, n ≥ 0
-  ```
-  --/
-  inductive Module : Type where
-    | module :
-        Module_Name -- Use QModule:Name in the future?
-      → List Entity
-      → List Import
-      → Module
+/--
+```text
+implist ∈ Import list → [[hiding] (ent₁,...,entₙ)]
+                        n ≥ 0
+```
+--/
+inductive ImportList : Type where
+  | imp_hiding  : List Entity → ImportList
+  | imp_showing : List Entity → ImportList
+  | imp_empty
 
-  /--
-  ```text
-  imp ∈ Import → import qualifier M as M' implist
-  ```
-  --/
-  inductive Import : Type where
-    | imp :
-        Qualifier
-      → Module_Name
-      → Module_Name
-      → ImportList
-      → Import
+/--
+```text
+imp ∈ Import → import qualifier M as M' implist
+```
+--/
+inductive Import : Type where
+  | imp :
+      Qualifier
+    → Module_Name
+    → Module_Name
+    → ImportList
+    → Import
 
-  /--
-  ```text
-  implist ∈ Import list → [[hiding] (ent₁,...,entₙ)]
-                          n ≥ 0
-  ```
-  --/
-  inductive ImportList : Type where
-    | imp_hiding  : List Entity → ImportList
-    | imp_showing : List Entity → ImportList
-    | imp_empty
-end
+/--
+```text
+mod ∈ Module → module M (ent₁,..., entₖ) where imp₁;...;impₙ;body
+               k, n ≥ 0
+```
+--/
+inductive Module : Type where
+  | module :
+      Module_Name -- Use QModule:Name in the future?
+    → List Entity
+    → List Import
+    → Module
 
 mutual
   /--
