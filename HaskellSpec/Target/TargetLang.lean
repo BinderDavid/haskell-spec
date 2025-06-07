@@ -73,19 +73,6 @@ inductive Import : Type where
     → ImportList
     → Import
 
-/--
-```text
-mod ∈ Module → module M (ent₁,..., entₖ) where imp₁;...;impₙ;body
-               k, n ≥ 0
-```
---/
-inductive Module : Type where
-  | module :
-      Module_Name -- Use QModule:Name in the future?
-    → List Entity
-    → List Import
-    → Module
-
 
 mutual
   /--
@@ -368,3 +355,35 @@ mutual
   inductive Context : Type where
     | cx : List ClassAssertion → Context
 end
+
+/--
+```text
+typeDecl ∈ TypeDeclaration → data χ α₁ … αₖ = conDecl₁ | … | conDeclsₙ    k ≥ 0
+                                                                          n ≥ 1
+```
+--/
+inductive TypeDeclaration : Type where
+  | typeDecl :
+      -- Chi ->
+      -- List Alphas ->
+      NonEmptyList ConstructorDecl ->
+      TypeDeclaration
+
+/--
+```text
+typeDecls ∈ TypeDeclarations → typeDecl₁; …; typeDeclₙ    n ≥ 0
+```
+--/
+inductive TypeDeclarations : Type where
+  | typeDecls : List TypeDeclaration -> TypeDeclarations
+
+/--
+```text
+mod ∈ Module → module M where typeDecls; binds
+```
+--/
+inductive Module : Type where
+  | module :
+      Module_Name -- Use QModule:Name in the future?
+    → List TypeDeclarations
+    → Module
