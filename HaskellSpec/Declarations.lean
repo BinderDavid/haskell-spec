@@ -68,7 +68,9 @@ mutual
     | imp_hiding  : List Entity → ImportList
     | imp_showing : List Entity → ImportList
     | imp_empty
+end
 
+mutual
   /--
   ```text
   body ∈ Module body → ctDecls; instDecls; binds
