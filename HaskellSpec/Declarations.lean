@@ -187,12 +187,13 @@ mutual
   -/
   inductive Signatures : Type where
     | sigs : List Signature -> Signatures
-end
 
-/--
-```text
-cx ∈ Context → (class₁,...,classₖ)
-                k ≥ 0
-```
---/
-def Context : Type := List ClassAssertion
+  /--
+  ```text
+  cx ∈ Context → (class₁,...,classₖ)
+                  k ≥ 0
+  ```
+  --/
+  inductive Context : Type where
+    | cx : List ClassAssertion -> Context
+end
