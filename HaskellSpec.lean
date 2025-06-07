@@ -4,3 +4,4 @@ import HaskellSpec.Names
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Environments
 import HaskellSpec.NonEmptyList
+import HaskellSpec.Elaboration.Kinding
