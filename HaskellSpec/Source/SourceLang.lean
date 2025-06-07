@@ -1,4 +1,6 @@
--- Figure 1 and 2
+/-!
+Figure 1 and 2
+-/
 import HaskellSpec.Names
 import HaskellSpec.NonEmptyList
 
