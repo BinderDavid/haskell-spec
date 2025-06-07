@@ -55,7 +55,7 @@ mutual
         Qualifier
       → Module_Name
       → Module_Name
-      → Import_List
+      → ImportList
       → Import
 
   /--
@@ -64,9 +64,9 @@ mutual
                           n ≥ 0
   ```
   --/
-  inductive Import_List : Type where
-    | imp_hiding  : List Entity → Import_List
-    | imp_showing : List Entity → Import_List
+  inductive ImportList : Type where
+    | imp_hiding  : List Entity → ImportList
+    | imp_showing : List Entity → ImportList
     | imp_empty
 
   /--
@@ -74,12 +74,12 @@ mutual
   body ∈ Module body → ctDecls; instDecls; binds
   ```
   --/
-  inductive Module_Body : Type where
+  inductive ModuleBody : Type where
     | body :
-        Classes_and_Types
-      → Instance_Decls
+        ClassesAndTypes
+      → InstanceDecls
       -- → Binds
-      → Module_Body
+      → ModuleBody
 
   /--
   ```text
@@ -87,9 +87,9 @@ mutual
                                 n ≥ 1
   ```
   --/
-  inductive Classes_and_Types : Type where
+  inductive ClassesAndTypes : Type where
     | ct_empty
-    | ct_Decls : NonEmptyList Class_or_Type → Classes_and_Types → Classes_and_Types
+    | ct_Decls : NonEmptyList ClassOrType → ClassesAndTypes → ClassesAndTypes
 
   /--
   ```text
@@ -98,25 +98,25 @@ mutual
                          | class cx => B u where sigs; bind₁; ...; bindₙ     k ≥ 0
   ```
   --/
-  inductive Class_or_Type : Type where
+  inductive ClassOrType : Type where
     | ct_type :
         Type_Name
       → List Type_Variable
-      → Type_Expression
-      → Class_or_Type
+      → TypeExpression
+      → ClassOrType
     | ct_data :
         Context
       → Type_Name
       → List Type_Variable
-      → Constructor_Decls
-      → Class_or_Type
+      → ConstructorDecls
+      → ClassOrType
     | ct_class :
         Context
       → Class_Name
       → Type_Variable
       → Signatures
       -- → List Binding
-      → Class_or_Type
+      → ClassOrType
 
   /--
   ```text
@@ -125,10 +125,10 @@ mutual
                       | t₁ t₂
   ```
   --/
-  inductive Type_Expression : Type where
-    | type_var  : Type_Variable → Type_Expression
-    | type_name : Type_Name → Type_Expression
-    | type_cons : Type_Expression → Type_Expression → Type_Expression
+  inductive TypeExpression : Type where
+    | type_var  : Type_Variable → TypeExpression
+    | type_name : Type_Name → TypeExpression
+    | type_cons : TypeExpression → TypeExpression → TypeExpression
 
   /--
   ```text
@@ -136,7 +136,7 @@ mutual
   ```
   -/
   inductive ClassAssertion : Type where
-    | classAssert : Class_Name -> Type_Variable -> List Type_Expression -> ClassAssertion
+    | classAssert : Class_Name -> Type_Variable -> List TypeExpression -> ClassAssertion
 
   /--
   ```text
@@ -145,8 +145,8 @@ mutual
   ```
   -/
   inductive ConstructorDecl : Type where
-    | conDecl_simple: Constructor -> List Type_Expression -> ConstructorDecl
-    | conDecl_record: Constructor -> List (QVariable × Type_Expression) -> ConstructorDecl
+    | conDecl_simple: Constructor -> List TypeExpression -> ConstructorDecl
+    | conDecl_record: Constructor -> List (QVariable × TypeExpression) -> ConstructorDecl
 
   /--
   ```text
@@ -178,7 +178,7 @@ mutual
   ```
   -/
   inductive Signature : Type where
-    | sig : QVariable -> Context -> Type_Expression -> Signature
+    | sig : QVariable -> Context -> TypeExpression -> Signature
 
   /--
   ```text
