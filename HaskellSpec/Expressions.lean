@@ -1,5 +1,6 @@
 import HaskellSpec.Names
 import HaskellSpec.Declarations
+import HaskellSpec.NonEmptyList
 -- Figure 2
 
 inductive Literal : Type where
@@ -52,7 +53,7 @@ mutual
 ```
 --/
   inductive BindGroup : Type where
-    | bind_group : Binding -> List Binding -> BindGroup
+    | bind_group : NonEmptyList Binding -> BindGroup
 
 /--
 ```text
@@ -61,7 +62,7 @@ mutual
 ```
 --/
   inductive Binding : Type where
-    | bind_match : QVariable -> Match -> List Match -> Binding
+    | bind_match : QVariable -> NonEmptyList Match -> Binding
     | bind_pat : Pattern -> GuardedExprs -> Binding
 
 /--
@@ -70,7 +71,7 @@ mutual
 ```
 --/
   inductive Match : Type where
-    | match_match : Pattern -> List Pattern -> GuardedExprs -> Match
+    | match_match : NonEmptyList Pattern -> GuardedExprs -> Match
 
 /--
 ```text
@@ -78,7 +79,7 @@ mutual
 ```
 --/
   inductive GuardedExprs : Type where
-    | gExp_where : GuardedExp -> List GuardedExp -> Binds -> GuardedExprs
+    | gExp_where : NonEmptyList GuardedExp -> Binds -> GuardedExprs
 
 /--
 ```text
@@ -108,10 +109,10 @@ mutual
     | expr_var : QVariable -> Expression
     | expr_lit : Literal -> Expression
     | expr_constr : QConstructor -> Expression
-    | expr_abs : Pattern -> List Pattern -> Expression -> Expression
+    | expr_abs : NonEmptyList Pattern -> Expression -> Expression
     | expr_app : Expression -> Expression -> Expression
     | expr_let : Binds -> Expression -> Expression
-    | expr_case : Expression -> Match -> List Match -> Expression
+    | expr_case : Expression -> NonEmptyList Match -> Expression
     | expr_do : Statements -> Expression
     | expr_listComp : Expression -> Qualifiers -> Expression
     | expr_listRange : Expression -> Option Expression -> Option Expression -> Expression
