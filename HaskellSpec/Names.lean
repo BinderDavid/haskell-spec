@@ -13,12 +13,6 @@ Names are defined in Table 1 and Fig. 3 in the paper
 inductive Module_Name : Type where
 
 /--
-`M`
--/
-inductive QModule_Name : Type where
-
-
-/--
 `v`
 -/
 inductive Variable : Type where
@@ -110,8 +104,15 @@ inductive QType_Variable : Type where
 `B`
 -/
 inductive Class_Name : Type where
+  | Mk : String → Class_Name
 
 /--
-`C`
+# Qualified class name
+```text
+C ∈ Qualified class name → B
+                         | M.B
+```
 -/
 inductive QClassName : Type where
+  | Unqualified : Class_Name → QClassName
+  | Qualified : Module_Name → Class_Name → QClassName
