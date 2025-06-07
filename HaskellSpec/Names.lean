@@ -30,14 +30,37 @@ inductive Variable : Type where
 inductive QVariable : Type where
 
 /--
+```
+Δ ∈ Special data constructor → ()
+                             | (k)
+                             | []
+                             | (:)
+```
+-/
+inductive Special_Data_Constructor where
+  | Unit : Special_Data_Constructor
+  | Tuple : Nat → Special_Data_Constructor
+  | Nil : Special_Data_Constructor
+  | Cons : Special_Data_Constructor
+
+
+/--
 `J`
 -/
 inductive Constructor : Type where
+  | Mk : String → Constructor
 
 /--
-`K`
+```text
+K ∈ Qualified data constructor → J
+                               | M.J
+                               | Δ
+```
 -/
 inductive QConstructor : Type where
+  | Unqualified : Constructor → QConstructor
+  | Qualified : Module_Name → Constructor → QConstructor
+  | Special : Special_Data_Constructor → QConstructor
 
 /--
 ```text
