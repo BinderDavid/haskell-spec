@@ -119,17 +119,43 @@ mutual
     | expr_recUpd : Expression -> List FieldBinding -> Expression
     | expr_recConstr : QConstructor -> List FieldBinding -> Expression
 
+  /--
+  ```text
+  helper type used in the internals of Statements, Qualifiers
+  ```
+  -/
   inductive Statement : Type where
     | stmt_arr : Pattern -> Expression -> Statement
     | stmt_let : Binds -> Statement
     | stmt_expr : Expression -> Statement
 
+  /--
+  ```text
+  stmts ∈ Statements → p <- e; stmts
+                     | let binds; stmts
+                     | e; stmts
+                     | e
+  ```
+  -/
   inductive Statements : Type where
     | stmt_list : List Statement -> Expression -> Statements
 
+  /--
+  ```text
+  quals ∈ Qualifiers → p <- e, quals
+                     | let binds, quals
+                     | e, quals
+                     | ε
+  ```
+  -/
   inductive Qualifiers : Type where
     | qal_list : List Statement -> Qualifiers
 
+  /--
+  ```text
+  fbind ∈ FieldBinding → x = e
+  ```
+  -/
   inductive FieldBinding : Type where
     | fb_bind : QVariable -> Expression -> FieldBinding
 end
