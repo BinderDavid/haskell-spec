@@ -4,7 +4,7 @@ import HaskellSpec.NonEmptyList
 Figure 1 and 2
 -/
 
-
+namespace Target
 /--
 From Fig. 3:
 ```
@@ -387,3 +387,5 @@ inductive Module : Type where
       Module_Name -- Use QModule:Name in the future?
     → List TypeDeclarations
     → Module
+
+end Target

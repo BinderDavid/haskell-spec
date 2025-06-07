@@ -4,6 +4,7 @@ import HaskellSpec.NonEmptyList
 Figure 1 and 2
 -/
 
+namespace Source
 
 /--
 From Fig. 3:
@@ -368,3 +369,5 @@ mutual
   inductive Context : Type where
     | cx : List ClassAssertion → Context
 end
+
+end Source
