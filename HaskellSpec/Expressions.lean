@@ -3,8 +3,20 @@ import HaskellSpec.Declarations
 import HaskellSpec.NonEmptyList
 -- Figure 2
 
+/--
+From Fig. 3:
+```
+literal ∈ Literal → char
+                  | string
+                  | integer
+                  | float
+```
+-/
 inductive Literal : Type where
-  | lit_dummy : Int -> Literal
+  | char : Char → Literal
+  | string : String → Literal
+  | integer : Int → Literal
+  | float : Float → Literal
 
 mutual
 /--
