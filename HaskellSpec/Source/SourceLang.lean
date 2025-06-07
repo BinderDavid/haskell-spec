@@ -1,8 +1,8 @@
+import HaskellSpec.Names
+import HaskellSpec.NonEmptyList
 /-!
 Figure 1 and 2
 -/
-import HaskellSpec.Names
-import HaskellSpec.NonEmptyList
 
 
 /--
