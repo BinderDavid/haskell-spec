@@ -6,6 +6,18 @@ inductive Literal : Type where
   | lit_dummy : Int -> Literal
 
 mutual
+/--
+```text
+  p ∈ Pattern → x
+               | K p₁ … pₙ      k ≥ 0
+               | K {fp₁ … fpₙ}  k ≥ 0
+               | v@p
+               | ~p
+               | _
+               | literal
+               | v+integer
+```
+--/
   inductive Pattern : Type where
     | pat_var : QVariable -> Pattern
     | pat_constr_pat : QConstructor -> List Pattern -> Pattern
@@ -16,30 +28,82 @@ mutual
     | pat_lit : Literal -> Pattern
     | pat_plus : Variable -> Int -> Pattern
 
+/--
+```text
+  fp ∈ FieldPattern → x = p
+```
+--/
   inductive FieldPattern : Type where
     | fp_pat: Variable -> Pattern -> FieldPattern
 end
 
 mutual
+/--
+```text
+  binds ∈ Binds → [ sigs; bindG then binds]
+```
+--/
   inductive Binds : Type where
     | binds_binds : Signatures -> BindGroup -> Binds -> Binds
 
+/--
+```text
+  bindG ∈ BindGroup → bind₁; …; bindₙ   n ≥ 1
+```
+--/
   inductive BindGroup : Type where
     | bind_group : Binding -> List Binding -> BindGroup
 
+/--
+```text
+  bind ∈ Binding → x match₁ [] … [] matchₙ    n ≥ 1
+                 | p gdes
+```
+--/
   inductive Binding : Type where
     | bind_match : QVariable -> Match -> List Match -> Binding
     | bind_pat : Pattern -> GuardedExprs -> Binding
 
+/--
+```text
+  match ∈ Match → p₁ … pₖ gdes    k ≥ 1
+```
+--/
   inductive Match : Type where
     | match_match : Pattern -> List Pattern -> GuardedExprs -> Match
 
+/--
+```text
+  gdes ∈ GuardedExprs → gde₁ … gdeₙ where binds   n ≥ 1
+```
+--/
   inductive GuardedExprs : Type where
     | gExp_where : GuardedExp -> List GuardedExp -> Binds -> GuardedExprs
 
+/--
+```text
+  gde ∈ GuardedExpr → | e₁ = e₂
+```
+--/
   inductive GuardedExp : Type where
     | gExp_eq : Expression -> Expression -> GuardedExp
 
+/--
+```text
+  e ∈ Expression → x
+                  | literal
+                  | K
+                  | \p₁ … pₖ -> e                     k ≥ 1
+                  | e₁ e₂
+                  | let binds in e
+                  | case e of match₁ [] … [] matchₙ   n ≥ 1
+                  | do stmts
+                  | [e | quals]
+                  | [e₁ [,e₂] .. [e₃]]
+                  | e ⇐ {fbind₁, …, fbindₖ}           k ≥ 0
+                  | K {fbind₁, …, fbindₖ}             k ≥ 0
+```
+--/
   inductive Expression : Type where
     | expr_var : QVariable -> Expression
     | expr_lit : Literal -> Expression
