@@ -1,0 +1,10 @@
+name = "haskell-spec"
+version = "0.1.0"
+defaultTargets = ["haskell-spec"]
+
+[[lean_lib]]
+name = "HaskellSpec"
+
+[[lean_exe]]
+name = "haskell-spec"
+root = "Main"
