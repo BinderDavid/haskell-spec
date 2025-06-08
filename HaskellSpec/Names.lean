@@ -11,6 +11,7 @@ Names are defined in Table 1 and Fig. 3 in the paper
 `M`
 -/
 inductive Module_Name : Type where
+  | Mk : String -> Module_Name
 
 /--
 `v`
