@@ -10,6 +10,8 @@ The rules are defined in fig. 8, 9, 10 of the paper.
 
 namespace Kinding
 
+inductive ktype : Environment.KE → Source.TypeExpression → SemanticTypes.Kind → Prop where
+
 inductive KindOrdering : SemanticTypes.Kind → SemanticTypes.Kind → Prop where
 
 inductive kctDecls : Environment.KE → Source.ClassesAndTypes → Environment.KE → Prop where
@@ -24,8 +26,26 @@ inductive ksigs : Environment.KE → Source.Signatures → Prop where
 
 inductive ksig : Environment.KE → Source.Signature → Prop where
 
-inductive kctx : Environment.KE → Source.Context → Prop where
 
-inductive ktype : Environment.KE → Source.TypeExpression → SemanticTypes.Kind → Prop where
+open Environment Source ClassAssertion Context
+
+/-!
+```text
+{C₁ : κ₁, ..., Cₙ : κₙ} ⊆ KE
+i ∈ [1, n] : KE ⊢^ktype tᵢ : κᵢ
+------------------------------ KIND CTX
+KE ⊢^kctx C₁ t₁, ... Cₙ tₙ
+```
+-/
+inductive kctx : Environment.KE → Source.Context → Prop where
+  | KIND_CTX {CAS KE} :
+      (∀ CA K,
+        CA ∈ CAS →
+        (KE_Name.C (classAssertionName CA), K) ∈ KE →
+        ktype KE (classAssertionType CA) K
+      )
+      → ---------------------------------------------
+      kctx KE (Context.cx CAS)
+
 
 end Kinding

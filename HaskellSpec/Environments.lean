@@ -3,6 +3,7 @@ import HaskellSpec.SemanticTypes
 
 namespace Environment
 
+@[reducible]
 def Env (name : Type) (info : Type) : Type :=
   List (name × info)
 
@@ -50,6 +51,7 @@ inductive KE_Name : Type where
   | C : QClassName -> KE_Name
 
 
+@[reducible]
 def KE : Type :=
   Env KE_Name SemanticTypes.Kind
 
