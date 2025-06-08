@@ -97,18 +97,28 @@ inductive ctDecl : Environment.GE → Environment.IE → Environment.VE
 /--
 Cp. Fig 24
 ```text
-GE ⊢ sigs : VE
+GE ⊢ sig : VE
 ```
 -/
-inductive sigs : Environment.GE → Source.Signatures → Environment.VE → Prop where
+inductive sig : Environment.GE
+              → Source.Signature
+              → Environment.VE
+              → Prop where
 
 /--
 Cp. Fig 24
 ```text
-GE ⊢ sig : VE
+GE ⊢ sigs : VE
 ```
 -/
-inductive sig : Environment.GE → Source.Signature → Environment.VE → Prop where
+inductive sigs : Environment.GE
+               → Source.Signatures
+               → Environment.VE
+               → Prop where
+  | Nil : sigs ge (Source.Signatures.sigs []) []
+  | Cons : sig ge s ve
+         → sigs ge (Source.Signatures.sigs ss) ves
+         → sigs ge (Source.Signatures.sigs (s :: ss)) (List.append ve ves)
 
 /--
 Cp. Fig 25

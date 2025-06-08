@@ -38,10 +38,13 @@ Overloading Environment
 -/
 inductive OE : Type where
 
+
+inductive VE_Item : Type where
+
 /--
 Variable Environment
 -/
-inductive VE : Type where
+def VE : Type := Env QVariable VE_Item
 
 /--
 Kind Environment
