@@ -20,60 +20,6 @@ inductive Literal : Type where
   | integer : Int → Literal
   | float : Float → Literal
 
-/--
-```text
-qualifer ∈ Qualifier → [qualified]
-```
---/
-inductive Qualifier : Type where
-  | qualified
-  | unqualified
-
-/--
-```text
-ent ∈ Entity → x
-             | K
-             | T (x₁,...,xₖ;K₁,...,Kₙ)   k, n ≥ 0
-             | T (..)
-             | C (x₁,...,xₖ)             k    ≥ 0
-             | C (..)
-             | module M
-```
---/
-inductive Entity : Type where
-  | ent_var      : QVariable → Entity
-  | ent_cons     : QConstructor → Entity
-  | ent_type     : QType_Name → List QVariable → List QConstructor → Entity
-  | ent_typeall  : QType_Name → Entity
-  | ent_class    : QClassName → List QVariable → Entity
-  | ent_classall : QClassName → Entity
-  | ent_module   : Module_Name → Entity -- use QModule_Name
-
-/--
-```text
-implist ∈ Import list → [[hiding] (ent₁,...,entₙ)]
-                        n ≥ 0
-```
---/
-inductive ImportList : Type where
-  | imp_hiding  : List Entity → ImportList
-  | imp_showing : List Entity → ImportList
-  | imp_empty
-
-/--
-```text
-imp ∈ Import → import qualifier M as M' implist
-```
---/
-inductive Import : Type where
-  | imp :
-      Qualifier
-    → Module_Name
-    → Module_Name
-    → ImportList
-    → Import
-
-
 mutual
   /--
   ```text
