@@ -17,6 +17,8 @@ inductive Kind : Type where
   | Star : Kind
   | Fun : Kind → Kind → Kind
 
+export Kind (Star Fun)
+
 /--
 ```text
 C ∈ Original class name → B
