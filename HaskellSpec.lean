@@ -8,3 +8,4 @@ import HaskellSpec.Elaboration.Kinding
 import HaskellSpec.Elaboration.Modules
 import HaskellSpec.Elaboration.ImportExport
 import HaskellSpec.Elaboration.Bindings
+import HaskellSpec.Elaboration.Expressions
