@@ -23,7 +23,11 @@ Cp. Fig 35
 GE, IE, VE ⊢ match ⇝ match : τ
 ```
 -/
-inductive matchR : Environment.GE → Environment.IE → Environment.VE → Source.Match → Target.Match → SemanticTypes.TypeS → Prop where
+inductive matchR : Environment.GE → Environment.IE → Environment.VE
+                 → Source.Match
+                 → Target.Match
+                 → SemanticTypes.TypeS
+                 → Prop where
 
 /--
 Cp. Fig 35
@@ -31,7 +35,11 @@ Cp. Fig 35
 GE, IE, VE ⊢ gdes ⇝ gdes : τ
 ```
 -/
-inductive gdes : Environment.GE → Environment.IE → Environment.VE → Source.GuardedExprs → Target.GuardedExprs → SemanticTypes.TypeS → Prop where
+inductive gdes : Environment.GE → Environment.IE → Environment.VE
+               → Source.GuardedExprs
+               → Target.GuardedExprs
+               → SemanticTypes.TypeS
+               → Prop where
 
 
 /--
@@ -40,7 +48,11 @@ Cp. Fig 35
 GE, IE, VE ⊢ gde ⇝ gde : τ
 ```
 -/
-inductive gde : Environment.GE → Environment.IE → Environment.VE → Source.GuardedExp → Target.GuardedExp → SemanticTypes.TypeS → Prop where
+inductive gde : Environment.GE → Environment.IE → Environment.VE
+              → Source.GuardedExp
+              → Target.GuardedExp
+              → SemanticTypes.TypeS
+              → Prop where
 
 /--
 Cp. Fig 36. 38. 39. 42
@@ -114,7 +126,11 @@ Cp. Fig 40
 GE, IE, VE ⊢ quals ⇝ quals : VE
 ```
 -/
-inductive quals : Environment.GE → Environment.IE → Environment.VE → Source.Qualifiers → Target.Qualifiers → Environment.VE → Prop where
+inductive quals : Environment.GE → Environment.IE → Environment.VE
+                → Source.Qualifiers
+                → Target.Qualifiers
+                → Environment.VE
+                → Prop where
 
 /--
 Cp. Fig 41
@@ -122,7 +138,11 @@ Cp. Fig 41
 GE, IE, VE ⊢ stmts ⇝ e : τ
 ```
 -/
-inductive stmts : Environment.GE → Environment.IE → Environment.VE → Source.Statements → Target.Expression → SemanticTypes.TypeS → Prop where
+inductive stmts : Environment.GE → Environment.IE → Environment.VE
+                → Source.Statements
+                → Target.Expression
+                → SemanticTypes.TypeS
+                → Prop where
 
 /--
 Cp. Fig 43. 44.
@@ -130,4 +150,9 @@ Cp. Fig 43. 44.
 GE, IE ⊢ p ⇝ p : VE, τ
 ```
 -/
-inductive pat : Environment.GE → Environment.IE → Source.Pattern → Target.Pattern → Environment.VE → SemanticTypes.TypeS → Prop where
+inductive pat : Environment.GE → Environment.IE
+              → Source.Pattern
+              → Target.Pattern
+              → Environment.VE
+              → SemanticTypes.TypeS
+              → Prop where
