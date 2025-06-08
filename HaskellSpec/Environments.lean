@@ -1,4 +1,10 @@
+import HaskellSpec.Names
+import HaskellSpec.SemanticTypes
+
 namespace Environment
+
+def Env (name : Type) (info : Type) : Type :=
+  List (name × info)
 
 /--
 Class environment
@@ -38,7 +44,14 @@ inductive VE : Type where
 /--
 Kind Environment
 -/
-inductive KE : Type where
+inductive KE_Name : Type where
+  | T : QType_Name -> KE_Name
+  | u : Type_Variable -> KE_Name
+  | C : QClassName -> KE_Name
+
+
+def KE : Type :=
+  Env KE_Name SemanticTypes.Kind
 
 /--
 Source Environment
