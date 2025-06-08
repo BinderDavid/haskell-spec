@@ -44,6 +44,12 @@ def prelude_char : SemanticTypes.TypeS :=
   SemanticTypes.TypeS.TypeConstructor (SemanticTypes.Type_Constructor.Mk (SemanticTypes.Original_Type_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Char")) SemanticTypes.Kind.Star)
 
 /--
+The type `[] : * → *`
+-/
+def prelude_list : SemanticTypes.TypeS :=
+SemanticTypes.TypeS.TypeConstructor (SemanticTypes.Type_Constructor.Mk (SemanticTypes.Original_Type_Name.Special Special_Type_Constructor.List) (SemanticTypes.Kind.Fun SemanticTypes.Kind.Star SemanticTypes.Kind.Star))
+
+/--
 Cp. Fig 37
 ```text
 IE ⊢ literal ⇝ e : τ
@@ -54,7 +60,16 @@ inductive literal : Environment.IE
                   → Target.Expression
                   → SemanticTypes.TypeS
                   → Prop where
-  | LitChar : literal env (Source.Literal.char c) (Target.Expression.expr_lit (Target.Literal.char c)) prelude_char
+  | LitChar : literal
+                  env
+                  (Source.Literal.char c)
+                  (Target.Expression.expr_lit (Target.Literal.char c))
+                  prelude_char
+  | LitString : literal
+                  env
+                  (Source.Literal.string s)
+                  (Target.Expression.expr_lit (Target.Literal.string s))
+                  (SemanticTypes.TypeS.App prelude_list prelude_char)
 
 /--
 Cp. Fig 40
