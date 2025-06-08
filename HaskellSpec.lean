@@ -6,3 +6,5 @@ import HaskellSpec.Environments
 import HaskellSpec.NonEmptyList
 import HaskellSpec.Elaboration.Kinding
 import HaskellSpec.Elaboration.Modules
+import HaskellSpec.Elaboration.ImportExport
+import HaskellSpec.Elaboration.Bindings
