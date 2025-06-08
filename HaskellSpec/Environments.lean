@@ -6,6 +6,7 @@ namespace Environment
 def Env (name : Type) (info : Type) : Type :=
   List (name × info)
 
+
 /--
 Class environment
 -/
@@ -59,23 +60,31 @@ Source Environment
 inductive SE : Type where
 
 /--
-Global Environment
+### Global Environment
+
+Cp. section 2.7.8
 -/
-inductive GE : Type where
+def GE : Type := CE × TE × DE
 
 /--
-Full Environment
+### Full Environment
+
+Cp. section 2.7.8
 -/
-inductive FE : Type where
+def FE : Type := CE × TE × DE × IE × VE
 
 /--
-Entity Environment
+### Entity Environment
+
+Cp. section 2.7.8
 -/
-inductive EE : Type where
+def EE : Type := CE × TE × DE × VE
 
 /--
-Module Environment
+### Module Environment
+
+Cp. section 2.7.9
 -/
-inductive ME : Type where
+def ME : Type := Env Module_Name FE
 
 end Environment
