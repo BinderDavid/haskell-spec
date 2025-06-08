@@ -20,9 +20,14 @@ inductive Variable : Type where
   | Mk : String → Variable
 
 /--
-`x`
+```text
+x ∈ Original variable → v
+                      | M!v
+```
 -/
 inductive QVariable : Type where
+  | Unqualified : Variable → QVariable
+  | Qualified : Module_Name → Variable → QVariable
 
 /--
 ```
