@@ -15,7 +15,7 @@ rec {
       ## It should be enough to add
       ## (require 'lean4-mode)
       ## to the .emacs file.
-      export EMACSLOADPATH="${lean4mode}''${EMACSLOADPATH:+:}$EMACSLOADPATH"
+      export EMACSLOADPATH="${lean4mode}:$EMACSLOADPATH"
       alias lean="steam-run lean"
       alias lake="steam-run lake"
      '';
