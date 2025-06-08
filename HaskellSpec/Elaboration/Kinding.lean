@@ -10,7 +10,28 @@ The rules are defined in fig. 8, 9, 10 of the paper.
 
 namespace Kinding
 
-inductive ktype : Environment.KE → Source.TypeExpression → SemanticTypes.Kind → Prop where
+open Source Environment SemanticTypes
+
+
+/-
+Fig. 10 (Kind inference, type expressions)
+-/
+inductive ktype : KindEnv → TypeExpression → Kind → Prop where
+  | Kind_TVar :
+      (KindEnv_Name.u u, κ) ∈ KE
+    → ---------------------------
+      ktype KE (type_var u) κ
+
+  | Kind_TCon :
+      (KindEnv_Name.T T, κ) ∈ KE
+    → ---------------------------
+      ktype KE (type_var u) κ
+
+  | Kind_App :
+      ktype KE t₁ (Fun κ₁ κ₂)
+    → ktype KE t₂ κ₁
+    → --------------------------
+      ktype KE (type_cons t₁ t₂) κ₂
 
 /--
 Defined in section 3.1.1
@@ -21,20 +42,20 @@ inductive KindOrdering : SemanticTypes.Kind → SemanticTypes.Kind → Prop wher
              → KindOrdering κ₂ κ₂'
              → KindOrdering (SemanticTypes.Kind.Fun κ₁ κ₂) (SemanticTypes.Kind.Fun κ₁' κ₂')
 
-inductive kctDecls : Environment.KE → Source.ClassesAndTypes → Environment.KE → Prop where
+inductive kctDecls : KindEnv → Source.ClassesAndTypes → KindEnv → Prop where
 
-inductive kgroup : Environment.KE → List Source.ClassOrType → Environment.KE → Prop where
+inductive kgroup : KindEnv → List Source.ClassOrType → KindEnv → Prop where
 
-inductive kctDecl : Environment.KE → Source.ClassOrType → Environment.KE → Prop where
+inductive kctDecl : KindEnv → Source.ClassOrType → KindEnv → Prop where
 
-inductive kconDecl : Environment.KE → Source.ConstructorDecl → Prop where
+inductive kconDecl : KindEnv → Source.ConstructorDecl → Prop where
 
-inductive ksigs : Environment.KE → Source.Signatures → Prop where
+inductive ksigs : KindEnv → Source.Signatures → Prop where
 
-inductive ksig : Environment.KE → Source.Signature → Prop where
+inductive ksig : KindEnv → Source.Signature → Prop where
 
 
-open Environment Source ClassAssertion Context
+open  Source ClassAssertion Context
 
 /-!
 ```text
@@ -44,11 +65,11 @@ i ∈ [1, n] : KE ⊢^ktype tᵢ : κᵢ
 KE ⊢^kctx C₁ t₁, ... Cₙ tₙ
 ```
 -/
-inductive kctx : Environment.KE → Source.Context → Prop where
+inductive kctx : KindEnv → Source.Context → Prop where
   | KIND_CTX {CAS KE} :
       (∀ CA K,
         CA ∈ CAS →
-        (KE_Name.C (classAssertionName CA), K) ∈ KE →
+        (KindEnv_Name.C (classAssertionName CA), K) ∈ KE →
         ktype KE (classAssertionType CA) K
       )
       → ---------------------------------------------

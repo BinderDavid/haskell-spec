@@ -49,15 +49,15 @@ def VE : Type := Env QVariable VE_Item
 /--
 Kind Environment
 -/
-inductive KE_Name : Type where
-  | T : QType_Name -> KE_Name
-  | u : Type_Variable -> KE_Name
-  | C : QClassName -> KE_Name
+inductive KindEnv_Name : Type where
+  | T : QType_Name -> KindEnv_Name
+  | u : Type_Variable -> KindEnv_Name
+  | C : QClassName -> KindEnv_Name
 
 
 @[reducible]
-def KE : Type :=
-  Env KE_Name SemanticTypes.Kind
+def KindEnv : Type :=
+  Env KindEnv_Name SemanticTypes.Kind
 
 /--
 Source Environment

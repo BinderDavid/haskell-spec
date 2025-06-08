@@ -56,7 +56,7 @@ GE, IE, VE ⊢ ctDecl ⇝ typeDecls; binds : ⟨ CE, TE, KE, IE, VE⟩
 inductive ctdecl : Environment.GE → Environment.VE → Environment.IE
                  → Source.ClassOrType
                  → Target.ClassOrType
-                 → Environment.CE → Environment.TE → Environment.KE → Environment.IE → Environment.VE
+                 → Environment.CE → Environment.TE → Environment.KindEnv → Environment.IE → Environment.VE
                  → Prop where
 
 /--
