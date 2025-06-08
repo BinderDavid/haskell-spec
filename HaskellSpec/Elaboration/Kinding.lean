@@ -12,7 +12,14 @@ namespace Kinding
 
 inductive ktype : Environment.KE → Source.TypeExpression → SemanticTypes.Kind → Prop where
 
+/--
+Defined in section 3.1.1
+-/
 inductive KindOrdering : SemanticTypes.Kind → SemanticTypes.Kind → Prop where
+  | Star_LT : KindOrdering SemanticTypes.Kind.Star κ
+  | Fun_Cong : KindOrdering κ₁ κ₁'
+             → KindOrdering κ₂ κ₂'
+             → KindOrdering (SemanticTypes.Kind.Fun κ₁ κ₂) (SemanticTypes.Kind.Fun κ₁' κ₂')
 
 inductive kctDecls : Environment.KE → Source.ClassesAndTypes → Environment.KE → Prop where
 
