@@ -11,6 +11,12 @@ def prelude_char : SemanticTypes.TypeS :=
   SemanticTypes.TypeS.TypeConstructor (SemanticTypes.Type_Constructor.Mk (SemanticTypes.Original_Type_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Char")) SemanticTypes.Kind.Star)
 
 /--
+The type `Prelude!Bool`
+-/
+def prelude_bool : SemanticTypes.TypeS :=
+  SemanticTypes.TypeS.TypeConstructor (SemanticTypes.Type_Constructor.Mk (SemanticTypes.Original_Type_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Bool")) SemanticTypes.Kind.Star)
+
+/--
 The type `[] : * → *`
 -/
 def prelude_list : SemanticTypes.TypeS :=
@@ -41,18 +47,6 @@ inductive gdes : Environment.GE → Environment.IE → Environment.VE
                → SemanticTypes.TypeS
                → Prop where
 
-
-/--
-Cp. Fig 35
-```text
-GE, IE, VE ⊢ gde ⇝ gde : τ
-```
--/
-inductive gde : Environment.GE → Environment.IE → Environment.VE
-              → Source.GuardedExp
-              → Target.GuardedExp
-              → SemanticTypes.TypeS
-              → Prop where
 
 /--
 Cp. Fig 36. 38. 39. 42
@@ -97,6 +91,21 @@ inductive exp : Environment.GE → Environment.IE → Environment.VE
           (Source.Expression.expr_listRange e1 none none)
           e /- Prelude!enumFrom τ e e1' -/
           (SemanticTypes.TypeS.App prelude_list τ)
+
+/--
+Cp. Fig 35
+```text
+GE, IE, VE ⊢ gde ⇝ gde : τ
+```
+-/
+inductive gde : Environment.GE → Environment.IE → Environment.VE
+              → Source.GuardedExp
+              → Target.GuardedExp
+              → SemanticTypes.TypeS
+              → Prop where
+  | Gde : exp ge ie ve e1 e1' prelude_bool
+        → exp ge ie ve e2 e2' τ
+        → gde ge ie ve (Source.GuardedExp.gExp_eq e1 e2) (Target.GuardedExp.gExp_eq e1' e2') τ
 
 /--
 Cp. Fig 37
