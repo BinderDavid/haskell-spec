@@ -2,6 +2,20 @@ import HaskellSpec.Environments
 import HaskellSpec.Source.SourceLang
 import HaskellSpec.Target.TargetLang
 import HaskellSpec.SemanticTypes
+import HaskellSpec.Elaboration.Modules
+
+/--
+The type `Prelude!Char`
+-/
+def prelude_char : SemanticTypes.TypeS :=
+  SemanticTypes.TypeS.TypeConstructor (SemanticTypes.Type_Constructor.Mk (SemanticTypes.Original_Type_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Char")) SemanticTypes.Kind.Star)
+
+/--
+The type `[] : * → *`
+-/
+def prelude_list : SemanticTypes.TypeS :=
+SemanticTypes.TypeS.TypeConstructor (SemanticTypes.Type_Constructor.Mk (SemanticTypes.Original_Type_Name.Special Special_Type_Constructor.List) (SemanticTypes.Kind.Fun SemanticTypes.Kind.Star SemanticTypes.Kind.Star))
+
 
 /--
 Cp. Fig 35
@@ -34,20 +48,43 @@ Cp. Fig 36. 38. 39. 42
 GE, IE, VE ⊢ e ⇝ e : τ
 ```
 -/
-inductive exp : Environment.GE → Environment.IE → Environment.VE → Source.Expression → Target.Expression → SemanticTypes.TypeS → Prop where
-
-
-/--
-The type `Prelude!Char`
--/
-def prelude_char : SemanticTypes.TypeS :=
-  SemanticTypes.TypeS.TypeConstructor (SemanticTypes.Type_Constructor.Mk (SemanticTypes.Original_Type_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Char")) SemanticTypes.Kind.Star)
-
-/--
-The type `[] : * → *`
--/
-def prelude_list : SemanticTypes.TypeS :=
-SemanticTypes.TypeS.TypeConstructor (SemanticTypes.Type_Constructor.Mk (SemanticTypes.Original_Type_Name.Special Special_Type_Constructor.List) (SemanticTypes.Kind.Fun SemanticTypes.Kind.Star SemanticTypes.Kind.Star))
+inductive exp : Environment.GE → Environment.IE → Environment.VE
+              → Source.Expression
+              → Target.Expression
+              → SemanticTypes.TypeS
+              → Prop where
+  | EnumFromThenTo :
+      exp ge ie ve e1 e1' τ
+    → exp ge ie ve e2 e2' τ
+    → exp ge ie ve e3 e3' τ
+    /- → dict ie e (Prelude!Enum^* τ) -/
+    → exp ge ie ve
+          (Source.Expression.expr_listRange e1 (some e2) (some e3))
+          e /- Prelude!enumFromThenTo τ e e1' e2' e3' -/
+          (SemanticTypes.TypeS.App prelude_list τ)
+  | EnumFromTo :
+      exp ge ie ve e1 e1' τ
+    → exp ge ie ve e2 e2' τ
+    /- → dict ie e (Prelude!Enum^* τ) -/
+    → exp ge ie ve
+          (Source.Expression.expr_listRange e1 none (some e2))
+          e /- Prelude!enumFromTo τ e e1' e2' -/
+          (SemanticTypes.TypeS.App prelude_list τ)
+  | EnumFromThen :
+      exp ge ie ve e1 e1' τ
+    → exp ge ie ve e2 e2' τ
+    /- → dict ie e (Prelude!Enum^* τ) -/
+    → exp ge ie ve
+          (Source.Expression.expr_listRange e1 (some e2) none)
+          e /- Prelude!enumFromThen τ e e1' e2' -/
+          (SemanticTypes.TypeS.App prelude_list τ)
+  | EnumFrom :
+      exp ge ie ve e1 e1' τ
+    /- → dict ie e (Prelude!Enum^* τ) -/
+    → exp ge ie ve
+          (Source.Expression.expr_listRange e1 none none)
+          e /- Prelude!enumFrom τ e e1' -/
+          (SemanticTypes.TypeS.App prelude_list τ)
 
 /--
 Cp. Fig 37
