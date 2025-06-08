@@ -7,6 +7,7 @@ import HaskellSpec.Names
 /-!
 # Import + Export Declarations
 -/
+
 /--
 Cp. Fig 12
 ```text
@@ -57,7 +58,15 @@ Cp. Fig 14
 EE ⊢ ent, EE
 ```
 -/
-inductive Entity : Env.EE
-                 → Source.Entity
-                 → Env.EE
-                 → Prop where
+inductive Entity : Env.EE → Source.Entity → Env.EE → Prop where
+  | Var_Ent : (ve : Env.VE) → (x : QVariable) → (x ∈ Env.dom ve)
+    → (ce : Env.CE)
+    → (te : Env.TE)
+    → (de : Env.DE)
+    → (ve : Env.VE)
+    → Entity ⟨ce, te, de, ve⟩ (Source.Entity.var x) ⟨_, _, _, _⟩ --- TODO continue here
+  | Type_Some : Entity _ _ _
+  | Type_All : Entity _ _ _
+  | Type_Syn : Entity _ _ _
+  | Class_Some : Entity _ _ _
+  | Class_All : Entity _ _ _

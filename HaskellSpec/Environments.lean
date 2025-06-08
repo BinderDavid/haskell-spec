@@ -61,10 +61,6 @@ def justSingle [BEq name] [BEq info] : Env name info -> Env name info :=
   sorry -- TODO My first attempt at defining this did not satisfy the
         -- termination checker.
 
-inductive TE_Item : Type where
-  | DataType : SemTy.Type_Constructor →  TE_Item
-  | TypeSynonym : SemTy.Type_Constructor → Int → List SemTy.Type_Variable → SemTy.TypeS → TE_Item
-
 /--
 ### Type environment
 
@@ -74,6 +70,11 @@ the type variable information records in-scope type variables.
 
 Cp. section 2.7.2
 -/
+
+inductive TE_Item : Type where
+  | DataType : SemTy.Type_Constructor →  TE_Item
+  | TypeSynonym : SemTy.Type_Constructor → Int → List SemTy.Type_Variable → SemTy.TypeS → TE_Item
+
 def TE : Type := Env QType_Name TE_Item × Env Type_Variable SemTy.Type_Variable
 
 def TE_init : TE :=
