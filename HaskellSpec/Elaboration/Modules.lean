@@ -123,17 +123,6 @@ inductive sigs : Environment.GE
 /--
 Cp. Fig 25
 ```text
-CE, TE, h ⊢ cx : θ
-```
--/
-inductive context : Environment.CE → Environment.TE → Int
-                  → Source.Context
-                  → SemanticTypes.Context
-                  → Prop where
-
-/--
-Cp. Fig 25
-```text
 CE, TE, h ⊢ class : Γ τ
 ```
 -/
@@ -142,6 +131,33 @@ inductive classR : Environment.CE → Environment.TE → Int
                  → SemanticTypes.Class_Name
                  → SemanticTypes.TypeS
                  → Prop where
+  | classR :  (ce: Environment.CE) ->
+              (te: Environment.TE) ->
+              (h: Int) ->
+              (className : QClassName) →
+              (u: Type_Variable) →
+              (ts: List Source.TypeExpression) ->
+              (Γ : SemanticTypes.Class_Name) ->
+              (τ : SemanticTypes.TypeS) ->
+              (h' : Int) ->
+              (x: Variable) ->
+              (ie: Environment.IE) ->
+              ((Environment.CEEntry.ceEntry Γ h' x className ie) ∈ ce) ->
+              (h' < h) ->
+              (h'' : Int) ->
+              (type te h'' (List.foldl Source.TypeExpression.type_cons (Source.TypeExpression.type_var u) ts) τ) ->
+              classR ce te h (Source.classAssert className u ts) Γ τ
+
+/--
+Cp. Fig 25
+```text
+CE, TE, h ⊢ cx : θ
+```
+-/
+inductive context : Environment.CE → Environment.TE → Int
+                  → Source.Context
+                  → SemanticTypes.Context
+                  → Prop where
 
 
 /--
