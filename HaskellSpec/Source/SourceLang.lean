@@ -308,7 +308,7 @@ mutual
   ```
   -/
   inductive ClassAssertion : Type where
-    | classAssert : Class_Name → Type_Variable → List TypeExpression → ClassAssertion
+    | classAssert : QClassName → Type_Variable → List TypeExpression → ClassAssertion
 
   /--
   ```text
@@ -334,7 +334,7 @@ mutual
   ```
   -/
   inductive InstanceDecl : Type where
-    | instDecl : Context → Class_Name → Type_Expression → List Binding → InstanceDecl
+    | instDecl : Context → Class_Name → TypeExpression → List Binding → InstanceDecl
 
   /--
   ```text
@@ -369,5 +369,19 @@ mutual
   inductive Context : Type where
     | cx : List ClassAssertion → Context
 end
+
+
+export ClassAssertion (classAssert)
+export TypeExpression (type_var type_name type_cons)
+
+def classAssertionName : ClassAssertion → QClassName
+  | classAssert C _ _ => C
+
+/-
+Reconstruct the type of the class assertion. e.g.
+   classAssertionType (C u (t₁ … tₖ)) = u t₁ … tₖ
+-/
+def classAssertionType : ClassAssertion → TypeExpression
+   | classAssert _ TV TS => List.foldl type_cons (type_var TV) TS
 
 end Source
