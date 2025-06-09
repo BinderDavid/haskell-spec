@@ -8,19 +8,19 @@ import HaskellSpec.Elaboration.Modules
 The type `Prelude!Char`
 -/
 def prelude_char : SemTy.TypeS :=
-  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (SemTy.Original_Type_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Char")) SemTy.Kind.Star)
+  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Char")) SemTy.Kind.Star)
 
 /--
 The type `Prelude!Bool`
 -/
 def prelude_bool : SemTy.TypeS :=
-  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (SemTy.Original_Type_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Bool")) SemTy.Kind.Star)
+  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Bool")) SemTy.Kind.Star)
 
 /--
 The type `[] : * → *`
 -/
 def prelude_list : SemTy.TypeS :=
-SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (SemTy.Original_Type_Name.Special Special_Type_Constructor.List) (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star))
+SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star))
 
 
 /--

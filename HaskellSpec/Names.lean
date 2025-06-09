@@ -8,18 +8,25 @@ Names are defined in Table 1 and Fig. 3 in the paper
 -/
 
 /--
-`M`
+### Module Name
+
+Module names are written `M` in the paper. The Haskell 98 standard does
+not have hierarchical modules, so this type does not have any structure.
 -/
 inductive Module_Name : Type where
   | Mk : String -> Module_Name
 
 /--
-`v`
+### Variable
+
+Unqualified variables are written `v` in the paper.
 -/
 inductive Variable : Type where
   | Mk : String → Variable
 
 /--
+### Original Variable
+
 ```text
 x ∈ Original variable → v
                       | M!v
@@ -30,6 +37,8 @@ inductive QVariable : Type where
   | Qualified : Module_Name → Variable → QVariable
 
 /--
+### Special Data Constructor
+
 ```
 Δ ∈ Special data constructor → ()
                              | (k)
@@ -45,12 +54,16 @@ inductive Special_Data_Constructor where
 
 
 /--
-`J`
+### Constructor
+
+Constructors are written as `J` in the paper.
 -/
 inductive Constructor : Type where
   | Mk : String → Constructor
 
 /--
+### Qualified Data Constructors
+
 ```text
 K ∈ Qualified data constructor → J
                                | M.J
@@ -63,6 +76,8 @@ inductive QConstructor : Type where
   | Special : Special_Data_Constructor → QConstructor
 
 /--
+### Special Type Constructor
+
 ```text
 Σ ∈ Special type constructor → ()
                              | (k)
@@ -85,6 +100,8 @@ inductive Type_Name : Type where
   | Mk : String -> Type_Name
 
 /--
+### Qualified Type Name
+
 ```text
 T ∈ Qualified type constructor → S
                                | M.S
@@ -96,24 +113,46 @@ inductive QType_Name : Type where
   | Qualified : Module_Name → Type_Name → QType_Name
   | Special : Special_Type_Constructor → QType_Name
 
+
 /--
-`u`
+### Original Type Name
+
+```text
+T ∈ Original type name → S
+                       | M!S
+                       | Σ
+```
+-/
+inductive OType_Name : Type where
+  | Unqualified : Type_Name → OType_Name
+  | Qualified : Module_Name → Type_Name → OType_Name
+  | Special : Special_Type_Constructor → OType_Name
+
+/--
+### Type Variable
+
+Type variables are written as `u` in the paper.
 -/
 inductive Type_Variable : Type where
 
 /--
-`M`
+### Qualified Type Variable
+
+Qualified type variables are written as `M` in the paper.
 -/
 inductive QType_Variable : Type where
 
 /--
-`B`
+### Class Name
+
+Class names are written as `B` in the paper.
 -/
 inductive Class_Name : Type where
   | Mk : String → Class_Name
 
 /--
-# Qualified class name
+### Qualified Class Name
+
 ```text
 C ∈ Qualified class name → B
                          | M.B
@@ -122,6 +161,21 @@ C ∈ Qualified class name → B
 inductive QClassName : Type where
   | Unqualified : Class_Name → QClassName
   | Qualified : Module_Name → Class_Name → QClassName
+
+
+/--
+### Original Type Name
+
+```text
+C ∈ Original class name → B
+                        | M!B
+```
+-/
+inductive OClass_Name : Type where
+  | Unqualified : Class_Name → OClass_Name
+  | Qualified : Module_Name → Class_Name → OClass_Name
+
+
 
 /--
 This class is informally specified at the end of section 2.3.
