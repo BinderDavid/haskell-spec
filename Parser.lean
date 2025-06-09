@@ -57,3 +57,10 @@ def parseSpecialDataConstructor : SimpleParser Substring Char Special_Data_Const
    <|> char '[' *> dropMany (char ' ') *> char ']' *> pure Special_Data_Constructor.Nil
    <|> char ':' *> pure Special_Data_Constructor.Cons
 
+#guard testParser parseSpecialDataConstructor "()" Special_Data_Constructor.Unit
+#guard testParser parseSpecialDataConstructor "(  )" Special_Data_Constructor.Unit
+#guard testParser parseSpecialDataConstructor "(2)" (Special_Data_Constructor.Tuple 2)
+#guard testParser parseSpecialDataConstructor "(  3   )" (Special_Data_Constructor.Tuple 3)
+#guard testParser parseSpecialDataConstructor "[]" Special_Data_Constructor.Nil
+#guard testParser parseSpecialDataConstructor "[   ]" Special_Data_Constructor.Nil
+#guard testParser parseSpecialDataConstructor ":" Special_Data_Constructor.Cons
