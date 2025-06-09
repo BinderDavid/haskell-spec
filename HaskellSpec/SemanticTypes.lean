@@ -5,7 +5,7 @@ import HaskellSpec.Names
 
 Semantic types are defined in Fig. 4 of the paper.
 -/
-namespace SemanticTypes
+namespace SemTy
 
 /--
 ```text
@@ -97,4 +97,4 @@ inductive Context : Type where
 inductive TypeScheme : Type where
   | Forall : List Type_Variable → Context → TypeS → TypeScheme
 
-end SemanticTypes
+end SemTy

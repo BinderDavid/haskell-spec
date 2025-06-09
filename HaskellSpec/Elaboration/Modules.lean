@@ -58,7 +58,7 @@ TE, h ⊢ t : τ
 -/
 inductive type : Env.TE → Int
                → Source.TypeExpression
-               → SemanticTypes.TypeS
+               → SemTy.TypeS
                → Prop where
 
 /--
@@ -80,12 +80,12 @@ TE, θ, τ ⊢ conDecl ⇝ conDecl : DE, VE, LE, θ
 ```
 -/
 inductive condecl : Env.TE
-                  → SemanticTypes.Context
-                  → SemanticTypes.TypeS
+                  → SemTy.Context
+                  → SemTy.TypeS
                   → Source.ConstructorDecl
                   → Target.ConstructorDecl
                   → Env.DE → Env.VE → Env.LE
-                  → SemanticTypes.Context
+                  → SemTy.Context
                   → Prop where
 
 
@@ -97,8 +97,8 @@ IE, φ ⊢ τ_old, UE, τ_new
 TODO: UE and φ are still not formalized
 -/
 inductive lcon : Env.IE
-               → SemanticTypes.TypeS
-               → SemanticTypes.TypeS
+               → SemTy.TypeS
+               → SemTy.TypeS
                → Prop where
 
 /--
@@ -146,8 +146,8 @@ CE, TE, h ⊢ class : Γ τ
 -/
 inductive classR : Env.CE → Env.TE → Int
                  → Source.ClassAssertion
-                 → SemanticTypes.Class_Name
-                 → SemanticTypes.TypeS
+                 → SemTy.Class_Name
+                 → SemTy.TypeS
                  → Prop where
   | classR :  (ce: Env.CE) ->
               (te: Env.TE) ->
@@ -155,8 +155,8 @@ inductive classR : Env.CE → Env.TE → Int
               (className : QClassName) →
               (u: Type_Variable) →
               (ts: List Source.TypeExpression) ->
-              (Γ : SemanticTypes.Class_Name) ->
-              (τ : SemanticTypes.TypeS) ->
+              (Γ : SemTy.Class_Name) ->
+              (τ : SemTy.TypeS) ->
               (h' : Int) ->
               (x: Variable) ->
               (ie: Env.IE) ->
@@ -174,7 +174,7 @@ CE, TE, h ⊢ cx : θ
 -/
 inductive context : Env.CE → Env.TE → Int
                   → Source.Context
-                  → SemanticTypes.Context
+                  → SemTy.Context
                   → Prop where
 
 

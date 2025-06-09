@@ -10,7 +10,7 @@ The rules are defined in fig. 8, 9, 10 of the paper.
 
 namespace Kinding
 
-open Source Env SemanticTypes
+open Source Env SemTy
 
 
 /-
@@ -36,11 +36,11 @@ inductive ktype : KindEnv → TypeExpression → Kind → Prop where
 /--
 Defined in section 3.1.1
 -/
-inductive KindOrdering : SemanticTypes.Kind → SemanticTypes.Kind → Prop where
-  | Star_LT : KindOrdering SemanticTypes.Kind.Star κ
+inductive KindOrdering : SemTy.Kind → SemTy.Kind → Prop where
+  | Star_LT : KindOrdering SemTy.Kind.Star κ
   | Fun_Cong : KindOrdering κ₁ κ₁'
              → KindOrdering κ₂ κ₂'
-             → KindOrdering (SemanticTypes.Kind.Fun κ₁ κ₂) (SemanticTypes.Kind.Fun κ₁' κ₂')
+             → KindOrdering (SemTy.Kind.Fun κ₁ κ₂) (SemTy.Kind.Fun κ₁' κ₂')
 
 inductive kctDecls : KindEnv → Source.ClassesAndTypes → KindEnv → Prop where
 

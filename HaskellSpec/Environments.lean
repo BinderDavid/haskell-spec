@@ -59,7 +59,7 @@ Class environment
 -/
 inductive CEEntry : Type where
   | ceEntry :
-      SemanticTypes.Class_Name ->
+      SemTy.Class_Name ->
       Int ->
       -- this is probably wrong, it should be some "dictionary variable"
       Variable ->
@@ -109,7 +109,7 @@ inductive KindEnv_Name : Type where
 
 @[reducible]
 def KindEnv : Type :=
-  Env KindEnv_Name SemanticTypes.Kind
+  Env KindEnv_Name SemTy.Kind
 
 /--
 Source Environment
