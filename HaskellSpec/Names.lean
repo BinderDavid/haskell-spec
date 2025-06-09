@@ -64,6 +64,7 @@ Constructors are written as `J` in the paper.
 -/
 inductive Constructor : Type where
   | Mk : String → Constructor
+  deriving BEq
 
 /--
 ### Qualified Data Constructors

@@ -64,3 +64,8 @@ def parseSpecialDataConstructor : SimpleParser Substring Char Special_Data_Const
 #guard testParser parseSpecialDataConstructor "[]" Special_Data_Constructor.Nil
 #guard testParser parseSpecialDataConstructor "[   ]" Special_Data_Constructor.Nil
 #guard testParser parseSpecialDataConstructor ":" Special_Data_Constructor.Cons
+
+def parseConstrutor : SimpleParser Substring Char Constructor :=
+  (λ c cs => Constructor.Mk ∘ String.mk ∘ List.cons c $ Array.toList cs) <$> ASCII.uppercase <*> takeMany ASCII.alphanum
+
+#guard testParser parseConstrutor "Cons" (Constructor.Mk "Cons")
