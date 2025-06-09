@@ -70,7 +70,7 @@ GE, IE, VE ⊢ ctDecl ⇝ typeDecls; binds : ⟨ CE, TE, KE, IE, VE⟩
 inductive ctdecl : Env.GE → Env.VE → Env.IE
                  → Source.ClassOrType
                  → Target.ClassOrType
-                 → Env.CE → Env.TE → Env.KindEnv → Env.IE → Env.VE
+                 → Env.CE → Env.TE → Env.KE → Env.IE → Env.VE
                  → Prop where
 
 /--
