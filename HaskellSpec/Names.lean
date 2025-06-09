@@ -122,3 +122,38 @@ C ∈ Qualified class name → B
 inductive QClassName : Type where
   | Unqualified : Class_Name → QClassName
   | Qualified : Module_Name → Class_Name → QClassName
+
+/--
+This class is informally specified at the end of section 2.3.
+-/
+class Unqual (name : Type u) where
+  unQual : name -> name
+
+instance instUnqualQClassName : Unqual QClassName where
+  unQual
+    | QClassName.Unqualified c => QClassName.Unqualified c
+    | QClassName.Qualified _ c => QClassName.Unqualified c
+
+instance instUnqualQConstructor : Unqual QConstructor where
+  unQual
+    | QConstructor.Unqualified c => QConstructor.Unqualified c
+    | QConstructor.Qualified _ c => QConstructor.Unqualified c
+    | QConstructor.Special s => QConstructor.Special s
+
+/--
+This class needed for a polymorphic implementation of
+the `justQs` function, defined in section 2.7.
+-/
+class IsQual (name : Type u) where
+  isQual : name -> Bool
+
+instance instIsqualQClassName : IsQual QClassName where
+  isQual
+    | QClassName.Unqualified _ => False
+    | QClassName.Qualified _ _ => True
+
+instance instIsqualQConstructor : IsQual QConstructor where
+  isQual
+    | QConstructor.Unqualified _ => False
+    | QConstructor.Qualified _ _ => True
+    | QConstructor.Special _ => False
