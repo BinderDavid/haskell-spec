@@ -1,7 +1,7 @@
 import HaskellSpec.Names
 import HaskellSpec.SemanticTypes
 
-namespace Environment
+namespace Env
 
 @[reducible]
 def Env (name : Type) (info : Type) : Type :=
@@ -47,19 +47,20 @@ def justSingle [BEq name] [BEq info] : Env name info -> Env name info :=
   sorry -- TODO My first attempt at defining this did not satisfy the
         -- termination checker.
 
-/--
-Instance Environment
--/
+
 inductive IEEntry : Type where
 
+/--
+### Instance Environment
+
+Cp. section 2.7.4
+-/
 def IE := List IEEntry
 
-/--
-Class environment
--/
+
 inductive CEEntry : Type where
   | ceEntry :
-      SemanticTypes.Class_Name ->
+      SemTy.Class_Name ->
       Int ->
       -- this is probably wrong, it should be some "dictionary variable"
       Variable ->
@@ -67,26 +68,39 @@ inductive CEEntry : Type where
       IE ->
       CEEntry
 
+/--
+### Class environment
+
+Cp. section 2.7.1
+-/
 @[reducible]
 def CE := List CEEntry
 
 /--
-Type environment
+### Type environment
+
+Cp. section 2.7.2
 -/
 inductive TE : Type where
 
 /--
-Data constructor environment
+### Data constructor environment
+
+Cp. section 2.7.3
 -/
 inductive DE : Type where
 
 /--
-Label Environment
+### Label Environment
+
+Cp. section 2.7.3
 -/
 inductive LE : Type where
 
 /--
-Overloading Environment
+### Overloading Environment
+
+Cp. section 2.7.4
 -/
 inductive OE : Type where
 
@@ -94,25 +108,31 @@ inductive OE : Type where
 inductive VE_Item : Type where
 
 /--
-Variable Environment
+### Variable Environment
+
+Cp. section 2.7.5
 -/
 def VE : Type := Env QVariable VE_Item
 
-/--
-Kind Environment
--/
+
 inductive KindEnv_Name : Type where
   | T : QType_Name -> KindEnv_Name
   | u : Type_Variable -> KindEnv_Name
   | C : QClassName -> KindEnv_Name
 
+/--
+### Kind Environment
 
+Cp. section 2.7.6
+-/
 @[reducible]
-def KindEnv : Type :=
-  Env KindEnv_Name SemanticTypes.Kind
+def KE : Type :=
+  Env KindEnv_Name SemTy.Kind
 
 /--
-Source Environment
+### Source Environment
+
+Cp. section 2.7.7
 -/
 inductive SE : Type where
 
@@ -144,4 +164,4 @@ Cp. section 2.7.9
 -/
 def ME : Type := Env Module_Name FE
 
-end Environment
+end Env

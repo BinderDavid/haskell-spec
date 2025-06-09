@@ -10,37 +10,37 @@ The rules are defined in fig. 8, 9, 10 of the paper.
 
 namespace Kinding
 
-open Source Environment SemanticTypes
+open Source Env SemTy
 
 
 /-
 Fig. 10 (Kind inference, type expressions)
 -/
-inductive ktype : KindEnv → TypeExpression → Kind → Prop where
+inductive ktype : KE → TypeExpression → Kind → Prop where
   | Kind_TVar :
-      (KindEnv_Name.u u, κ) ∈ KE
+      (KindEnv_Name.u u, κ) ∈ ke
     → ---------------------------
-      ktype KE (type_var u) κ
+      ktype ke (type_var u) κ
 
   | Kind_TCon :
-      (KindEnv_Name.T T, κ) ∈ KE
+      (KindEnv_Name.T T, κ) ∈ ke
     → ---------------------------
-      ktype KE (type_var u) κ
+      ktype ke (type_var u) κ
 
   | Kind_App :
-      ktype KE t₁ (Fun κ₁ κ₂)
-    → ktype KE t₂ κ₁
+      ktype ke t₁ (Fun κ₁ κ₂)
+    → ktype ke t₂ κ₁
     → --------------------------
-      ktype KE (type_cons t₁ t₂) κ₂
+      ktype ke (type_cons t₁ t₂) κ₂
 
 /--
 Defined in section 3.1.1
 -/
-inductive KindOrdering : SemanticTypes.Kind → SemanticTypes.Kind → Prop where
-  | Star_LT : KindOrdering SemanticTypes.Kind.Star κ
+inductive KindOrdering : SemTy.Kind → SemTy.Kind → Prop where
+  | Star_LT : KindOrdering SemTy.Kind.Star κ
   | Fun_Cong : KindOrdering κ₁ κ₁'
              → KindOrdering κ₂ κ₂'
-             → KindOrdering (SemanticTypes.Kind.Fun κ₁ κ₂) (SemanticTypes.Kind.Fun κ₁' κ₂')
+             → KindOrdering (SemTy.Kind.Fun κ₁ κ₂) (SemTy.Kind.Fun κ₁' κ₂')
 
 inductive kctDecls : KindEnv → Source.ClassesAndTypes → KindEnv → Prop where
 
