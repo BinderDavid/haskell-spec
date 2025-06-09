@@ -16,6 +16,18 @@ def testParserFails  {α : Type} (p : HaskellParser α) (str : String) : Bool :=
     | .ok _ _ => false
     | _ => true
 
+def parseLowerCaseIdentifier : HaskellParser String :=
+  (λ c cs => String.mk ∘ List.cons c $ Array.toList cs ) <$> ASCII.lowercase <*> takeMany ASCII.alphanum
+
+#guard testParser parseLowerCaseIdentifier "str" "str"
+#guard testParserFails parseLowerCaseIdentifier "Str"
+
+def parseUpperCaseIdentifier : HaskellParser String :=
+  (λ c cs => String.mk ∘ List.cons c $ Array.toList cs ) <$> ASCII.uppercase <*> takeMany ASCII.alphanum
+
+#guard testParser parseUpperCaseIdentifier "Str" "Str"
+#guard testParserFails parseUpperCaseIdentifier "str"
+
 def parseLiteral : HaskellParser Source.Literal :=
  Source.Literal.char <$> (char '\'' *> ASCII.alphanum <* char '\'')
  <|> Source.Literal.string <$>
@@ -36,13 +48,13 @@ def parseQualifier : HaskellParser Source.Qualifier :=
 #guard testParser parseQualifier "qualified"  .qualified 
 
 def parseModuleName : HaskellParser Module_Name :=
-  (λ c cs => Module_Name.Mk ∘ String.mk ∘ List.cons c $ Array.toList cs ) <$> ASCII.uppercase <*> takeMany ASCII.alphanum
+  Module_Name.Mk  <$> parseUpperCaseIdentifier
 
 #guard testParser parseModuleName "Mod" (.Mk "Mod")
 #guard testParserFails parseModuleName "mod" 
 
 def parseVariable : HaskellParser Variable :=
-  (λ c cs => Variable.Mk ∘ String.mk ∘ List.cons c $ Array.toList cs ) <$> ASCII.lowercase <*> takeMany ASCII.alphanum
+  Variable.Mk <$> parseLowerCaseIdentifier
 
 #guard testParser parseVariable "var" (.Mk "var")
 #guard testParserFails parseVariable "Var"
@@ -68,6 +80,6 @@ def parseSpecialDataConstructor : HaskellParser Special_Data_Constructor :=
 #guard testParser parseSpecialDataConstructor ":" Special_Data_Constructor.Cons
 
 def parseConstrutor : HaskellParser Constructor :=
-  (λ c cs => Constructor.Mk ∘ String.mk ∘ List.cons c $ Array.toList cs) <$> ASCII.uppercase <*> takeMany ASCII.alphanum
+  Constructor.Mk <$> parseUpperCaseIdentifier
 
 #guard testParser parseConstrutor "Cons" (Constructor.Mk "Cons")
