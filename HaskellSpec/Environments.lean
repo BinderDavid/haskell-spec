@@ -28,6 +28,20 @@ def intersect [BEq t] (l l' : List t) : (List t) :=
 def oplus [BEq name] [BEq info] (env env' : Env name info) (_ : (intersect (dom env) (dom env') = empty)) : (Env name info) :=
   List.append env env'
 
+-- ⊕ from Section 2.7 as a ternary relation
+-- asserts that the environments have no overlapping domains
+inductive safe_union : Env k v -> Env k v -> Env k v -> Prop where
+
+  | SU_nil :
+      safe_union [] E E
+
+  | SU_cons :
+        k ∉ dom E'
+      → safe_union E E' E''
+      → safe_union ((k, v) :: E) E' ((k, v) :: E'')
+
+export safe_union (SU_nil SU_cons)
+
 def oplusbar [BEq name] (env env' : Env name info) (_ : (restrict env (dom env') = restrict env' (dom env))) : (Env name info) :=
   List.append env env'
 
