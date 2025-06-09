@@ -6,14 +6,16 @@ import HaskellSpec.Names
 /-!
 # Import + Export Declarations
 -/
-
 /--
 Cp. Fig 12
 ```text
 FE, SE ⊢ ent : FE
 ```
 -/
-inductive Export : Environment.FE → Environment.SE → Source.Entity → Environment.FE → Prop where
+inductive Export : Env.FE → Env.SE
+                 → Source.Entity
+                 → Env.FE
+                 → Prop where
 
 /--
 Cp. Fig 13
@@ -21,7 +23,10 @@ Cp. Fig 13
 ME ⊢ imp, FE, SE
 ```
 -/
-inductive Import : Environment.ME → Source.Import → Environment.FE → Environment.SE → Prop where
+inductive Import : Env.ME
+                 → Source.Import
+                 → Env.FE → Env.SE
+                 → Prop where
 
 /--
 Cp. Fig 13
@@ -29,7 +34,10 @@ Cp. Fig 13
 M, EE ⊢ implist, EE
 ```
 -/
-inductive Implist : Module_Name → Environment.EE → Source.ImportList → Environment.EE → Prop where
+inductive Implist : Module_Name → Env.EE
+                  → Source.ImportList
+                  → Env.EE
+                  → Prop where
 
 /--
 Cp. Fig 13
@@ -37,7 +45,10 @@ Cp. Fig 13
 EE ⊢ qualifier, EE
 ```
 -/
-inductive Qualifier : Environment.EE → Source.Qualifier → Environment.EE → Prop where
+inductive Qualifier : Env.EE
+                    → Source.Qualifier
+                    → Env.EE
+                    → Prop where
 
 /--
 Cp. Fig 14
@@ -45,4 +56,7 @@ Cp. Fig 14
 EE ⊢ ent, EE
 ```
 -/
-inductive Entity : Environment.EE → Source.Entity → Environment.EE → Prop where
+inductive Entity : Env.EE
+                 → Source.Entity
+                 → Env.EE
+                 → Prop where

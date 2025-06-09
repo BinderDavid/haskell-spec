@@ -1,7 +1,7 @@
 import HaskellSpec.Names
 import HaskellSpec.SemanticTypes
 
-namespace Environment
+namespace Env
 
 @[reducible]
 def Env (name : Type) (info : Type) : Type :=
@@ -144,4 +144,4 @@ Cp. section 2.7.9
 -/
 def ME : Type := Env Module_Name FE
 
-end Environment
+end Env

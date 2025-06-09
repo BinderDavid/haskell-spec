@@ -10,7 +10,7 @@ The rules are defined in fig. 8, 9, 10 of the paper.
 
 namespace Kinding
 
-open Source Environment SemanticTypes
+open Source Env SemanticTypes
 
 
 /-

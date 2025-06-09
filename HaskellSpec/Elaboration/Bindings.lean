@@ -8,10 +8,10 @@ Cp. Fig. 29
 GE, IE, VE ⊢ binds ⇝ binds : VE
 ```
 -/
-inductive binds : Environment.GE → Environment.IE → Environment.VE
+inductive binds : Env.GE → Env.IE → Env.VE
                 → Source.Binds
                 → Target.Binds
-                → Environment.VE
+                → Env.VE
                 → Prop where
 
 
@@ -21,9 +21,9 @@ Cp. Fig 30
 GE, IE, VE ⊢ sigs;bindG ⇝ binds : VE
 ```
 -/
-inductive bindG : Environment.GE → Environment.IE → Environment.VE
+inductive bindG : Env.GE → Env.IE → Env.VE
                 → Target.Binds
-                → Environment.VE
+                → Env.VE
                 → Prop where
 
 /--
@@ -32,10 +32,10 @@ Cp. Fig 34
 GE, IE, VE ⊢ bindG ⇝ binds : VE
 ```
 -/
-inductive monobinds : Environment.GE → Environment.IE → Environment.VE
+inductive monobinds : Env.GE → Env.IE → Env.VE
                     → Source.BindGroup
                     → Target.Binds
-                    → Environment.VE
+                    → Env.VE
                     → Prop where
 
 /--
@@ -44,8 +44,8 @@ Cp. Fig 34
 GE, IE, VE ⊢ bind ⇝ bind : VE
 ```
 -/
-inductive bind : Environment.GE → Environment.IE → Environment.VE
+inductive bind : Env.GE → Env.IE → Env.VE
                → Source.Binding
                → Target.Binding
-               → Environment.VE
+               → Env.VE
                → Prop where
