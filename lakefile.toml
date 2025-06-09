@@ -8,3 +8,8 @@ name = "HaskellSpec"
 [[lean_exe]]
 name = "haskell-spec"
 root = "Main"
+
+[[require]]
+name = "Parser"
+git = "https://github.com/fgdorais/lean4-parser"
+rev = "26d5ce4d60195a869b1fdb100b442794ea63e1ad"
