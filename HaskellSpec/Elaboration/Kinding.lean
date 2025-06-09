@@ -119,17 +119,17 @@ i ∈ [1, n] : KE ⊢^ktype tᵢ : κᵢ
 KE ⊢^kctx C₁ t₁, ... Cₙ tₙ
 ```
 -/
-inductive kctx : KE
-               → Source.Context
-               → Prop where
-  | KIND_CTX {CAS ke} :
-      (∀ CA K,
-        CA ∈ CAS →
-        (KindEnv_Name.C (classAssertionName CA), K) ∈ ke →
-        ktype ke (classAssertionType CA) K
-      )
-      → ---------------------------------------------
-      kctx ke (Context.cx CAS)
+inductive kctx : KE → Source.Context → Prop where
 
+  | Kind_Ctx_nil :
+      -----------------------
+      kctx ke (Context.cx [])
+
+  | Kind_Ctx_cons :
+        (KindEnv_Name.C (classAssertionName CA), κ) ∈ ke
+      → ktype ke (classAssertionType CA) κ
+      → kctx ke (Context.cx CAS)
+      → ---------------------------------------------
+        kctx ke (Context.cx (CA :: CAS))
 
 end Kinding
