@@ -20,6 +20,7 @@ inductive Literal : Type where
   | string : String → Literal
   | integer : Int → Literal
   | float : Float → Literal
+  deriving BEq
 
 /--
 ```text
@@ -29,6 +30,7 @@ qualifer ∈ Qualifier → [qualified]
 inductive Qualifier : Type where
   | qualified
   | unqualified
+  deriving BEq
 
 /--
 ```text
