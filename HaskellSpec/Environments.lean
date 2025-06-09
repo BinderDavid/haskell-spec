@@ -48,9 +48,27 @@ def justSingle [BEq name] [BEq info] : Env name info -> Env name info :=
         -- termination checker.
 
 /--
+Instance Environment
+-/
+inductive IEEntry : Type where
+
+def IE := List IEEntry
+
+/--
 Class environment
 -/
-inductive CE : Type where
+inductive CEEntry : Type where
+  | ceEntry :
+      SemanticTypes.Class_Name ->
+      Int ->
+      -- this is probably wrong, it should be some "dictionary variable"
+      Variable ->
+      QClassName ->
+      IE ->
+      CEEntry
+
+@[reducible]
+def CE := List CEEntry
 
 /--
 Type environment
@@ -66,11 +84,6 @@ inductive DE : Type where
 Label Environment
 -/
 inductive LE : Type where
-
-/--
-Instance Environment
--/
-inductive IE : Type where
 
 /--
 Overloading Environment
