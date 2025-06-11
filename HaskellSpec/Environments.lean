@@ -120,6 +120,8 @@ inductive OE : Type where
 
 
 inductive VE_Item : Type where
+  | Ordinary : QVariable → SemTy.TypeScheme → VE_Item
+  | Class : VE_Item /- TODO -/
 
 /--
 ### Variable Environment

@@ -163,8 +163,8 @@ inductive classR : Env.CE → Env.TE → Int
               ((Env.CEEntry.ceEntry Γ h' x className ie) ∈ ce) ->
               (h' < h) ->
               (h'' : Int) ->
-              (type te h'' (List.foldl Source.TypeExpression.type_cons (Source.TypeExpression.type_var u) ts) τ) ->
-              classR ce te h (Source.classAssert className u ts) Γ τ
+              (type te h'' (List.foldl Source.TypeExpression.app (Source.TypeExpression.var u) ts) τ) ->
+              classR ce te h (Source.ClassAssertion.classAssert className u ts) Γ τ
 
 /--
 Cp. Fig 25

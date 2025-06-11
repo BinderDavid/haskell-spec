@@ -65,7 +65,7 @@ inductive exp : Env.GE → Env.IE → Env.VE
     → exp ge ie ve e3 e3' τ
     /- → dict ie e (Prelude!Enum^* τ) -/
     → exp ge ie ve
-          (Source.Expression.expr_listRange e1 (some e2) (some e3))
+          (Source.Expression.listRange e1 (some e2) (some e3))
           e /- Prelude!enumFromThenTo τ e e1' e2' e3' -/
           (SemTy.TypeS.App prelude_list τ)
   | EnumFromTo :
@@ -73,7 +73,7 @@ inductive exp : Env.GE → Env.IE → Env.VE
     → exp ge ie ve e2 e2' τ
     /- → dict ie e (Prelude!Enum^* τ) -/
     → exp ge ie ve
-          (Source.Expression.expr_listRange e1 none (some e2))
+          (Source.Expression.listRange e1 none (some e2))
           e /- Prelude!enumFromTo τ e e1' e2' -/
           (SemTy.TypeS.App prelude_list τ)
   | EnumFromThen :
@@ -81,14 +81,14 @@ inductive exp : Env.GE → Env.IE → Env.VE
     → exp ge ie ve e2 e2' τ
     /- → dict ie e (Prelude!Enum^* τ) -/
     → exp ge ie ve
-          (Source.Expression.expr_listRange e1 (some e2) none)
+          (Source.Expression.listRange e1 (some e2) none)
           e /- Prelude!enumFromThen τ e e1' e2' -/
           (SemTy.TypeS.App prelude_list τ)
   | EnumFrom :
       exp ge ie ve e1 e1' τ
     /- → dict ie e (Prelude!Enum^* τ) -/
     → exp ge ie ve
-          (Source.Expression.expr_listRange e1 none none)
+          (Source.Expression.listRange e1 none none)
           e /- Prelude!enumFrom τ e e1' -/
           (SemTy.TypeS.App prelude_list τ)
 
@@ -153,6 +153,11 @@ inductive stmts : Env.GE → Env.IE → Env.VE
                 → SemTy.TypeS
                 → Prop where
 
+def unqual_var (var : QVariable) : Variable :=
+  match var with
+    | (QVariable.Qualified _m x) => x
+    | (QVariable.Unqualified x) => x
+
 /--
 Cp. Fig 43. 44.
 ```
@@ -165,3 +170,53 @@ inductive pat : Env.GE → Env.IE
               → Env.VE
               → SemTy.TypeS
               → Prop where
+  | PVar :
+    σ = (SemTy.TypeScheme.Forall [] (SemTy.Context.Mk []) τ) →
+    pat
+      ge
+      ie
+      (Source.Pattern.var x)
+      (Target.Pattern.var (unqual_var x) σ)
+      [(x, Env.VE_Item.Ordinary x σ)]
+      τ
+  | PIrr :
+    pat ge ie p₁ p₂ ve τ →
+    pat ge ie (Source.Pattern.lazy p₁) (Target.Pattern.lazy p₂) ve τ
+  | PWild :
+    pat ge ie Source.Pattern.wildcard Target.Pattern.wildcard [] τ
+  | PChar :
+    pat
+      ge
+      ie
+      (Source.Pattern.lit (Source.Literal.char c))
+      (Target.Pattern.lit (Target.Literal.char c))
+      []
+      prelude_char
+  | PString :
+    pat
+      ge
+      ie
+      (Source.Pattern.lit (Source.Literal.string s))
+      (Target.Pattern.lit (Target.Literal.string s))
+      []
+      (SemTy.TypeS.App prelude_list prelude_char)
+  | PInteger :
+    literal ie (Source.Literal.integer i) e τ →
+    dict ie ed →
+    pat
+      ge
+      ie
+      (Source.Pattern.lit (Source.Literal.integer i))
+      _ /- { (Prelude.== τ ed e) } -/
+      []
+      τ
+  | PFloat :
+    literal ie (Source.Literal.float f) e τ →
+    dict ie ed →
+    pat
+      ge
+      ie
+      (Source.Pattern.lit (Source.Literal.float f))
+      _ /- { (Prelude.== τ ed e) } -/
+      []
+      τ

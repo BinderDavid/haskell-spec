@@ -16,9 +16,29 @@ literal ∈ Literal → char
 ```
 -/
 inductive Literal : Type where
+    /--
+    A character literal.
+    Example: `'a'`
+    Character literals are not overloaded and have type `Prelude.Char`.
+    -/
   | char : Char → Literal
+    /--
+    A string literal.
+    Example: `"hello"`
+    String literals are not overloaded and have type `[Prelude.Char]`.
+    -/
   | string : String → Literal
+    /--
+    An integer literal.
+    Example: `5`
+    Integer literals are overloaded and have type `Num a => a`.
+    -/
   | integer : Int → Literal
+    /--
+    A floating literal.
+    Example: `2.3`
+    Floating literals are overloaded and have type `Fractional a => a`.
+    -/
   | float : Float → Literal
 
 /--
@@ -31,6 +51,7 @@ inductive Qualifier : Type where
   | unqualified
 
 /--
+An entity is something that can be exported or imported by a module.
 ```text
 ent ∈ Entity → x
              | K
@@ -42,13 +63,13 @@ ent ∈ Entity → x
 ```
 --/
 inductive Entity : Type where
-  | ent_var      : QVariable → Entity
-  | ent_cons     : QConstructor → Entity
-  | ent_type     : QType_Name → List QVariable → List QConstructor → Entity
-  | ent_typeall  : QType_Name → Entity
-  | ent_class    : QClassName → List QVariable → Entity
-  | ent_classall : QClassName → Entity
-  | ent_module   : Module_Name → Entity -- use QModule_Name
+  | var       : QVariable → Entity
+  | cons      : QConstructor → Entity
+  | type      : QType_Name → List QVariable → List QConstructor → Entity
+  | typeall   : QType_Name → Entity
+  | typeclass : QClassName → List QVariable → Entity
+  | classall  : QClassName → Entity
+  | module    : Module_Name → Entity -- use QModule_Name
 
 /--
 ```text
@@ -102,14 +123,14 @@ mutual
   ```
   --/
   inductive Pattern : Type where
-    | pat_var : QVariable → Pattern
-    | pat_constr_pat : QConstructor → List Pattern → Pattern
-    | pat_constr_fieldPat : QConstructor → List FieldPattern → Pattern
-    | pat_at : Variable → Pattern → Pattern
-    | pat_lazy : Pattern → Pattern
-    | pat_wildcard : Pattern
-    | pat_lit : Literal → Pattern
-    | pat_plus : Variable → Int → Pattern
+    | var : QVariable → Pattern
+    | constr_pat : QConstructor → List Pattern → Pattern
+    | constr_fieldPat : QConstructor → List FieldPattern → Pattern
+    | at : Variable → Pattern → Pattern
+    | lazy : Pattern → Pattern
+    | wildcard : Pattern
+    | lit : Literal → Pattern
+    | n_plus_k : Variable → Int → Pattern
 
   /--
   ```text
@@ -188,28 +209,18 @@ mutual
   ```
   --/
   inductive Expression : Type where
-    | expr_var : QVariable → Expression
-    | expr_lit : Literal → Expression
-    | expr_constr : QConstructor → Expression
-    | expr_abs : NonEmptyList Pattern → Expression → Expression
-    | expr_app : Expression → Expression → Expression
-    | expr_let : Binds → Expression → Expression
-    | expr_case : Expression → NonEmptyList Match → Expression
-    | expr_do : Statements → Expression
-    | expr_listComp : Expression → Qualifiers → Expression
-    | expr_listRange : Expression → Option Expression → Option Expression → Expression
-    | expr_recUpd : Expression → List FieldBinding → Expression
-    | expr_recConstr : QConstructor → List FieldBinding → Expression
-
-  /--
-  ```text
-  helper type used in the internals of Statements, Qualifiers
-  ```
-  -/
-  inductive Statement : Type where
-    | stmt_arr : Pattern → Expression → Statement
-    | stmt_let : Binds → Statement
-    | stmt_expr : Expression → Statement
+    | var : QVariable → Expression
+    | lit : Literal → Expression
+    | constr : QConstructor → Expression
+    | abs : NonEmptyList Pattern → Expression → Expression
+    | app : Expression → Expression → Expression
+    | let_bind : Binds → Expression → Expression
+    | case : Expression → NonEmptyList Match → Expression
+    | do_block : Statements → Expression
+    | listComp : Expression → Qualifiers → Expression
+    | listRange : Expression → Option Expression → Option Expression → Expression
+    | recUpd : Expression → List FieldBinding → Expression
+    | recConstr : QConstructor → List FieldBinding → Expression
 
   /--
   ```text
@@ -220,7 +231,25 @@ mutual
   ```
   -/
   inductive Statements : Type where
-    | stmt_list : List Statement → Expression → Statements
+      /--
+      ```text
+      p <- e; stmts
+      ```
+      -/
+    | mbind : Pattern → Expression → Statements → Statements
+      /--
+      ```text
+      let binds; stmts
+      ```
+      -/
+    | lbind : Binds → Statements → Statements
+      /--
+      ```text
+      e; stmts
+      ```
+      -/
+    | seq : Expression → Statements → Statements
+    | last : Expression → Statements
 
   /--
   ```text
@@ -231,7 +260,10 @@ mutual
   ```
   -/
   inductive Qualifiers : Type where
-    | qal_list : List Statement → Qualifiers
+    | list_bind : Pattern → Expression → Qualifiers → Qualifiers
+    | lbind : Binds → Qualifiers → Qualifiers
+    | guard : Expression → Qualifiers → Qualifiers
+    | empty : Qualifiers
 
   /--
   ```text
@@ -298,9 +330,9 @@ mutual
   ```
   --/
   inductive TypeExpression : Type where
-    | type_var  : Type_Variable → TypeExpression
-    | type_name : Type_Name → TypeExpression
-    | type_cons : TypeExpression → TypeExpression → TypeExpression
+    | var      : Type_Variable → TypeExpression
+    | typename : Type_Name → TypeExpression
+    | app      : TypeExpression → TypeExpression → TypeExpression
 
   /--
   ```text
@@ -370,18 +402,14 @@ mutual
     | cx : List ClassAssertion → Context
 end
 
-
-export ClassAssertion (classAssert)
-export TypeExpression (type_var type_name type_cons)
-
 def classAssertionName : ClassAssertion → QClassName
-  | classAssert C _ _ => C
+  | ClassAssertion.classAssert C _ _ => C
 
 /-
 Reconstruct the type of the class assertion. e.g.
    classAssertionType (C u (t₁ … tₖ)) = u t₁ … tₖ
 -/
 def classAssertionType : ClassAssertion → TypeExpression
-   | classAssert _ TV TS => List.foldl type_cons (type_var TV) TS
+   | ClassAssertion.classAssert _ TV TS => List.foldl TypeExpression.app (TypeExpression.var TV) TS
 
 end Source
