@@ -153,6 +153,11 @@ inductive stmts : Env.GE → Env.IE → Env.VE
                 → SemTy.TypeS
                 → Prop where
 
+def unqual_var (var : QVariable) : Variable :=
+  match var with
+    | (QVariable.Qualified _m x) => x
+    | (QVariable.Unqualified x) => x
+
 /--
 Cp. Fig 43. 44.
 ```
@@ -165,3 +170,53 @@ inductive pat : Env.GE → Env.IE
               → Env.VE
               → SemTy.TypeS
               → Prop where
+  | PVar :
+    σ = (SemTy.TypeScheme.Forall [] (SemTy.Context.Mk []) τ) →
+    pat
+      ge
+      ie
+      (Source.Pattern.var x)
+      (Target.Pattern.var (unqual_var x) σ)
+      [(x, Env.VE_Item.Ordinary x σ)]
+      τ
+  | PIrr :
+    pat ge ie p₁ p₂ ve τ →
+    pat ge ie (Source.Pattern.lazy p₁) (Target.Pattern.lazy p₂) ve τ
+  | PWild :
+    pat ge ie Source.Pattern.wildcard Target.Pattern.wildcard [] τ
+  | PChar :
+    pat
+      ge
+      ie
+      (Source.Pattern.lit (Source.Literal.char c))
+      (Target.Pattern.lit (Target.Literal.char c))
+      []
+      prelude_char
+  | PString :
+    pat
+      ge
+      ie
+      (Source.Pattern.lit (Source.Literal.string s))
+      (Target.Pattern.lit (Target.Literal.string s))
+      []
+      (SemTy.TypeS.App prelude_list prelude_char)
+  | PInteger :
+    literal ie (Source.Literal.integer i) e τ →
+    dict ie ed →
+    pat
+      ge
+      ie
+      (Source.Pattern.lit (Source.Literal.integer i))
+      _ /- { (Prelude.== τ ed e) } -/
+      []
+      τ
+  | PFloat :
+    literal ie (Source.Literal.float f) e τ →
+    dict ie ed →
+    pat
+      ge
+      ie
+      (Source.Pattern.lit (Source.Literal.float f))
+      _ /- { (Prelude.== τ ed e) } -/
+      []
+      τ

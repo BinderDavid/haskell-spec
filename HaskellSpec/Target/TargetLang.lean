@@ -1,5 +1,6 @@
 import HaskellSpec.Names
 import HaskellSpec.NonEmptyList
+import HaskellSpec.SemanticTypes
 /-!
 Figure 1 and 2
 -/
@@ -34,7 +35,7 @@ mutual
   ```
   --/
   inductive Pattern : Type where
-    | var : QVariable → Pattern
+    | var : Variable → SemTy.TypeScheme →  Pattern
     | constr_pat : QConstructor → List Pattern → Pattern
     | constr_fieldPat : QConstructor → List FieldPattern → Pattern
     | at : Variable → Pattern → Pattern
