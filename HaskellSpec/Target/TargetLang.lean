@@ -136,16 +136,6 @@ mutual
 
   /--
   ```text
-  helper type used in the internals of Statements, Qualifiers
-  ```
-  -/
-  inductive Statement : Type where
-    | stmt_arr : Pattern → Expression → Statement
-    | stmt_let : Binds → Statement
-    | stmt_expr : Expression → Statement
-
-  /--
-  ```text
   stmts ∈ Statements → p <- e; stmts
                      | let binds; stmts
                      | e; stmts
@@ -153,7 +143,25 @@ mutual
   ```
   -/
   inductive Statements : Type where
-    | stmt_list : List Statement → Expression → Statements
+      /--
+      ```text
+      p <- e; stmts
+      ```
+      -/
+    | mbind : Pattern → Expression → Statements → Statements
+      /--
+      ```text
+      let binds; stmts
+      ```
+      -/
+    | lbind : Binds → Statements → Statements
+      /--
+      ```text
+      e; stmts
+      ```
+      -/
+    | seq : Expression → Statements → Statements
+    | last : Expression → Statements
 
   /--
   ```text
@@ -164,7 +172,10 @@ mutual
   ```
   -/
   inductive Qualifiers : Type where
-    | qal_list : List Statement → Qualifiers
+    | list_bind : Pattern → Expression → Qualifiers → Qualifiers
+    | lbind : Binds → Qualifiers → Qualifiers
+    | guard : Expression → Qualifiers → Qualifiers
+    | empty : Qualifiers
 
   /--
   ```text
