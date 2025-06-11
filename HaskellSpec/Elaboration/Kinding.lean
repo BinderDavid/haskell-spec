@@ -21,17 +21,17 @@ KE ⊢ t : κ
 ```
 -/
 inductive ktype : KE → TypeExpression → Kind → Prop where
-  | Kind_TVar :
+  | KIND_TVAR :
       (KE_Name.u u, κ) ∈ ke
     → ---------------------------
       ktype ke (TypeExpression.var u) κ
 
-  | Kind_TCon :
+  | KIND_TCON :
       (KE_Name.T T, κ) ∈ ke
     → ---------------------------
-      ktype ke (TypeExpression.var u) κ
+      ktype ke (TypeExpression.typename T) κ
 
-  | Kind_App :
+  | KIND_APP :
       ktype ke t₁ (Fun κ₁ κ₂)
     → ktype ke t₂ κ₁
     → --------------------------

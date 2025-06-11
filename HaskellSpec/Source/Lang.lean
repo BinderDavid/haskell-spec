@@ -18,7 +18,7 @@ t ∈ Type expression → u
 --/
 inductive TypeExpression : Type where
   | var      : Type_Variable → TypeExpression
-  | typename : Type_Name → TypeExpression
+  | typename : QType_Name → TypeExpression
   | app      : TypeExpression → TypeExpression → TypeExpression
 
 /--
