@@ -21,12 +21,12 @@ KE ⊢ t : κ
 -/
 inductive ktype : KE → TypeExpression → Kind → Prop where
   | Kind_TVar :
-      (KindEnv_Name.u u, κ) ∈ ke
+      (KE_Name.u u, κ) ∈ ke
     → ---------------------------
       ktype ke (TypeExpression.var u) κ
 
   | Kind_TCon :
-      (KindEnv_Name.T T, κ) ∈ ke
+      (KE_Name.T T, κ) ∈ ke
     → ---------------------------
       ktype ke (TypeExpression.var u) κ
 
@@ -126,7 +126,7 @@ inductive kctx : KE → Source.Context → Prop where
       kctx ke (Context.cx [])
 
   | Kind_Ctx_cons :
-        (KindEnv_Name.C (classAssertionName CA), κ) ∈ ke
+        (KE_Name.C (classAssertionName CA), κ) ∈ ke
       → ktype ke (classAssertionType CA) κ
       → kctx ke (Context.cx CAS)
       → ---------------------------------------------

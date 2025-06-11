@@ -77,4 +77,16 @@ inductive Context : Type where
 inductive TypeScheme : Type where
   | Forall : List Type_Variable → Context → TypeS → TypeScheme
 
+/--
+This is written as follows in the paper:
+```
+∀ α. Γ α ⇒c σ
+```
+It is used to assign types to typeclass methods. The example given in the paper is:
+```
+ceiling : ∀ α. RealFrac α ⇒c ∀ β. Integral β ⇒ α → β
+```
+-/
+inductive ClassTypeScheme : Type where
+  | Forall : Type_Variable → Class_Name → TypeScheme → ClassTypeScheme
 end SemTy
