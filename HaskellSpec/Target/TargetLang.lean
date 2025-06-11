@@ -34,14 +34,14 @@ mutual
   ```
   --/
   inductive Pattern : Type where
-    | pat_var : QVariable → Pattern
-    | pat_constr_pat : QConstructor → List Pattern → Pattern
-    | pat_constr_fieldPat : QConstructor → List FieldPattern → Pattern
-    | pat_at : Variable → Pattern → Pattern
-    | pat_lazy : Pattern → Pattern
-    | pat_wildcard : Pattern
-    | pat_lit : Literal → Pattern
-    | pat_plus : Variable → Int → Pattern
+    | var : QVariable → Pattern
+    | constr_pat : QConstructor → List Pattern → Pattern
+    | constr_fieldPat : QConstructor → List FieldPattern → Pattern
+    | at : Variable → Pattern → Pattern
+    | lazy : Pattern → Pattern
+    | wildcard : Pattern
+    | lit : Literal → Pattern
+    | n_plus_k : Variable → Int → Pattern
 
   /--
   ```text
@@ -230,9 +230,9 @@ mutual
   ```
   --/
   inductive TypeExpression : Type where
-    | type_var  : Type_Variable → TypeExpression
-    | type_name : Type_Name → TypeExpression
-    | type_cons : TypeExpression → TypeExpression → TypeExpression
+    | var      : Type_Variable → TypeExpression
+    | typename : Type_Name → TypeExpression
+    | app      : TypeExpression → TypeExpression → TypeExpression
 
   /--
   ```text

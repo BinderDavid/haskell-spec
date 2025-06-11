@@ -23,18 +23,18 @@ inductive ktype : KE → TypeExpression → Kind → Prop where
   | Kind_TVar :
       (KindEnv_Name.u u, κ) ∈ ke
     → ---------------------------
-      ktype ke (type_var u) κ
+      ktype ke (TypeExpression.var u) κ
 
   | Kind_TCon :
       (KindEnv_Name.T T, κ) ∈ ke
     → ---------------------------
-      ktype ke (type_var u) κ
+      ktype ke (TypeExpression.var u) κ
 
   | Kind_App :
       ktype ke t₁ (Fun κ₁ κ₂)
     → ktype ke t₂ κ₁
     → --------------------------
-      ktype ke (type_cons t₁ t₂) κ₂
+      ktype ke (TypeExpression.app t₁ t₂) κ₂
 
 /--
 Defined in section 3.1.1

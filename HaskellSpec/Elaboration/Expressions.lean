@@ -65,7 +65,7 @@ inductive exp : Env.GE → Env.IE → Env.VE
     → exp ge ie ve e3 e3' τ
     /- → dict ie e (Prelude!Enum^* τ) -/
     → exp ge ie ve
-          (Source.Expression.expr_listRange e1 (some e2) (some e3))
+          (Source.Expression.listRange e1 (some e2) (some e3))
           e /- Prelude!enumFromThenTo τ e e1' e2' e3' -/
           (SemTy.TypeS.App prelude_list τ)
   | EnumFromTo :
@@ -73,7 +73,7 @@ inductive exp : Env.GE → Env.IE → Env.VE
     → exp ge ie ve e2 e2' τ
     /- → dict ie e (Prelude!Enum^* τ) -/
     → exp ge ie ve
-          (Source.Expression.expr_listRange e1 none (some e2))
+          (Source.Expression.listRange e1 none (some e2))
           e /- Prelude!enumFromTo τ e e1' e2' -/
           (SemTy.TypeS.App prelude_list τ)
   | EnumFromThen :
@@ -81,14 +81,14 @@ inductive exp : Env.GE → Env.IE → Env.VE
     → exp ge ie ve e2 e2' τ
     /- → dict ie e (Prelude!Enum^* τ) -/
     → exp ge ie ve
-          (Source.Expression.expr_listRange e1 (some e2) none)
+          (Source.Expression.listRange e1 (some e2) none)
           e /- Prelude!enumFromThen τ e e1' e2' -/
           (SemTy.TypeS.App prelude_list τ)
   | EnumFrom :
       exp ge ie ve e1 e1' τ
     /- → dict ie e (Prelude!Enum^* τ) -/
     → exp ge ie ve
-          (Source.Expression.expr_listRange e1 none none)
+          (Source.Expression.listRange e1 none none)
           e /- Prelude!enumFrom τ e e1' -/
           (SemTy.TypeS.App prelude_list τ)
 
