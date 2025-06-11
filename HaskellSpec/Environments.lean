@@ -95,6 +95,11 @@ inductive TE_Item : Type where
   | TypeSynonym : SemTy.Type_Constructor → Int → List SemTy.Type_Variable → SemTy.TypeS → TE_Item
 
 /--
+Cp. Fig 16
+-/
+def CE_init : CE := []
+
+/--
 ### Type environment
 
 The type environment contains information about type constructors and type variables.
@@ -105,6 +110,9 @@ Cp. section 2.7.2
 -/
 def TE : Type := Env QType_Name TE_Item × Env Type_Variable SemTy.Type_Variable
 
+def TE_init : TE :=
+  ([(QType_Name.Special Special_Type_Constructor.List, TE_Item.DataType (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star)))],
+   [])
 
 /--
 ### Label Environment
