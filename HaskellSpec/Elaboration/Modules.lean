@@ -1,5 +1,5 @@
-import HaskellSpec.Source.SourceLang
-import HaskellSpec.Target.TargetLang
+import HaskellSpec.Source.Lang
+import HaskellSpec.Target.Lang
 import HaskellSpec.Environments
 import HaskellSpec.SemanticTypes
 

@@ -1,6 +1,6 @@
 import HaskellSpec.Environments
-import HaskellSpec.Source.SourceLang
-import HaskellSpec.Target.TargetLang
+import HaskellSpec.Source.Lang
+import HaskellSpec.Target.Lang
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Elaboration.Modules
 

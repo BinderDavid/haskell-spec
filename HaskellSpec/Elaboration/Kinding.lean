@@ -1,5 +1,5 @@
 import HaskellSpec.SemanticTypes
-import HaskellSpec.Source.SourceLang
+import HaskellSpec.Source.Lang
 import HaskellSpec.Environments
 
 /-!
