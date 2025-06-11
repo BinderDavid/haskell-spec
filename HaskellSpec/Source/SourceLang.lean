@@ -109,37 +109,29 @@ inductive Module : Type where
     → Module
 
 
-mutual
-  /--
-  ```text
-    p ∈ Pattern → x
-                 | K p₁ … pₙ      k ≥ 0
-                 | K {fp₁ … fpₙ}  k ≥ 0
-                 | v@p
-                 | ~p
-                 | _
-                 | literal
-                 | v+integer
-  ```
-  --/
-  inductive Pattern : Type where
-    | var : QVariable → Pattern
-    | constr_pat : QConstructor → List Pattern → Pattern
-    | constr_fieldPat : QConstructor → List FieldPattern → Pattern
-    | at : Variable → Pattern → Pattern
-    | lazy : Pattern → Pattern
-    | wildcard : Pattern
-    | lit : Literal → Pattern
-    | n_plus_k : Variable → Int → Pattern
 
-  /--
-  ```text
-    fp ∈ FieldPattern → x = p
-  ```
-  --/
-  inductive FieldPattern : Type where
-    | fp_pat: Variable → Pattern → FieldPattern
-end
+/--
+```text
+  p ∈ Pattern       → x
+                    | K p₁ … pₙ      k ≥ 0
+                    | K {fp₁ … fpₙ}  k ≥ 0
+                    | v@p
+                    | ~p
+                    | _
+                    | literal
+                    | v+integer
+  fp ∈ FieldPattern → x = p
+```
+--/
+inductive Pattern : Type where
+  | var : QVariable → Pattern
+  | constr_pat : QConstructor → List Pattern → Pattern
+  | constr_fieldPat : QConstructor → List (Variable × Pattern) → Pattern
+  | at : Variable → Pattern → Pattern
+  | lazy : Pattern → Pattern
+  | wildcard : Pattern
+  | lit : Literal → Pattern
+  | n_plus_k : Variable → Int → Pattern
 
 mutual
   /--
