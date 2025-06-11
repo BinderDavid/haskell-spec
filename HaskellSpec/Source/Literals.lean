@@ -33,6 +33,6 @@ inductive Literal : Type where
     Example: `2.3`
     Floating literals are overloaded and have type `Fractional a => a`.
     -/
-  | float : Float → Literal
+  | float : Int → Int → Literal
 
 end Source

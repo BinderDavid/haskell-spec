@@ -213,12 +213,12 @@ inductive pat : Env.GE → Env.IE
       []
       τ
   | PFloat :
-    literal ie (Source.Literal.float f) e τ →
+    literal ie (Source.Literal.float n d) e τ →
     dict ie ed →
     pat
       ge
       ie
-      (Source.Pattern.lit (Source.Literal.float f))
+      (Source.Pattern.lit (Source.Literal.float n d))
       _ /- { (Prelude.== τ ed e) } -/
       []
       τ

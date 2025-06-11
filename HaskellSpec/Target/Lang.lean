@@ -19,7 +19,7 @@ inductive Literal : Type where
   | char : Char → Literal
   | string : String → Literal
   | integer : Int → Literal
-  | float : Float → Literal
+  | float : Int → Int → Literal
 
 /--
 ```text

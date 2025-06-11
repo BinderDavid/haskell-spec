@@ -47,23 +47,6 @@ sigs ∈ Signatures → sig₁; …; sigₙ   n ≥ 0
 inductive Signature : Type where
   | sig : QVariable → Context → TypeExpression → Signature
 
-/--
-```text
-conDecl ∈ ConstructorDecl → J t₁ … tₙ                 k ≥ 0
-                          | J { v₁ ∷ t₁ … vₙ ∷ tₙ }   k ≥ 0
-```
--/
-inductive ConstructorDecl : Type where
-  | conDecl_simple: Constructor → List TypeExpression → ConstructorDecl
-  | conDecl_record: Constructor → List (QVariable × TypeExpression) → ConstructorDecl
-
-/--
-```text
-conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
-```
--/
-inductive ConstructorDecls : Type where
-  | conDecls : NonEmptyList ConstructorDecl → ConstructorDecls
 
 mutual
   /--
@@ -190,70 +173,5 @@ mutual
     | guard : Expression → Qualifiers → Qualifiers
     | empty : Qualifiers
 end
-
-/--
-```text
-ctDecl ∈ Class or type → type S u₁ ... uₖ = t                              k ≥ 0
-                       | data cx => S u₁ ... uₖ = conDecls                 k ≥ 0
-                       | class cx => B u where sigs; bind₁; ...; bindₙ     k ≥ 0
-```
---/
-inductive ClassOrType : Type where
-  | ct_type :
-      Type_Name
-    → List Type_Variable
-    → TypeExpression
-    → ClassOrType
-  | ct_data :
-      Context
-    → Type_Name
-    → List Type_Variable
-    → ConstructorDecls
-    → ClassOrType
-  | ct_class :
-      Context
-    → Class_Name
-    → Type_Variable
-    → List Signature
-    → List Binding
-    → ClassOrType
-
-/--
-```text
-instDecl ∈ InstanceDecl → instance cx => C t where bind₁; …; bindₙ    n ≥ 0
-```
--/
-inductive InstanceDecl : Type where
-  | instDecl : Context → Class_Name → TypeExpression → List Binding → InstanceDecl
-
-/--
-```text
-instDecls ∈ InstanceDecls → instDecl₁; …; instDeclₙ   n ≥ 0
-```
--/
-inductive InstanceDecls : Type where
-  | instDecls : List InstanceDecl → InstanceDecls
-
-/--
-```text
-ctDecls ∈ Classes and types → [ctDecl₁;...;ctDeclₙ then ctDecls]
-                              n ≥ 1
-```
---/
-inductive ClassesAndTypes : Type where
-  | ct_empty
-  | ct_Decls : NonEmptyList ClassOrType → ClassesAndTypes → ClassesAndTypes
-
-
-
-def classAssertionName : ClassAssertion → QClassName
-  | ClassAssertion.classAssert C _ _ => C
-
-/-
-Reconstruct the type of the class assertion. e.g.
-   classAssertionType (C u (t₁ … tₖ)) = u t₁ … tₖ
--/
-def classAssertionType : ClassAssertion → TypeExpression
-   | ClassAssertion.classAssert _ TV TS => List.foldl TypeExpression.app (TypeExpression.var TV) TS
 
 end Source
