@@ -49,17 +49,6 @@ inductive KindOrdering : SemTy.Kind → SemTy.Kind → Prop where
 /--
 Cp. fig 8
 ```text
-KE ⊢ ctDecls : KE
-```
--/
-inductive kctDecls : KE
-                   → Source.ClassesAndTypes
-                   → KE
-                   → Prop where
-
-/--
-Cp. fig 8
-```text
 KE ⊢ ctDecl₁; … ; ctDeclₙ : KE
 ```
 -/
@@ -71,6 +60,25 @@ inductive kgroup : KE
 /--
 Cp. fig 8
 ```text
+KE ⊢ ctDecls : KE
+```
+-/
+inductive kctDecls : KE
+                   → Source.ClassesAndTypes
+                   → KE
+                   → Prop where
+  | KCTDECLS :
+    kgroup _ _ _ →
+    kctDecls _ _ _ →
+    kctDecls ke (Source.ClassesAndTypes.decls grp rest) _
+  | KCTEMPTY :
+    kctDecls ke Source.ClassesAndTypes.empty []
+
+
+
+/--
+Cp. fig 8
+```text
 KE ⊢ ctDecl : KE
 ```
 -/
@@ -78,6 +86,12 @@ inductive kctDecl : KE
                   → Source.ClassOrType
                   → KE
                   → Prop where
+  | KIND_DATA :
+    kctDecl ke (Source.ClassOrType.ct_data _ _ _ _) _
+  | KIND_TYPE :
+    kctDecl ke (Source.ClassOrType.ct_type _ _ _) _
+  | KIND_CLASS :
+    kctDecl ke (Source.ClassOrType.ct_class _ _ _ _ _) _
 
 /--
 Cp. fig 9
@@ -88,6 +102,12 @@ KE ⊢ conDecl
 inductive kconDecl : KE
                    → Source.ConstructorDecl
                    → Prop where
+  | KIND_POSCON :
+    (∀ τ, τ ∈ tys → ktype ke τ SemTy.Kind.Star) →
+    kconDecl ke (ConstructorDecl.conDecl_simple c tys)
+  | KIND_LABCON :
+    (∀ l τ, (l,τ) ∈ lbls → ktype ke τ SemTy.Kind.Star) →
+    kconDecl ke (ConstructorDecl.conDecl_record c lbls)
 
 /--
 Cp. fig 9
