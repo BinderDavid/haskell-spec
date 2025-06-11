@@ -1,11 +1,11 @@
 import HaskellSpec.Names
 import HaskellSpec.NonEmptyList
+import HaskellSpec.SemanticTypes
 /-!
 Figure 1 and 2
 -/
 
-namespace Source
-
+namespace Target
 /--
 From Fig. 3:
 ```
@@ -16,130 +16,34 @@ literal ∈ Literal → char
 ```
 -/
 inductive Literal : Type where
-    /--
-    A character literal.
-    Example: `'a'`
-    Character literals are not overloaded and have type `Prelude.Char`.
-    -/
   | char : Char → Literal
-    /--
-    A string literal.
-    Example: `"hello"`
-    String literals are not overloaded and have type `[Prelude.Char]`.
-    -/
   | string : String → Literal
-    /--
-    An integer literal.
-    Example: `5`
-    Integer literals are overloaded and have type `Num a => a`.
-    -/
   | integer : Int → Literal
-    /--
-    A floating literal.
-    Example: `2.3`
-    Floating literals are overloaded and have type `Fractional a => a`.
-    -/
-  | float : Float → Literal
+  | float : Int → Int → Literal
 
 /--
 ```text
-qualifer ∈ Qualifier → [qualified]
+  p ∈ Pattern → x
+               | K p₁ … pₙ      k ≥ 0
+               | K {fp₁ … fpₙ}  k ≥ 0
+               | v@p
+               | ~p
+               | _
+               | literal
+               | v+integer
+  fp ∈ FieldPattern → x = p
 ```
 --/
-inductive Qualifier : Type where
-  | qualified
-  | unqualified
+inductive Pattern : Type where
+  | var : Variable → SemTy.TypeScheme →  Pattern
+  | constr_pat : QConstructor → List Pattern → Pattern
+  | constr_fieldPat : QConstructor → List (Variable × Pattern) → Pattern
+  | at : Variable → Pattern → Pattern
+  | lazy : Pattern → Pattern
+  | wildcard : Pattern
+  | lit : Literal → Pattern
+  | n_plus_k : Variable → Int → Pattern
 
-/--
-An entity is something that can be exported or imported by a module.
-```text
-ent ∈ Entity → x
-             | K
-             | T (x₁,...,xₖ;K₁,...,Kₙ)   k, n ≥ 0
-             | T (..)
-             | C (x₁,...,xₖ)             k    ≥ 0
-             | C (..)
-             | module M
-```
---/
-inductive Entity : Type where
-  | var       : QVariable → Entity
-  | cons      : QConstructor → Entity
-  | type      : QType_Name → List QVariable → List QConstructor → Entity
-  | typeall   : QType_Name → Entity
-  | typeclass : QClassName → List QVariable → Entity
-  | classall  : QClassName → Entity
-  | module    : Module_Name → Entity -- use QModule_Name
-
-/--
-```text
-implist ∈ Import list → [[hiding] (ent₁,...,entₙ)]
-                        n ≥ 0
-```
---/
-inductive ImportList : Type where
-  | imp_hiding  : List Entity → ImportList
-  | imp_showing : List Entity → ImportList
-  | imp_empty
-
-/--
-```text
-imp ∈ Import → import qualifier M as M' implist
-```
---/
-inductive Import : Type where
-  | imp :
-      Qualifier
-    → Module_Name
-    → Module_Name
-    → ImportList
-    → Import
-
-/--
-```text
-mod ∈ Module → module M (ent₁,..., entₖ) where imp₁;...;impₙ;body
-               k, n ≥ 0
-```
---/
-inductive Module : Type where
-  | module :
-      Module_Name -- Use QModule:Name in the future?
-    → List Entity
-    → List Import
-    → Module
-
-
-mutual
-  /--
-  ```text
-    p ∈ Pattern → x
-                 | K p₁ … pₙ      k ≥ 0
-                 | K {fp₁ … fpₙ}  k ≥ 0
-                 | v@p
-                 | ~p
-                 | _
-                 | literal
-                 | v+integer
-  ```
-  --/
-  inductive Pattern : Type where
-    | var : QVariable → Pattern
-    | constr_pat : QConstructor → List Pattern → Pattern
-    | constr_fieldPat : QConstructor → List FieldPattern → Pattern
-    | at : Variable → Pattern → Pattern
-    | lazy : Pattern → Pattern
-    | wildcard : Pattern
-    | lit : Literal → Pattern
-    | n_plus_k : Variable → Int → Pattern
-
-  /--
-  ```text
-    fp ∈ FieldPattern → x = p
-  ```
-  --/
-  inductive FieldPattern : Type where
-    | fp_pat: Variable → Pattern → FieldPattern
-end
 
 mutual
   /--
@@ -209,18 +113,18 @@ mutual
   ```
   --/
   inductive Expression : Type where
-    | var : QVariable → Expression
-    | lit : Literal → Expression
-    | constr : QConstructor → Expression
-    | abs : NonEmptyList Pattern → Expression → Expression
-    | app : Expression → Expression → Expression
-    | let_bind : Binds → Expression → Expression
-    | case : Expression → NonEmptyList Match → Expression
-    | do_block : Statements → Expression
-    | listComp : Expression → Qualifiers → Expression
-    | listRange : Expression → Option Expression → Option Expression → Expression
-    | recUpd : Expression → List FieldBinding → Expression
-    | recConstr : QConstructor → List FieldBinding → Expression
+    | expr_var : QVariable → Expression
+    | expr_lit : Literal → Expression
+    | expr_constr : QConstructor → Expression
+    | expr_abs : NonEmptyList Pattern → Expression → Expression
+    | expr_app : Expression → Expression → Expression
+    | expr_let : Binds → Expression → Expression
+    | expr_case : Expression → NonEmptyList Match → Expression
+    | expr_do : Statements → Expression
+    | expr_listComp : Expression → Qualifiers → Expression
+    | expr_listRange : Expression → Option Expression → Option Expression → Expression
+    | expr_recUpd : Expression → List FieldBinding → Expression
+    | expr_recConstr : QConstructor → List FieldBinding → Expression
 
   /--
   ```text
@@ -340,7 +244,7 @@ mutual
   ```
   -/
   inductive ClassAssertion : Type where
-    | classAssert : QClassName → Type_Variable → List TypeExpression → ClassAssertion
+    | classAssert : Class_Name → Type_Variable → List TypeExpression → ClassAssertion
 
   /--
   ```text
@@ -366,7 +270,7 @@ mutual
   ```
   -/
   inductive InstanceDecl : Type where
-    | instDecl : Context → Class_Name → TypeExpression → List Binding → InstanceDecl
+    | instDecl : Context → Class_Name → Type_Expression → List Binding → InstanceDecl
 
   /--
   ```text
@@ -402,14 +306,36 @@ mutual
     | cx : List ClassAssertion → Context
 end
 
-def classAssertionName : ClassAssertion → QClassName
-  | ClassAssertion.classAssert C _ _ => C
+/--
+```text
+typeDecl ∈ TypeDeclaration → data χ α₁ … αₖ = conDecl₁ | … | conDeclsₙ    k ≥ 0
+                                                                          n ≥ 1
+```
+--/
+inductive TypeDeclaration : Type where
+  | typeDecl :
+      -- Chi ->
+      -- List Alphas ->
+      NonEmptyList ConstructorDecl ->
+      TypeDeclaration
 
-/-
-Reconstruct the type of the class assertion. e.g.
-   classAssertionType (C u (t₁ … tₖ)) = u t₁ … tₖ
--/
-def classAssertionType : ClassAssertion → TypeExpression
-   | ClassAssertion.classAssert _ TV TS => List.foldl TypeExpression.app (TypeExpression.var TV) TS
+/--
+```text
+typeDecls ∈ TypeDeclarations → typeDecl₁; …; typeDeclₙ    n ≥ 0
+```
+--/
+inductive TypeDeclarations : Type where
+  | typeDecls : List TypeDeclaration -> TypeDeclarations
 
-end Source
+/--
+```text
+mod ∈ Module → module M where typeDecls; binds
+```
+--/
+inductive Module : Type where
+  | module :
+      Module_Name -- Use QModule:Name in the future?
+    → List TypeDeclarations
+    → Module
+
+end Target

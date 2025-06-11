@@ -1,5 +1,6 @@
-import HaskellSpec.Source.SourceLang
-import HaskellSpec.Target.TargetLang
+import HaskellSpec.Source.Lang
+import HaskellSpec.Source.Module
+import HaskellSpec.Target.Lang
 import HaskellSpec.Environments
 import HaskellSpec.SemanticTypes
 
@@ -130,13 +131,13 @@ GE ⊢ sigs : VE
 ```
 -/
 inductive sigs : Env.GE
-               → Source.Signatures
+               → List Source.Signature
                → Env.VE
                → Prop where
-  | Nil : sigs ge (Source.Signatures.sigs []) []
+  | Nil : sigs ge [] []
   | Cons : sig ge s ve
-         → sigs ge (Source.Signatures.sigs ss) ves
-         → sigs ge (Source.Signatures.sigs (s :: ss)) (List.append ve ves)
+         → sigs ge ss ves
+         → sigs ge (s :: ss) (List.append ve ves)
 
 /--
 Cp. Fig 25

@@ -60,6 +60,29 @@ inductive TypeS : Type where
   | TypeConstructor : Type_Constructor → TypeS
   | App : TypeS → TypeS → TypeS
 
+/--
+The type `Prelude!Char`
+-/
+def prelude_char : TypeS :=
+  TypeS.TypeConstructor (Type_Constructor.Mk (OType_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Char")) Kind.Star)
+
+/--
+The type `Prelude!Bool`
+-/
+def prelude_bool : TypeS :=
+  TypeS.TypeConstructor (Type_Constructor.Mk (OType_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Bool")) Kind.Star)
+
+/--
+The type `[] : * → *`
+-/
+def prelude_list : TypeS :=
+TypeS.TypeConstructor (Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) (Kind.Fun Kind.Star Kind.Star))
+
+/--
+The type `-> : * → * → *`
+-/
+def prelude_fun : TypeS :=
+TypeS.TypeConstructor (Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.Fun) (Kind.Fun Kind.Star (Kind.Fun Kind.Star Kind.Star)))
 
 /--
 ```text
@@ -77,4 +100,16 @@ inductive Context : Type where
 inductive TypeScheme : Type where
   | Forall : List Type_Variable → Context → TypeS → TypeScheme
 
+/--
+This is written as follows in the paper:
+```
+∀ α. Γ α ⇒c σ
+```
+It is used to assign types to typeclass methods. The example given in the paper is:
+```
+ceiling : ∀ α. RealFrac α ⇒c ∀ β. Integral β ⇒ α → β
+```
+-/
+inductive ClassTypeScheme : Type where
+  | Forall : Type_Variable → Class_Name → TypeScheme → ClassTypeScheme
 end SemTy

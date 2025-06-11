@@ -90,19 +90,29 @@ Cp. section 2.7.1
 @[reducible]
 def CE := List CEEntry
 
+inductive TE_Item : Type where
+  | DataType : SemTy.Type_Constructor →  TE_Item
+  | TypeSynonym : SemTy.Type_Constructor → Int → List SemTy.Type_Variable → SemTy.TypeS → TE_Item
+
+/--
+Cp. Fig 16
+-/
+def CE_init : CE := []
+
 /--
 ### Type environment
 
+The type environment contains information about type constructors and type variables.
+The type constructor information is derived from type declarations in the program and
+the type variable information records in-scope type variables.
+
 Cp. section 2.7.2
 -/
-inductive TE : Type where
+def TE : Type := Env QType_Name TE_Item × Env Type_Variable SemTy.Type_Variable
 
-/--
-### Data constructor environment
-
-Cp. section 2.7.3
--/
-inductive DE : Type where
+def TE_init : TE :=
+  ([(QType_Name.Special Special_Type_Constructor.List, TE_Item.DataType (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star)))],
+   [])
 
 /--
 ### Label Environment
@@ -110,6 +120,15 @@ inductive DE : Type where
 Cp. section 2.7.3
 -/
 inductive LE : Type where
+
+/--
+### Data constructor environment
+
+Cp. section 2.7.3
+-/
+def DE : Type := Env QConstructor (QConstructor × SemTy.Type_Constructor × SemTy.TypeScheme) × Env QVariable (QVariable × SemTy.Type_Constructor × LE)
+
+
 
 /--
 ### Overloading Environment
@@ -121,29 +140,33 @@ inductive OE : Type where
 
 inductive VE_Item : Type where
   | Ordinary : QVariable → SemTy.TypeScheme → VE_Item
-  | Class : VE_Item /- TODO -/
+  | Class : QVariable → SemTy.ClassTypeScheme → VE_Item
 
 /--
 ### Variable Environment
 
 Cp. section 2.7.5
 -/
-def VE : Type := Env QVariable VE_Item
+@[reducible]
+def VE : Type :=
+  Env QVariable VE_Item
 
 
-inductive KindEnv_Name : Type where
-  | T : QType_Name -> KindEnv_Name
-  | u : Type_Variable -> KindEnv_Name
-  | C : QClassName -> KindEnv_Name
+inductive KE_Name : Type where
+  | T : QType_Name -> KE_Name
+  | u : Type_Variable -> KE_Name
+  | C : QClassName -> KE_Name
 
 /--
 ### Kind Environment
+
+The kind environment contains information about the kinds of class and type names and type variables.
 
 Cp. section 2.7.6
 -/
 @[reducible]
 def KE : Type :=
-  Env KindEnv_Name SemTy.Kind
+  Env KE_Name SemTy.Kind
 
 /--
 ### Source Environment

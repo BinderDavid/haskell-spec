@@ -1,27 +1,10 @@
 import HaskellSpec.Environments
-import HaskellSpec.Source.SourceLang
-import HaskellSpec.Target.TargetLang
+import HaskellSpec.Source.Lang
+import HaskellSpec.Source.Patterns
+import HaskellSpec.Source.Literals
+import HaskellSpec.Target.Lang
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Elaboration.Modules
-
-/--
-The type `Prelude!Char`
--/
-def prelude_char : SemTy.TypeS :=
-  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Char")) SemTy.Kind.Star)
-
-/--
-The type `Prelude!Bool`
--/
-def prelude_bool : SemTy.TypeS :=
-  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Bool")) SemTy.Kind.Star)
-
-/--
-The type `[] : * → *`
--/
-def prelude_list : SemTy.TypeS :=
-SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star))
-
 
 /--
 Cp. Fig 35
@@ -67,7 +50,7 @@ inductive exp : Env.GE → Env.IE → Env.VE
     → exp ge ie ve
           (Source.Expression.listRange e1 (some e2) (some e3))
           e /- Prelude!enumFromThenTo τ e e1' e2' e3' -/
-          (SemTy.TypeS.App prelude_list τ)
+          (SemTy.TypeS.App SemTy.prelude_list τ)
   | EnumFromTo :
       exp ge ie ve e1 e1' τ
     → exp ge ie ve e2 e2' τ
@@ -75,7 +58,7 @@ inductive exp : Env.GE → Env.IE → Env.VE
     → exp ge ie ve
           (Source.Expression.listRange e1 none (some e2))
           e /- Prelude!enumFromTo τ e e1' e2' -/
-          (SemTy.TypeS.App prelude_list τ)
+          (SemTy.TypeS.App SemTy.prelude_list τ)
   | EnumFromThen :
       exp ge ie ve e1 e1' τ
     → exp ge ie ve e2 e2' τ
@@ -83,14 +66,14 @@ inductive exp : Env.GE → Env.IE → Env.VE
     → exp ge ie ve
           (Source.Expression.listRange e1 (some e2) none)
           e /- Prelude!enumFromThen τ e e1' e2' -/
-          (SemTy.TypeS.App prelude_list τ)
+          (SemTy.TypeS.App SemTy.prelude_list τ)
   | EnumFrom :
       exp ge ie ve e1 e1' τ
     /- → dict ie e (Prelude!Enum^* τ) -/
     → exp ge ie ve
           (Source.Expression.listRange e1 none none)
           e /- Prelude!enumFrom τ e e1' -/
-          (SemTy.TypeS.App prelude_list τ)
+          (SemTy.TypeS.App SemTy.prelude_list τ)
 
 /--
 Cp. Fig 35
@@ -103,7 +86,7 @@ inductive gde : Env.GE → Env.IE → Env.VE
               → Target.GuardedExp
               → SemTy.TypeS
               → Prop where
-  | Gde : exp ge ie ve e1 e1' prelude_bool
+  | Gde : exp ge ie ve e1 e1' SemTy.prelude_bool
         → exp ge ie ve e2 e2' τ
         → gde ge ie ve (Source.GuardedExp.gExp_eq e1 e2) (Target.GuardedExp.gExp_eq e1' e2') τ
 
@@ -127,7 +110,7 @@ inductive literal : Env.IE
                   env
                   (Source.Literal.string s)
                   (Target.Expression.expr_lit (Target.Literal.string s))
-                  (SemTy.TypeS.App prelude_list prelude_char)
+                  (SemTy.TypeS.App SemTy.prelude_list SemTy.prelude_char)
 
 /--
 Cp. Fig 40
@@ -211,12 +194,12 @@ inductive pat : Env.GE → Env.IE
       []
       τ
   | PFloat :
-    literal ie (Source.Literal.float f) e τ →
+    literal ie (Source.Literal.float n d) e τ →
     dict ie ed →
     pat
       ge
       ie
-      (Source.Pattern.lit (Source.Literal.float f))
+      (Source.Pattern.lit (Source.Literal.float n d))
       _ /- { (Prelude.== τ ed e) } -/
       []
       τ

@@ -1,5 +1,6 @@
 import HaskellSpec.SemanticTypes
-import HaskellSpec.Source.SourceLang
+import HaskellSpec.Source.Lang
+import HaskellSpec.Source.Module
 import HaskellSpec.Environments
 
 /-!
@@ -20,17 +21,17 @@ KE ⊢ t : κ
 ```
 -/
 inductive ktype : KE → TypeExpression → Kind → Prop where
-  | Kind_TVar :
-      (KindEnv_Name.u u, κ) ∈ ke
+  | KIND_TVAR :
+      (KE_Name.u u, κ) ∈ ke
     → ---------------------------
       ktype ke (TypeExpression.var u) κ
 
-  | Kind_TCon :
-      (KindEnv_Name.T T, κ) ∈ ke
+  | KIND_TCON :
+      (KE_Name.T T, κ) ∈ ke
     → ---------------------------
-      ktype ke (TypeExpression.var u) κ
+      ktype ke (TypeExpression.typename T) κ
 
-  | Kind_App :
+  | KIND_APP :
       ktype ke t₁ (Fun κ₁ κ₂)
     → ktype ke t₂ κ₁
     → --------------------------
@@ -48,17 +49,6 @@ inductive KindOrdering : SemTy.Kind → SemTy.Kind → Prop where
 /--
 Cp. fig 8
 ```text
-KE ⊢ ctDecls : KE
-```
--/
-inductive kctDecls : KE
-                   → Source.ClassesAndTypes
-                   → KE
-                   → Prop where
-
-/--
-Cp. fig 8
-```text
 KE ⊢ ctDecl₁; … ; ctDeclₙ : KE
 ```
 -/
@@ -70,6 +60,25 @@ inductive kgroup : KE
 /--
 Cp. fig 8
 ```text
+KE ⊢ ctDecls : KE
+```
+-/
+inductive kctDecls : KE
+                   → Source.ClassesAndTypes
+                   → KE
+                   → Prop where
+  | KCTDECLS :
+    kgroup _ _ _ →
+    kctDecls _ _ _ →
+    kctDecls ke (Source.ClassesAndTypes.decls grp rest) _
+  | KCTEMPTY :
+    kctDecls ke Source.ClassesAndTypes.empty []
+
+
+
+/--
+Cp. fig 8
+```text
 KE ⊢ ctDecl : KE
 ```
 -/
@@ -77,6 +86,12 @@ inductive kctDecl : KE
                   → Source.ClassOrType
                   → KE
                   → Prop where
+  | KIND_DATA :
+    kctDecl ke (Source.ClassOrType.ct_data _ _ _ _) _
+  | KIND_TYPE :
+    kctDecl ke (Source.ClassOrType.ct_type _ _ _) _
+  | KIND_CLASS :
+    kctDecl ke (Source.ClassOrType.ct_class _ _ _ _ _) _
 
 /--
 Cp. fig 9
@@ -87,6 +102,12 @@ KE ⊢ conDecl
 inductive kconDecl : KE
                    → Source.ConstructorDecl
                    → Prop where
+  | KIND_POSCON :
+    (∀ τ, τ ∈ tys → ktype ke τ SemTy.Kind.Star) →
+    kconDecl ke (ConstructorDecl.conDecl_simple c tys)
+  | KIND_LABCON :
+    (∀ l τ, (l,τ) ∈ lbls → ktype ke τ SemTy.Kind.Star) →
+    kconDecl ke (ConstructorDecl.conDecl_record c lbls)
 
 /--
 Cp. fig 9
@@ -95,7 +116,7 @@ KE ⊢ sigs
 ```
 -/
 inductive ksigs : KE
-                → Source.Signatures
+                → List Source.Signature
                 → Prop where
 
 /--
@@ -126,7 +147,7 @@ inductive kctx : KE → Source.Context → Prop where
       kctx ke (Context.cx [])
 
   | Kind_Ctx_cons :
-        (KindEnv_Name.C (classAssertionName CA), κ) ∈ ke
+        (KE_Name.C (classAssertionName CA), κ) ∈ ke
       → ktype ke (classAssertionType CA) κ
       → kctx ke (Context.cx CAS)
       → ---------------------------------------------

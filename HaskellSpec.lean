@@ -1,5 +1,8 @@
-import HaskellSpec.Source.SourceLang
-import HaskellSpec.Target.TargetLang
+import HaskellSpec.Source.Lang
+import HaskellSpec.Source.Literals
+import HaskellSpec.Source.Module
+import HaskellSpec.Source.Patterns
+import HaskellSpec.Target.Lang
 import HaskellSpec.Names
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Environments
