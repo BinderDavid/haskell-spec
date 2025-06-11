@@ -95,7 +95,7 @@ KE ⊢ sigs
 ```
 -/
 inductive ksigs : KE
-                → Source.Signatures
+                → List Source.Signature
                 → Prop where
 
 /--
