@@ -61,43 +61,9 @@ def justSingle [BEq name] [BEq info] : Env name info -> Env name info :=
   sorry -- TODO My first attempt at defining this did not satisfy the
         -- termination checker.
 
-
-inductive IEEntry : Type where
-
-/--
-### Instance Environment
-
-Cp. section 2.7.4
--/
-def IE := List IEEntry
-
-
-inductive CEEntry : Type where
-  | ceEntry :
-      SemTy.Class_Name ->
-      Int ->
-      -- this is probably wrong, it should be some "dictionary variable"
-      Variable ->
-      QClassName ->
-      IE ->
-      CEEntry
-
-/--
-### Class environment
-
-Cp. section 2.7.1
--/
-@[reducible]
-def CE := List CEEntry
-
 inductive TE_Item : Type where
   | DataType : SemTy.Type_Constructor →  TE_Item
   | TypeSynonym : SemTy.Type_Constructor → Int → List SemTy.Type_Variable → SemTy.TypeS → TE_Item
-
-/--
-Cp. Fig 16
--/
-def CE_init : CE := []
 
 /--
 ### Type environment
@@ -122,13 +88,92 @@ Cp. section 2.7.3
 inductive LE : Type where
 
 /--
+Section 2.7.4
+
+The definition of IE_Entry is implicit in the definition of IE.
+
+Note: We are using the type Variable from the source language for x,
+instead of a separate type for the semantic syntax. For v, we use
+QVariable instead of a type for the semantic syntax.
+-/
+inductive IE_Entry : Type where
+/--
+v is bound in a dictionary abstraction
+```text
+v : Γ (α τ_1 … τ_k)
+```
+-/
+  | BoundInDictionaryAbstraction : Variable
+    -> SemTy.Class_Name -> SemTy.Type_Variable
+    -> List SemTy.TypeS -> IE_Entry
+/--
+x represents a superclass in classinfo
+```text
+x : Γ α
+```
+-/
+  | SuperclassInClassinfo : QVariable -> SemTy.Class_Name
+    -> SemTy.Type_Variable-> IE_Entry
+/--
+x is a dictionary from an instance declaration
+```text
+x : ∀α_1 … α_k . θ ⇒ Γ (χ α_1 … α_k)
+```
+-/
+  | DictioanryFromInstanceDeclaration : QVariable
+    -> List SemTy.Type_Variable
+    -> SemTy.Context
+    -> SemTy.Class_Name
+    -> SemTy.Type_Constructor
+    -> SemTy.Type_Variable-> IE_Entry
+/--
+x extracts a dictionary for the superclass Γ
+```text
+x : ∀α . Γ'α ⇒ Γα
+```
+-/
+  | ExtractsADictionaryForTheSuperclass : QVariable
+    -> SemTy.Type_Variable
+    -> SemTy.Class_Name
+    -> SemTy.Class_Name
+    -> IE_Entry
+
+/--
+### Instance Environment
+
+Cp. section 2.7.4
+-/
+def IE := List IE_Entry
+
+/--
+### Class environment
+
+Cp. section 2.7.1
+-/
+inductive CEEntry : Type where
+  | ceEntry :
+      SemTy.Class_Name ->
+      Int ->
+      -- this is probably wrong, it should be some "dictionary variable"
+      Variable ->
+      QClassName ->
+      IE ->
+      CEEntry
+
+@[reducible]
+def CE := List CEEntry
+
+/--
+Cp. Fig 16
+-/
+def CE_init : CE := []
+
+/--
 ### Data constructor environment
 
 Cp. section 2.7.3
 -/
 def DE : Type := Env QConstructor (QConstructor × SemTy.Type_Constructor × SemTy.TypeScheme) × Env QVariable (QVariable × SemTy.Type_Constructor × LE)
-
-
 
 /--
 ### Overloading Environment
