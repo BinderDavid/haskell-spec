@@ -63,8 +63,8 @@ conDecl ∈ ConstructorDecl → J t₁ … tₙ                 k ≥ 0
 ```
 -/
 inductive ConstructorDecl : Type where
-  | conDecl_simple: Constructor → List TypeExpression → ConstructorDecl
-  | conDecl_record: Constructor → List (QVariable × TypeExpression) → ConstructorDecl
+  | poscon: Constructor → List TypeExpression → ConstructorDecl
+  | labcon: Constructor → List (QVariable × TypeExpression) → ConstructorDecl
 
 /--
 ```text
