@@ -27,6 +27,47 @@ At some point we might want to switch to using [verso](https://github.com/leanpr
 - Names of judgement forms start with lowercase
 - Constructors of inductive data types should not have a prefix, since constructors are namespaced w.r.t. the type.
 
+### Type Inference Rule
+
+The following layouting style should be used to typeset and layout typing rules:
+
+```lean
+/--
+Fig. 10 (Kind inference, type expressions)
+```text
+KE ⊢ t : κ
+```
+-/
+inductive ktype : Env.KE
+                → TypeExpression
+                → Kind
+                → Prop where
+  | KIND_TVAR :
+    (Env.KE_Name.u u, κ) ∈ ke →
+    ----------------------------------------
+    ktype ke (Source.TypeExpression.var u) κ
+
+  | KIND_TCON :
+    (Env.KE_Name.T T, κ) ∈ ke →
+    ----------------------------------------------
+    ktype ke (Source.TypeExpression.typename T) κ
+
+  | KIND_APP :
+    ktype ke t₁ (SemTy.Fun κ₁ κ₂) →
+    ktype ke t₂ κ₁ →
+    ---------------------------------------------
+    ktype ke (Source.TypeExpression.app t₁ t₂) κ₂
+```
+
+To do this, observe the following points:
+
+- The name of each inference rule is written in all-caps.
+- All the premisses and the conclusion are aligned with the name of the inference rule.
+- The implication arrow in inference rules comes at the end of the line.
+- Different inference rules are separated by one empty line
+- One line of dashes is used to separate the conclusion from the premisses of the rule.
+
+
 ### Import/Export Discipline
 
 TODO

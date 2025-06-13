@@ -34,7 +34,7 @@ inductive ClassAssertion : Type where
 cx ∈ Context → (class₁,...,classₖ)
                 k ≥ 0
 ```
---/
+-/
 inductive Context : Type where
   | cx : List ClassAssertion → Context
 
