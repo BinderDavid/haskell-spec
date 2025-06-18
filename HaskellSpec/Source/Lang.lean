@@ -81,7 +81,7 @@ mutual
   ```
   --/
   inductive Match : Type where
-    | match_match : NonEmptyList Pattern → GuardedExprs → Match
+    | mk : NonEmptyList Pattern → GuardedExprs → Match
 
   /--
   ```text
