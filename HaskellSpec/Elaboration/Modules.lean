@@ -222,5 +222,17 @@ IE ⊢ e : (Γ₁ τ₁,…,Γₙ τₙ)
 ```
 -/
 inductive dict : Env.IE
-               → Source.Expression
+               → Target.Expression
+               → List (SemTy.Class_Name × SemTy.TypeS)
                → Prop where
+  | DICT_TUPLE :
+    dict _ _ _
+
+  | DICT_VAR :
+    dict _ _ _
+
+  | DICT_INST :
+    dict _ _ _
+
+  | DICT_SUPER :
+    dict _ _ _
