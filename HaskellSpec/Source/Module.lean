@@ -25,13 +25,13 @@ ent ∈ Entity → x
 ```
 --/
 inductive Entity : Type where
-  | var       : QVariable → Entity
-  | cons      : QConstructor → Entity
-  | type      : QType_Name → List QVariable → List QConstructor → Entity
-  | typeall   : QType_Name → Entity
-  | typeclass : QClassName → List QVariable → Entity
-  | classall  : QClassName → Entity
-  | module    : Module_Name → Entity -- use QModule_Name
+  | var        : QVariable → Entity
+  | cons       : QConstructor → Entity
+  | type_some  : QType_Name → List QVariable → List QConstructor → Entity
+  | type_all   : QType_Name → Entity
+  | class_some : QClassName → List QVariable → Entity
+  | class_all  : QClassName → Entity
+  | module     : Module_Name → Entity -- use QModule_Name
 /--
 ```text
 implist ∈ Import list → [[hiding] (ent₁,...,entₙ)]
@@ -39,9 +39,9 @@ implist ∈ Import list → [[hiding] (ent₁,...,entₙ)]
 ```
 --/
 inductive ImportList : Type where
-  | imp_hiding  : List Entity → ImportList
-  | imp_showing : List Entity → ImportList
-  | imp_empty
+  | hide_some  : List Entity → ImportList
+  | list_some : List Entity → ImportList
+  | empty
 
 /--
 ```text
