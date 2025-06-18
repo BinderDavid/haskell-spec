@@ -22,7 +22,7 @@ inductive literal : Env.IE
     literal env
             (Source.Literal.char c)
             (Target.Expression.expr_lit (Target.Literal.char c))
-            prelude_char
+            SemTy.prelude_char
 
   | LIT_STRING :
     literal env
@@ -80,11 +80,11 @@ inductive pat : Env.GE → Env.IE
       (Source.Pattern.lit (Source.Literal.string s))
       (Target.Pattern.lit (Target.Literal.string s))
       []
-      (SemTy.TypeS.App prelude_list prelude_char)
+      (SemTy.TypeS.App SemTy.prelude_list SemTy.prelude_char)
 
   | PINTEGER :
     literal ie (Source.Literal.integer i) e τ →
-    dict ie ed →
+    dict ie ed [⟨SemTy.prelude_eq, τ⟩] →
     pat
       ge
       ie
@@ -95,7 +95,7 @@ inductive pat : Env.GE → Env.IE
 
   | PFLOAT :
     literal ie (Source.Literal.float n d) e τ →
-    dict ie ed →
+    dict ie ed [⟨SemTy.prelude_eq, τ⟩]→
     pat
       ge
       ie
@@ -190,7 +190,7 @@ inductive exp : Env.GE → Env.IE → Env.VE
     exp ge ie ve e1 e1' τ →
     exp ge ie ve e2 e2' τ →
     exp ge ie ve e3 e3' τ →
-    -- dict ie e (Prelude!Enum^* τ) →
+    dict ie e [⟨SemTy.prelude_enum, τ⟩] →
     exp ge ie ve
       (Source.Expression.listRange e1 (some e2) (some e3))
       e /- Prelude!enumFromThenTo τ e e1' e2' e3' -/
@@ -199,7 +199,7 @@ inductive exp : Env.GE → Env.IE → Env.VE
   | ENUM_FROM_TO :
     exp ge ie ve e1 e1' τ →
     exp ge ie ve e2 e2' τ →
-    -- dict ie e (Prelude!Enum^* τ) →
+    dict ie e [⟨SemTy.prelude_enum, τ⟩] →
     exp ge ie ve
       (Source.Expression.listRange e1 none (some e2))
       e /- Prelude!enumFromTo τ e e1' e2' -/
@@ -208,7 +208,7 @@ inductive exp : Env.GE → Env.IE → Env.VE
   | ENUM_FROM_THEN :
     exp ge ie ve e1 e1' τ →
     exp ge ie ve e2 e2' τ →
-    -- dict ie e (Prelude!Enum^* τ) →
+    dict ie e [⟨SemTy.prelude_enum, τ⟩] →
     exp ge ie ve
       (Source.Expression.listRange e1 (some e2) none)
       e /- Prelude!enumFromThen τ e e1' e2' -/
@@ -216,7 +216,7 @@ inductive exp : Env.GE → Env.IE → Env.VE
 
   | ENUM_FROM :
     exp ge ie ve e1 e1' τ →
-    -- dict ie e (Prelude!Enum^* τ) →
+    dict ie e [⟨SemTy.prelude_enum, τ⟩] →
     exp ge ie ve
           (Source.Expression.listRange e1 none none)
           e /- Prelude!enumFrom τ e e1' -/
@@ -272,5 +272,5 @@ inductive stmts : Env.GE → Env.IE → Env.VE
 
   | SRET :
     exp ge ie ve e e' (SemTy.TypeS.App τ τ₁) →
-    -- IE ⊢dict _ : Prelude!Monad τ →
+    dict ie _ [⟨SemTy.prelude_monad, τ⟩] →
     stmts ge ie ve (Source.Statements.last e) e' (SemTy.TypeS.App τ τ₁)

@@ -29,7 +29,30 @@ export Kind (Star Fun)
 inductive Class_Name : Type where
   | Mk : OClass_Name → Kind → Class_Name
 
+def prelude_eq : Class_Name :=
+  Class_Name.Mk (OClass_Name.Qualified (Module_Name.Mk "Prelude") (_root_.Class_Name.Mk
+  "Eq")) Kind.Star
 
+
+def prelude_ord : Class_Name :=
+  Class_Name.Mk (OClass_Name.Qualified (Module_Name.Mk "Prelude") (_root_.Class_Name.Mk
+  "Ord")) Kind.Star
+
+def prelude_num : Class_Name :=
+  Class_Name.Mk (OClass_Name.Qualified (Module_Name.Mk "Prelude") (_root_.Class_Name.Mk
+  "Num")) Kind.Star
+
+def prelude_integral : Class_Name :=
+  Class_Name.Mk (OClass_Name.Qualified (Module_Name.Mk "Prelude") (_root_.Class_Name.Mk
+  "Integral")) Kind.Star
+
+def prelude_enum : Class_Name :=
+  Class_Name.Mk (OClass_Name.Qualified (Module_Name.Mk "Prelude") (_root_.Class_Name.Mk
+  "Enum")) Kind.Star
+
+def prelude_monad : Class_Name :=
+  Class_Name.Mk (OClass_Name.Qualified (Module_Name.Mk "Prelude") (_root_.Class_Name.Mk
+  "Monad")) (Kind.Fun Kind.Star Kind.Star)
 
 
 /--
