@@ -69,16 +69,16 @@ inductive pat : Env.GE → Env.IE
       ge
       ie
       (Source.Pattern.lit (Source.Literal.char c))
-      (Target.Pattern.lit (Target.Literal.char c))
+      (Target.Pattern.char c)
       []
-      prelude_char
+      SemTy.prelude_char
 
   | PSTRING :
     pat
       ge
       ie
       (Source.Pattern.lit (Source.Literal.string s))
-      (Target.Pattern.lit (Target.Literal.string s))
+      (Target.Pattern.string s)
       []
       (SemTy.TypeS.App SemTy.prelude_list SemTy.prelude_char)
 
@@ -89,7 +89,7 @@ inductive pat : Env.GE → Env.IE
       ge
       ie
       (Source.Pattern.lit (Source.Literal.integer i))
-      _ /- { (Prelude.== τ ed e) } -/
+      (Target.Pattern.exp _) /- { (Prelude.== τ ed e) } -/
       []
       τ
 
@@ -100,7 +100,7 @@ inductive pat : Env.GE → Env.IE
       ge
       ie
       (Source.Pattern.lit (Source.Literal.float n d))
-      _ /- { (Prelude.== τ ed e) } -/
+      (Target.Pattern.exp _) /- { (Prelude.== τ ed e) } -/
       []
       τ
 
