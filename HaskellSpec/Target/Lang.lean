@@ -2,7 +2,7 @@ import HaskellSpec.Names
 import HaskellSpec.NonEmptyList
 import HaskellSpec.SemanticTypes
 /-!
-Figure 1 and 2
+Figure 6
 -/
 
 namespace Target
@@ -21,31 +21,62 @@ inductive Literal : Type where
   | integer : Int → Literal
   | float : Int → Int → Literal
 
+
 /--
 ```text
-  p ∈ Pattern → x
-               | K p₁ … pₙ      k ≥ 0
-               | K {fp₁ … fpₙ}  k ≥ 0
-               | v@p
-               | ~p
-               | _
-               | literal
-               | v+integer
-  fp ∈ FieldPattern → x = p
+t ∈ Type expression → u
+                    | T
+                    | t₁ t₂
 ```
 --/
-inductive Pattern : Type where
-  | var : Variable → SemTy.TypeScheme →  Pattern
-  | constr_pat : QConstructor → List Pattern → Pattern
-  | constr_fieldPat : QConstructor → List (Variable × Pattern) → Pattern
-  | at : Variable → Pattern → Pattern
-  | lazy : Pattern → Pattern
-  | wildcard : Pattern
-  | lit : Literal → Pattern
-  | n_plus_k : Variable → Int → Pattern
+inductive TypeExpression : Type where
+  | var      : Type_Variable → TypeExpression
+  | typename : Type_Name → TypeExpression
+  | app      : TypeExpression → TypeExpression → TypeExpression
 
+/--
+```text
+class ∈ ClassAssertion → C (u t₁ … tₖ)   k ≥ 0
+```
+-/
+inductive ClassAssertion : Type where
+  | classAssert : Class_Name → Type_Variable → List TypeExpression → ClassAssertion
+
+/--
+```text
+cx ∈ Context → (class₁,...,classₖ)
+                k ≥ 0
+```
+--/
+inductive Context : Type where
+  | cx : List ClassAssertion → Context
 
 mutual
+  /--
+  ```text
+    p ∈ Pattern → v : σ
+                | K p₁ … pₙ      k ≥ 0
+                | K {fp₁ … fpₙ}  k ≥ 0
+                | v : σ @ p
+                | ~p
+                | _
+                | { e }
+                | v : σ {e1, e2}
+    fp ∈ FieldPattern → x = p
+  ```
+  --/
+  inductive Pattern : Type where
+    | var : Variable → SemTy.TypeScheme →  Pattern
+    | constr_pat : QConstructor → List Pattern → Pattern
+    | constr_fieldPat : QConstructor → List (Variable × Pattern) → Pattern
+    | at : Variable → SemTy.TypeScheme → Pattern → Pattern
+    | lazy : Pattern → Pattern
+    | wildcard : Pattern
+    | exp : Expression → Pattern
+    | n_plus_k : Variable → SemTy.TypeScheme → Expression → Expression → Pattern
+    | char : Char → Pattern -- Seems to be omitted in Faxen?
+    | string : String → Pattern -- Seems to be omitted in Faxen?
+
   /--
   ```text
     binds ∈ Binds → [ sigs; bindG then binds]
@@ -176,135 +207,107 @@ mutual
   -/
   inductive FieldBinding : Type where
     | fb_bind : QVariable → Expression → FieldBinding
+end
 
-  /--
-  ```text
-  body ∈ Module body → ctDecls; instDecls; binds
-  ```
-  --/
-  inductive ModuleBody : Type where
-    | body :
-        ClassesAndTypes
-      → InstanceDecls
-      → Binds
-      → ModuleBody
+/--
+```text
+instDecl ∈ InstanceDecl → instance cx => C t where bind₁; …; bindₙ    n ≥ 0
+```
+-/
+inductive InstanceDecl : Type where
+  | instDecl : Context → Class_Name → Type_Expression → List Binding → InstanceDecl
 
-  /--
-  ```text
-  ctDecls ∈ Classes and types → [ctDecl₁;...;ctDeclₙ then ctDecls]
-                                n ≥ 1
-  ```
-  --/
-  inductive ClassesAndTypes : Type where
-    | ct_empty
-    | ct_Decls : NonEmptyList ClassOrType → ClassesAndTypes → ClassesAndTypes
+/--
+```text
+instDecls ∈ InstanceDecls → instDecl₁; …; instDeclₙ   n ≥ 0
+```
+-/
+inductive InstanceDecls : Type where
+  | instDecls : List InstanceDecl → InstanceDecls
 
-  /--
-  ```text
-  ctDecl ∈ Class or type → type S u₁ ... uₖ = t                              k ≥ 0
-                         | data cx => S u₁ ... uₖ = conDecls                 k ≥ 0
-                         | class cx => B u where sigs; bind₁; ...; bindₙ     k ≥ 0
-  ```
-  --/
-  inductive ClassOrType : Type where
-    | ct_type :
-        Type_Name
-      → List Type_Variable
-      → TypeExpression
-      → ClassOrType
-    | ct_data :
-        Context
-      → Type_Name
-      → List Type_Variable
-      → ConstructorDecls
-      → ClassOrType
-    | ct_class :
-        Context
-      → Class_Name
-      → Type_Variable
-      → Signatures
-      → List Binding
-      → ClassOrType
+/--
+```text
+conDecl ∈ ConstructorDecl → J t₁ … tₙ                 k ≥ 0
+                          | J { v₁ ∷ t₁ … vₙ ∷ tₙ }   k ≥ 0
+```
+-/
+inductive ConstructorDecl : Type where
+  | conDecl_simple: Constructor → List TypeExpression → ConstructorDecl
+  | conDecl_record: Constructor → List (QVariable × TypeExpression) → ConstructorDecl
 
-  /--
-  ```text
-  t ∈ Type expression → u
-                      | T
-                      | t₁ t₂
-  ```
-  --/
-  inductive TypeExpression : Type where
-    | var      : Type_Variable → TypeExpression
-    | typename : Type_Name → TypeExpression
-    | app      : TypeExpression → TypeExpression → TypeExpression
-
-  /--
-  ```text
-  class ∈ ClassAssertion → C (u t₁ … tₖ)   k ≥ 0
-  ```
-  -/
-  inductive ClassAssertion : Type where
-    | classAssert : Class_Name → Type_Variable → List TypeExpression → ClassAssertion
-
-  /--
-  ```text
-  conDecl ∈ ConstructorDecl → J t₁ … tₙ                 k ≥ 0
-                            | J { v₁ ∷ t₁ … vₙ ∷ tₙ }   k ≥ 0
-  ```
-  -/
-  inductive ConstructorDecl : Type where
-    | conDecl_simple: Constructor → List TypeExpression → ConstructorDecl
-    | conDecl_record: Constructor → List (QVariable × TypeExpression) → ConstructorDecl
-
-  /--
-  ```text
-  conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
-  ```
-  -/
-  inductive ConstructorDecls : Type where
+/--
+```text
+conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
+```
+-/
+inductive ConstructorDecls : Type where
     | conDecls : NonEmptyList ConstructorDecl → ConstructorDecls
 
-  /--
-  ```text
-  instDecl ∈ InstanceDecl → instance cx => C t where bind₁; …; bindₙ    n ≥ 0
-  ```
-  -/
-  inductive InstanceDecl : Type where
-    | instDecl : Context → Class_Name → Type_Expression → List Binding → InstanceDecl
+/--
+```text
+sig ∈ Signature → v :: cx => t
+```
+-/
+inductive Signature : Type where
+  | sig : QVariable → Context → TypeExpression → Signature
 
-  /--
-  ```text
-  instDecls ∈ InstanceDecls → instDecl₁; …; instDeclₙ   n ≥ 0
-  ```
-  -/
-  inductive InstanceDecls : Type where
-    | instDecls : List InstanceDecl → InstanceDecls
+/--
+```text
+sigs ∈ Signatures → sig₁; …; sigₙ   n ≥ 0
+```
+-/
+inductive Signatures : Type where
+  | sigs : List Signature → Signatures
 
-  /--
-  ```text
-  sig ∈ Signature → v :: cx => t
-  ```
-  -/
-  inductive Signature : Type where
-    | sig : QVariable → Context → TypeExpression → Signature
 
-  /--
-  ```text
-  sigs ∈ Signatures → sig₁; …; sigₙ   n ≥ 0
-  ```
-  -/
-  inductive Signatures : Type where
-    | sigs : List Signature → Signatures
+/--
+```text
+ctDecl ∈ Class or type → type S u₁ ... uₖ = t                              k ≥ 0
+                       | data cx => S u₁ ... uₖ = conDecls                 k ≥ 0
+                       | class cx => B u where sigs; bind₁; ...; bindₙ     k ≥ 0
+```
+--/
+inductive ClassOrType : Type where
+  | ct_type :
+      Type_Name
+    → List Type_Variable
+    → TypeExpression
+    → ClassOrType
+  | ct_data :
+      Context
+    → Type_Name
+    → List Type_Variable
+    → ConstructorDecls
+    → ClassOrType
+  | ct_class :
+      Context
+    → Class_Name
+    → Type_Variable
+    → Signatures
+    → List Binding
+    → ClassOrType
 
-  /--
-  ```text
-  cx ∈ Context → (class₁,...,classₖ)
-                  k ≥ 0
-  ```
-  --/
-  inductive Context : Type where
-    | cx : List ClassAssertion → Context
-end
+/--
+```text
+ctDecls ∈ Classes and types → [ctDecl₁;...;ctDeclₙ then ctDecls]
+                              n ≥ 1
+```
+--/
+inductive ClassesAndTypes : Type where
+  | ct_empty
+  | ct_Decls : NonEmptyList ClassOrType → ClassesAndTypes → ClassesAndTypes
+
+/--
+```text
+body ∈ Module body → ctDecls; instDecls; binds
+```
+--/
+inductive ModuleBody : Type where
+  | body :
+      ClassesAndTypes
+    → InstanceDecls
+    → Binds
+    → ModuleBody
 
 /--
 ```text
