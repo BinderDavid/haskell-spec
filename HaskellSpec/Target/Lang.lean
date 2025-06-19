@@ -130,32 +130,32 @@ mutual
   /--
   ```text
     e ∈ Expression → x
-                    | literal
-                    | K
-                    | \p₁ … pₖ → e                     k ≥ 1
-                    | e₁ e₂
-                    | let binds in e
-                    | case e of match₁ [] … [] matchₙ   n ≥ 1
-                    | do stmts
-                    | [e | quals]
-                    | [e₁ [,e₂] .. [e₃]]
-                    | e ⇐ {fbind₁, …, fbindₖ}           k ≥ 0
-                    | K {fbind₁, …, fbindₖ}             k ≥ 0
+                   | literal
+                   | K
+                   | λ p₁ … pₖ → e                     k ≥ 1
+                   | e₁ e₂
+                   | let binds in e
+                   | case e of match₁ [] … [] matchₙ   n ≥ 1
+                   | [e | quals]
+                   | e ⇐ {fbind₁, …, fbindₖ}           k ≥ 0
+                   | e {fbind₁, …, fbindₖ}             k ≥ 0
+                   | e τ₁ … τₖ                         k ≥ 1
+                   | Λ α₁ … αₖ.e                       k ≥ 1
   ```
   --/
   inductive Expression : Type where
-    | expr_var : QVariable → Expression
-    | expr_lit : Literal → Expression
-    | expr_constr : QConstructor → Expression
-    | expr_abs : NonEmptyList Pattern → Expression → Expression
-    | expr_app : Expression → Expression → Expression
-    | expr_let : Binds → Expression → Expression
-    | expr_case : Expression → NonEmptyList Match → Expression
-    | expr_do : Statements → Expression
-    | expr_listComp : Expression → Qualifiers → Expression
-    | expr_listRange : Expression → Option Expression → Option Expression → Expression
-    | expr_recUpd : Expression → List FieldBinding → Expression
-    | expr_recConstr : QConstructor → List FieldBinding → Expression
+    | var : QVariable → Expression
+    | lit : Literal → Expression
+    | constr : QConstructor → Expression
+    | abs : NonEmptyList Pattern → Expression → Expression
+    | app : Expression → Expression → Expression
+    | let_bind : Binds → Expression → Expression
+    | case : Expression → NonEmptyList Match → Expression
+    | listComp : Expression → Qualifiers → Expression
+    | recUpd : Expression → List FieldBinding → Expression
+    | recConstr : Expression → List FieldBinding → Expression
+    | typ_app : Expression → NonEmptyList SemTy.TypeS → Expression
+    | typ_abs : NonEmptyList Type_Variable → Expression → Expression
 
   /--
   ```text

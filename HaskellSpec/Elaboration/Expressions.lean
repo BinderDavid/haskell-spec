@@ -21,13 +21,13 @@ inductive literal : Env.IE
   | LIT_CHAR :
     literal env
             (Source.Literal.char c)
-            (Target.Expression.expr_lit (Target.Literal.char c))
+            (Target.Expression.lit (Target.Literal.char c))
             SemTy.prelude_char
 
   | LIT_STRING :
     literal env
             (Source.Literal.string s)
-            (Target.Expression.expr_lit (Target.Literal.string s))
+            (Target.Expression.lit (Target.Literal.string s))
             (SemTy.TypeS.App SemTy.prelude_list SemTy.prelude_char)
 
 def unqual_var (var : QVariable) : Variable :=
