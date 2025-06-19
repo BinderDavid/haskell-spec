@@ -193,7 +193,8 @@ inductive exp : Env.GE → Env.IE → Env.VE
     dict ie e [⟨SemTy.prelude_enum, τ⟩] →
     exp ge ie ve
       (Source.Expression.listRange e1 (some e2) (some e3))
-      e /- Prelude!enumFromThenTo τ e e1' e2' e3' -/
+      (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then_to) _)
+      /- Prelude!enumFromThenTo τ e e1' e2' e3' -/
       (SemTy.TypeS.App SemTy.prelude_list τ)
 
   | ENUM_FROM_TO :
@@ -202,7 +203,8 @@ inductive exp : Env.GE → Env.IE → Env.VE
     dict ie e [⟨SemTy.prelude_enum, τ⟩] →
     exp ge ie ve
       (Source.Expression.listRange e1 none (some e2))
-      e /- Prelude!enumFromTo τ e e1' e2' -/
+      (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_to) _)
+      /- Prelude!enumFromTo τ e e1' e2' -/
       (SemTy.TypeS.App SemTy.prelude_list τ)
 
   | ENUM_FROM_THEN :
@@ -211,16 +213,18 @@ inductive exp : Env.GE → Env.IE → Env.VE
     dict ie e [⟨SemTy.prelude_enum, τ⟩] →
     exp ge ie ve
       (Source.Expression.listRange e1 (some e2) none)
-      e /- Prelude!enumFromThen τ e e1' e2' -/
+      (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then) _)
+      /- Prelude!enumFromThen τ e e1' e2' -/
       (SemTy.TypeS.App SemTy.prelude_list τ)
 
   | ENUM_FROM :
     exp ge ie ve e1 e1' τ →
     dict ie e [⟨SemTy.prelude_enum, τ⟩] →
     exp ge ie ve
-          (Source.Expression.listRange e1 none none)
-          e /- Prelude!enumFrom τ e e1' -/
-          (SemTy.TypeS.App SemTy.prelude_list τ)
+      (Source.Expression.listRange e1 none none)
+      (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from) _)
+      /- Prelude!enumFrom τ e e1' -/
+      (SemTy.TypeS.App SemTy.prelude_list τ)
 
 /--
 Cp. Fig 35
