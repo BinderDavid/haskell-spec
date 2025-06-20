@@ -19,16 +19,30 @@ inductive literal : Env.IE
                   → SemTy.TypeS
                   → Prop where
   | LIT_CHAR :
-    literal env
+    literal ie
             (Source.Literal.char c)
             (Target.Expression.lit (Target.Literal.char c))
             SemTy.prelude_char
 
   | LIT_STRING :
-    literal env
+    literal ie
             (Source.Literal.string s)
             (Target.Expression.lit (Target.Literal.string s))
             (SemTy.TypeS.App SemTy.prelude_list SemTy.prelude_char)
+
+  | LIT_INTEGER :
+    dict ie e [⟨SemTy.prelude_num, τ⟩] →
+    literal ie
+            (Source.Literal.integer i)
+            _ -- Prelude!fromInteger τ e i
+            τ
+
+  | LIT_FLOAT :
+    dict ie e [⟨SemTy.prelude_fractional, τ⟩] →
+    literal ie
+            (Source.Literal.float n d)
+            _ -- Prelude!fromRational τ e ((Ratio.%) n d)
+            τ
 
 def unqual_var (var : QVariable) : Variable :=
   match var with
@@ -160,10 +174,24 @@ inductive exp : Env.GE → Env.IE → Env.VE
     exp ge ie ve (Source.Expression.lit lit) e τ
 
   | LAMBDA :
-    exp ge ie ve (Source.Expression.abs _ _) _ _
+    -- i ∈ [1..k] : GE, IE ⊢ pᵢ ⇝ pᵢ : VEᵢ, τᵢ
+    exp ge ie _ e e' τ →
+    exp ge
+        ie
+        ve
+        (Source.Expression.abs ps e)
+        (Target.Expression.abs ps' e')
+        _
 
   | APP :
-    exp ge ie ve (Source.Expression.app e₁ e₂) _ _
+    exp ge ie ve e₁ e₁' _ →
+    exp ge ie ve e₂ e₂' _ →
+    exp ge
+        ie
+        ve
+        (Source.Expression.app e₁ e₂)
+        (Target.Expression.app e₁' e₂')
+        _
 
   | LET :
     exp ge ie ve (Source.Expression.let_bind _ _) _ _

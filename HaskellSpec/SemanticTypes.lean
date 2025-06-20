@@ -50,6 +50,10 @@ def prelude_integral : Class_Name :=
   Class_Name.Mk (OClass_Name.Qualified hs_prelude (_root_.Class_Name.Mk
   "Integral")) Kind.Star
 
+def prelude_fractional : Class_Name :=
+  Class_Name.Mk (OClass_Name.Qualified hs_prelude (_root_.Class_Name.Mk
+  "Fractional")) Kind.Star
+
 def prelude_enum : Class_Name :=
   Class_Name.Mk (OClass_Name.Qualified hs_prelude (_root_.Class_Name.Mk
   "Enum")) Kind.Star
