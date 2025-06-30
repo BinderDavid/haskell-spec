@@ -6,6 +6,20 @@ import HaskellSpec.Target.Lang
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Elaboration.Modules
 
+def fromRationalAfterRatio (n d : Int) : Target.Expression :=
+  Target.Expression.app
+   (Target.Expression.var SemTy.prelude_fromrational)
+   (Target.Expression.app
+     (Target.Expression.app
+       (Target.Expression.var SemTy.ratio_percent)
+       (Target.Expression.lit (Target.Literal.integer n))
+     )
+     (Target.Expression.lit (Target.Literal.integer d)))
+
+def fromInteger (i : Int) : Target.Expression :=
+  Target.Expression.app
+    (Target.Expression.var SemTy.prelude_frominteger)
+    (Target.Expression.lit (Target.Literal.integer i))
 
 /--
 Cp. Fig 37
@@ -31,17 +45,17 @@ inductive literal : Env.IE
             (SemTy.TypeS.App SemTy.prelude_list SemTy.prelude_char)
 
   | LIT_INTEGER :
-    dict ie e [⟨SemTy.prelude_num, τ⟩] →
+    dict ie (fromInteger i) [⟨SemTy.prelude_num, τ⟩] →
     literal ie
             (Source.Literal.integer i)
-            _ -- Prelude!fromInteger τ e i
+            (fromInteger i)
             τ
 
   | LIT_FLOAT :
-    dict ie e [⟨SemTy.prelude_fractional, τ⟩] →
+    dict ie (fromRationalAfterRatio n d) [⟨SemTy.prelude_fractional, τ⟩] →
     literal ie
             (Source.Literal.float n d)
-            _ -- Prelude!fromRational τ e ((Ratio.%) n d)
+            (fromRationalAfterRatio n d)
             τ
 
 def unqual_var (var : QVariable) : Variable :=

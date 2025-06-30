@@ -33,6 +33,9 @@ inductive Class_Name : Type where
 def hs_prelude : Module_Name :=
   Module_Name.Mk "Prelude"
 
+def hs_ratio : Module_Name :=
+  Module_Name.Mk "Ratio"
+
 def prelude_eq : Class_Name :=
   Class_Name.Mk (OClass_Name.Qualified hs_prelude (_root_.Class_Name.Mk
   "Eq")) Kind.Star
@@ -73,6 +76,15 @@ def prelude_enum_from_to : QVariable :=
 
 def prelude_enum_from_then_to : QVariable :=
   QVariable.Qualified hs_prelude (Variable.Mk "enumFromThenTo")
+
+def prelude_frominteger : QVariable :=
+  QVariable.Qualified hs_prelude (Variable.Mk "fromInteger")
+
+def prelude_fromrational : QVariable :=
+  QVariable.Qualified hs_prelude (Variable.Mk "fromRational")
+
+def ratio_percent : QVariable :=
+  QVariable.Qualified hs_ratio (Variable.Mk "(%)")
 
 /--
 ```text
