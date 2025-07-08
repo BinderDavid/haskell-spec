@@ -13,7 +13,11 @@ inductive binds : Env.GE → Env.IE → Env.VE
                 → Target.Binds
                 → Env.VE
                 → Prop where
+  | BINDS :
+    binds _ _ _ _ _ _
 
+  | EMPTY_BINDS :
+    binds _ _ _ _ _ _
 
 /--
 Cp. Fig 30
@@ -25,6 +29,8 @@ inductive bindG : Env.GE → Env.IE → Env.VE
                 → Target.Binds
                 → Env.VE
                 → Prop where
+  | BINDG :
+    bindG _ _ _ _ _
 
 /--
 Cp. Fig 34
@@ -37,6 +43,8 @@ inductive monobinds : Env.GE → Env.IE → Env.VE
                     → Target.Binds
                     → Env.VE
                     → Prop where
+  | MONOBINDS :
+    monobinds _ _ _ _ _ _
 
 /--
 Cp. Fig 34
@@ -49,3 +57,8 @@ inductive bind : Env.GE → Env.IE → Env.VE
                → Target.Binding
                → Env.VE
                → Prop where
+  | FUNBIND :
+    bind _ _ _ _ _ _
+
+  | PATBIND :
+    bind _ _ _ _ _ _
