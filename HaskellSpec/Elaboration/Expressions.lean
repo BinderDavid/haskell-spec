@@ -1,4 +1,5 @@
 import HaskellSpec.Environments
+import HaskellSpec.Forall2
 import HaskellSpec.Source.Lang
 import HaskellSpec.Source.Patterns
 import HaskellSpec.Source.Literals
@@ -133,39 +134,9 @@ inductive pat : Env.GE → Env.IE
       []
       τ
 
-/--
-Cp. Fig 35
-```text
-GE, IE, VE ⊢ match ⇝ match : τ
-```
--/
-inductive matchR : Env.GE
-                 → Env.IE
-                 → Env.VE
-                 → Source.Match
-                 → Target.Match
-                 → SemTy.TypeS
-                 → Prop where
-  | MATCH :
-    -- i ∈ [1,k] : GE, IE ⊢ pᵢ ⇝ pᵢ' : VEᵢ, τ →
-    -- GE, IE, _ ⊢ gdes ⇝ gdes'  : τ →
-    matchR ge ie ve (Source.Match.mk pats gdes) (Target.Match.mk pats' gdes') _
 
 
 
-/--
-Cp. Fig 35
-```text
-GE, IE, VE ⊢ gdes ⇝ gdes : τ
-```
--/
-inductive gdes : Env.GE → Env.IE → Env.VE
-               → Source.GuardedExprs
-               → Target.GuardedExprs
-               → SemTy.TypeS
-               → Prop where
-  | GDES :
-    gdes _ _ _ _ _ _
 
 mutual
   /--
@@ -190,7 +161,7 @@ mutual
       exp ge ie ve (Source.Expression.lit lit) e τ
 
     | LAMBDA :
-      -- i ∈ [1..k] : GE, IE ⊢ pᵢ ⇝ pᵢ : VEᵢ, τᵢ
+      Forall4NE ps ps' ves τs (λ p p' ve' τ' => pat ge ie p p' ve' τ') →
       exp ge ie _ e e' τ →
       exp ge
           ie
@@ -321,6 +292,41 @@ inductive gde : Env.GE → Env.IE → Env.VE
     exp ge ie ve e1 e1' SemTy.prelude_bool →
     exp ge ie ve e2 e2' τ →
     gde ge ie ve (Source.GuardedExp.gExp_eq e1 e2) (Target.GuardedExp.gExp_eq e1' e2') τ
+
+
+/--
+Cp. Fig 35
+```text
+GE, IE, VE ⊢ gdes ⇝ gdes : τ
+```
+-/
+inductive gdes : Env.GE → Env.IE → Env.VE
+               → Source.GuardedExprs
+               → Target.GuardedExprs
+               → SemTy.TypeS
+               → Prop where
+  | GDES :
+    Forall2NE gs gs' (λ g g' => gde ge ie _ g g' τ) →
+    binds ge ie ve bs bs' ve_binds →
+    gdes ge ie ve (Source.GuardedExprs.mk gs bs) _ τ
+
+/--
+Cp. Fig 35
+```text
+GE, IE, VE ⊢ match ⇝ match : τ
+```
+-/
+inductive matchR : Env.GE
+                 → Env.IE
+                 → Env.VE
+                 → Source.Match
+                 → Target.Match
+                 → SemTy.TypeS
+                 → Prop where
+  | MATCH :
+    Forall3NE pats pats' ves (λ p p' ve' => pat ge ie p p' ve' τ) →
+    gdes ge ie _ gs gs' τ →
+    matchR ge ie ve (Source.Match.mk pats gs) (Target.Match.mk pats' gs') _
 
 /--
 Cp. Fig 40
