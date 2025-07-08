@@ -5,6 +5,7 @@ import HaskellSpec.Source.Literals
 import HaskellSpec.Target.Lang
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Elaboration.Modules
+import HaskellSpec.Elaboration.Bindings
 
 def fromRationalAfterRatio (n d : Int) : Target.Expression :=
   Target.Expression.app
@@ -166,107 +167,144 @@ inductive gdes : Env.GE → Env.IE → Env.VE
   | GDES :
     gdes _ _ _ _ _ _
 
-/--
-Cp. Fig 36. 38. 39. 42
-```text
-GE, IE, VE ⊢ e ⇝ e : τ
-```
--/
-inductive exp : Env.GE → Env.IE → Env.VE
-              → Source.Expression
-              → Target.Expression
-              → SemTy.TypeS
-              → Prop where
-  | VAR_1 :
-    exp ge ie ve (Source.Expression.var v) _ _
+mutual
+  /--
+  Cp. Fig 36. 38. 39. 42
+  ```text
+  GE, IE, VE ⊢ e ⇝ e : τ
+  ```
+  -/
+  inductive exp : Env.GE → Env.IE → Env.VE
+                → Source.Expression
+                → Target.Expression
+                → SemTy.TypeS
+                → Prop where
+    | VAR_1 :
+      exp ge ie ve (Source.Expression.var v) _ _
 
-  | VAR_2 :
-    exp ge ie ve (Source.Expression.var v) _ _
+    | VAR_2 :
+      exp ge ie ve (Source.Expression.var v) _ _
 
-  | LITERAL :
-    literal ie lit e τ →
-    exp ge ie ve (Source.Expression.lit lit) e τ
+    | LITERAL :
+      literal ie lit e τ →
+      exp ge ie ve (Source.Expression.lit lit) e τ
 
-  | LAMBDA :
-    -- i ∈ [1..k] : GE, IE ⊢ pᵢ ⇝ pᵢ : VEᵢ, τᵢ
-    exp ge ie _ e e' τ →
-    exp ge
-        ie
-        ve
-        (Source.Expression.abs ps e)
-        (Target.Expression.abs ps' e')
-        _
+    | LAMBDA :
+      -- i ∈ [1..k] : GE, IE ⊢ pᵢ ⇝ pᵢ : VEᵢ, τᵢ
+      exp ge ie _ e e' τ →
+      exp ge
+          ie
+          ve
+          (Source.Expression.abs ps e)
+          (Target.Expression.abs ps' e')
+          _
 
-  | APP :
-    exp ge ie ve e₁ e₁' _ →
-    exp ge ie ve e₂ e₂' _ →
-    exp ge
-        ie
-        ve
-        (Source.Expression.app e₁ e₂)
-        (Target.Expression.app e₁' e₂')
-        _
+    | APP :
+      exp ge ie ve e₁ e₁' _ →
+      exp ge ie ve e₂ e₂' _ →
+      exp ge
+          ie
+          ve
+          (Source.Expression.app e₁ e₂)
+          (Target.Expression.app e₁' e₂')
+          _
 
-  | LET :
-    exp ge ie ve (Source.Expression.let_bind _ _) _ _
+    | LET :
+      exp ge ie ve (Source.Expression.let_bind _ _) _ _
 
-  | CASE :
-    exp ge ie ve (Source.Expression.case _ _) _ _
+    | CASE :
+      exp ge ie ve (Source.Expression.case _ _) _ _
 
-  | LIST_COMP :
-    exp ge ie ve (Source.Expression.listComp _ _) _ _
+    | LIST_COMP :
+      exp ge ie ve (Source.Expression.listComp _ _) _ _
 
-  | DO :
-    exp ge ie ve (Source.Expression.do_block _) _ _
+    | DO :
+      stmts ge ie ve s e τ →
+      exp ge ie ve (Source.Expression.do_block s) e τ
 
-  | CON :
-    exp ge ie ve (Source.Expression.constr _) _ _
+    | CON :
+      exp ge ie ve (Source.Expression.constr _) _ _
 
-  | UPD :
-    exp ge ie ve (Source.Expression.recUpd _ _) _ _
+    | UPD :
+      exp ge ie ve (Source.Expression.recUpd _ _) _ _
 
-  | LABCON :
-    exp ge ie ve (Source.Expression.recConstr _ _) _ _
+    | LABCON :
+      exp ge ie ve (Source.Expression.recConstr _ _) _ _
 
-  | ENUM_FROM_THEN_TO :
-    exp ge ie ve e1 e1' τ →
-    exp ge ie ve e2 e2' τ →
-    exp ge ie ve e3 e3' τ →
-    dict ie e [⟨SemTy.prelude_enum, τ⟩] →
-    exp ge ie ve
-      (Source.Expression.listRange e1 (some e2) (some e3))
-      (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then_to) _)
-      /- Prelude!enumFromThenTo τ e e1' e2' e3' -/
-      (SemTy.TypeS.App SemTy.prelude_list τ)
+    | ENUM_FROM_THEN_TO :
+      exp ge ie ve e1 e1' τ →
+      exp ge ie ve e2 e2' τ →
+      exp ge ie ve e3 e3' τ →
+      dict ie e [⟨SemTy.prelude_enum, τ⟩] →
+      exp ge ie ve
+        (Source.Expression.listRange e1 (some e2) (some e3))
+        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then_to) _)
+        /- Prelude!enumFromThenTo τ e e1' e2' e3' -/
+        (SemTy.TypeS.App SemTy.prelude_list τ)
 
-  | ENUM_FROM_TO :
-    exp ge ie ve e1 e1' τ →
-    exp ge ie ve e2 e2' τ →
-    dict ie e [⟨SemTy.prelude_enum, τ⟩] →
-    exp ge ie ve
-      (Source.Expression.listRange e1 none (some e2))
-      (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_to) _)
-      /- Prelude!enumFromTo τ e e1' e2' -/
-      (SemTy.TypeS.App SemTy.prelude_list τ)
+    | ENUM_FROM_TO :
+      exp ge ie ve e1 e1' τ →
+      exp ge ie ve e2 e2' τ →
+      dict ie e [⟨SemTy.prelude_enum, τ⟩] →
+      exp ge ie ve
+        (Source.Expression.listRange e1 none (some e2))
+        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_to) _)
+        /- Prelude!enumFromTo τ e e1' e2' -/
+        (SemTy.TypeS.App SemTy.prelude_list τ)
 
-  | ENUM_FROM_THEN :
-    exp ge ie ve e1 e1' τ →
-    exp ge ie ve e2 e2' τ →
-    dict ie e [⟨SemTy.prelude_enum, τ⟩] →
-    exp ge ie ve
-      (Source.Expression.listRange e1 (some e2) none)
-      (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then) _)
-      /- Prelude!enumFromThen τ e e1' e2' -/
-      (SemTy.TypeS.App SemTy.prelude_list τ)
+    | ENUM_FROM_THEN :
+      exp ge ie ve e1 e1' τ →
+      exp ge ie ve e2 e2' τ →
+      dict ie e [⟨SemTy.prelude_enum, τ⟩] →
+      exp ge ie ve
+        (Source.Expression.listRange e1 (some e2) none)
+        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then) _)
+        /- Prelude!enumFromThen τ e e1' e2' -/
+        (SemTy.TypeS.App SemTy.prelude_list τ)
 
-  | ENUM_FROM :
-    exp ge ie ve e1 e1' τ →
-    dict ie e [⟨SemTy.prelude_enum, τ⟩] →
-    exp ge ie ve
-      (Source.Expression.listRange e1 none none)
-      (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from) _)
-      /- Prelude!enumFrom τ e e1' -/
-      (SemTy.TypeS.App SemTy.prelude_list τ)
+    | ENUM_FROM :
+      exp ge ie ve e1 e1' τ →
+      dict ie e [⟨SemTy.prelude_enum, τ⟩] →
+      exp ge ie ve
+        (Source.Expression.listRange e1 none none)
+        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from) _)
+        /- Prelude!enumFrom τ e e1' -/
+        (SemTy.TypeS.App SemTy.prelude_list τ)
+
+  /--
+  Cp. Fig 41
+  ```text
+  GE, IE, VE ⊢ stmts ⇝ e : τ
+  ```
+  -/
+  inductive stmts : Env.GE → Env.IE → Env.VE
+                  → Source.Statements
+                  → Target.Expression
+                  → SemTy.TypeS
+                  → Prop where
+    | SBIND :
+      exp ge ie ve e e₁ (SemTy.TypeS.App τ τ₁) →
+      pat ge ie p p' veₚ τ₁ →
+      stmts ge ie _ s e₂ (SemTy.TypeS.App τ τ₂) →
+      dict ie ed [⟨SemTy.prelude_monad, τ⟩] →
+      stmts ge ie ve (Source.Statements.mbind p e s) _ (SemTy.TypeS.App τ τ₂)
+
+    | SLET :
+      binds ge ie ve bs bs' ve_binds →
+      stmts ge ie _ s e τ →
+      stmts ge ie ve (Source.Statements.lbind bs s) _ τ
+
+    | STHEN :
+      exp ge ie ve e e₁ (SemTy.TypeS.App τ τ₁) →
+      stmts ge ie ve s e₂ (SemTy.TypeS.App τ τ₂) →
+      dict ie ed [⟨SemTy.prelude_monad, τ⟩] →
+      stmts ge ie ve (Source.Statements.seq e s) _ (SemTy.TypeS.App τ τ₂)
+
+    | SRET :
+      exp ge ie ve e e' (SemTy.TypeS.App τ τ₁) →
+      dict ie _ [⟨SemTy.prelude_monad, τ⟩] →
+      stmts ge ie ve (Source.Statements.last e) e' (SemTy.TypeS.App τ τ₁)
+end
 
 /--
 Cp. Fig 35
@@ -295,28 +333,14 @@ inductive quals : Env.GE → Env.IE → Env.VE
                 → Target.Qualifiers
                 → Env.VE
                 → Prop where
+  | QGEN :
+    quals _ _ _ _ _ _
 
-/--
-Cp. Fig 41
-```text
-GE, IE, VE ⊢ stmts ⇝ e : τ
-```
--/
-inductive stmts : Env.GE → Env.IE → Env.VE
-                → Source.Statements
-                → Target.Expression
-                → SemTy.TypeS
-                → Prop where
-  | SBIND :
-    stmts ge ie ve (Source.Statements.mbind _ _ _) _ _
+  | QLET :
+    quals _ _ _ _ _ _
 
-  | SLET :
-    stmts ge ie ve (Source.Statements.lbind _ _) _ _
+  | QFILTER :
+    quals _ _ _ _ _ _
 
-  | STHEN :
-    stmts ge ie ve (Source.Statements.seq _ _) _ _
-
-  | SRET :
-    exp ge ie ve e e' (SemTy.TypeS.App τ τ₁) →
-    dict ie _ [⟨SemTy.prelude_monad, τ⟩] →
-    stmts ge ie ve (Source.Statements.last e) e' (SemTy.TypeS.App τ τ₁)
+  | QEMPTY :
+    quals _ _ _ _ _ _
