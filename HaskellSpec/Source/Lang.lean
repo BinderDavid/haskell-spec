@@ -89,7 +89,7 @@ mutual
   ```
   --/
   inductive GuardedExprs : Type where
-    | gExp_where : NonEmptyList GuardedExp → Binds → GuardedExprs
+    | mk : NonEmptyList GuardedExp → Binds → GuardedExprs
 
   /--
   ```text
