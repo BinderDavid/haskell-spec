@@ -15,3 +15,5 @@ import HaskellSpec.Elaboration.Bindings
 import HaskellSpec.Elaboration.Expressions
 import HaskellSpec.Lexer.Tokens
 import HaskellSpec.Lexer.RegExp
+import HaskellSpec.Lexer.Literals
+import HaskellSpec.Lexer.Reserved
