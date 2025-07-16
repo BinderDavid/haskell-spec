@@ -15,6 +15,18 @@ inductive RE : Type where
     /-- The regular expression matching the corresponding symbol: `L(Symbol('a')) = { "a" }` -/
   | Symbol : Char → RE
 
+def unions (res: List RE) : RE :=
+  match res with
+   | [] => RE.Empty
+   | (re :: res) => RE.Union re (unions res)
+
+def apps (res : List RE) : RE :=
+  match res with
+   | [] => RE.Epsilon
+   | (re :: res) => RE.App re (apps res)
+
+def from_string (l : List Char) : RE :=
+  apps (List.map (λ c => RE.Symbol c) l)
 
 inductive Matching : RE → List Char → Prop where
   | EPSILON :
