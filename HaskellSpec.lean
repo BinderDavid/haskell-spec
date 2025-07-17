@@ -18,3 +18,4 @@ import HaskellSpec.Lexer.RegExp
 import HaskellSpec.Lexer.Literals
 import HaskellSpec.Lexer.Reserved
 import HaskellSpec.Lexer.Identifier
+import HaskellSpec.Lexer.Rules

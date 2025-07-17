@@ -1,3 +1,7 @@
+/-
+Regular Expressions and Matching
+-/
+
 /-- Regular Expressions -/
 inductive RE : Type where
     /-- The regular expression corresponding to the empty language: `L(Empty) = ∅` -/
