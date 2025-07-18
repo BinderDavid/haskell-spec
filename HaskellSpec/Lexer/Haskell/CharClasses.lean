@@ -126,7 +126,7 @@ def Hexadecimal : RE := RE.Plus Hexit
 Graphic / Any etc
 -/
 
-def Symbol : RE :=
+def SymbolWithoutBackslash : RE :=
   unions [ RE.Symbol '!',
            RE.Symbol '#',
            RE.Symbol '$',
@@ -135,7 +135,6 @@ def Symbol : RE :=
            RE.Symbol '*',
            RE.Symbol '+',
            RE.Symbol '.',
-           RE.Symbol '/',
            RE.Symbol '<',
            RE.Symbol '=',
            RE.Symbol '>',
@@ -149,6 +148,9 @@ def Symbol : RE :=
            RE.Symbol ':'
            ]
 
+def Symbol : RE :=
+  RE.Union SymbolWithoutBackslash (RE.Symbol '\\')
+
 def Special : RE :=
   unions [ RE.Symbol '(',
            RE.Symbol ')',
@@ -160,8 +162,23 @@ def Special : RE :=
            RE.Symbol '{',
            RE.Symbol '}']
 
+
+def GraphicWithoutSymbol : RE :=
+  unions [Small, Large, Digit, Special, RE.Symbol '"', RE.Symbol '\'']
+
 def Graphic : RE :=
-  unions [Small, Large, Symbol, Digit, Special, RE.Symbol '"', RE.Symbol '\'']
+  RE.Union GraphicWithoutSymbol Symbol
+
+/-- GraphicChar = Graphic without ' and \ -/
+def GraphicChar : RE :=
+  unions [Small, Large, Digit, Special, RE.Symbol '"', SymbolWithoutBackslash]
+
+/-- Graphic without " and \ -/
+def GraphicString : RE :=
+  unions [Small, Large, Digit, Special, RE.Symbol '\'', SymbolWithoutBackslash]
+
+def AnyWithoutSymbol : RE :=
+  unions [ GraphicWithoutSymbol, RE.Symbol ' ', RE.Symbol '\t']
 
 def Any : RE :=
   unions [ Graphic, RE.Symbol ' ', RE.Symbol '\t']
@@ -169,6 +186,12 @@ def Any : RE :=
 /-
 Comments
 -/
+
+def Newline : RE :=
+  unions [RE.App (RE.Symbol '\r') (RE.Symbol '\n'),
+          RE.Symbol '\n',
+          RE.Symbol '\r',
+          RE.Symbol '\u000C'] -- Form feed
 
 def Dashes : RE :=
   RE.Union (RE.App (RE.Symbol '-') (RE.Symbol '-'))
@@ -180,7 +203,9 @@ def Opencom : RE :=
 def Closecom : RE :=
   RE.App (RE.Symbol '-') (RE.Symbol '}')
 
-def Comment : RE := sorry
+def Comment : RE :=
+  RE.Union (apps [Dashes, Newline])
+           (apps [Dashes, AnyWithoutSymbol, RE.Star Any, Newline])
 
 def NComment : RE := sorry
 
@@ -188,11 +213,7 @@ def NComment : RE := sorry
 Whitespace
 -/
 
-def Newline : RE :=
-  unions [RE.App (RE.Symbol '\r') (RE.Symbol '\n'),
-          RE.Symbol '\n',
-          RE.Symbol '\r',
-          RE.Symbol '\u000C'] -- Form feed
+
 
 def WhiteChar : RE := -- TODO: Missing "uniWhite"
   unions [ Newline,
