@@ -13,9 +13,9 @@ import HaskellSpec.Elaboration.Modules
 import HaskellSpec.Elaboration.ImportExport
 import HaskellSpec.Elaboration.Bindings
 import HaskellSpec.Elaboration.Expressions
-import HaskellSpec.Lexer.Tokens
-import HaskellSpec.Lexer.RegExp
-import HaskellSpec.Lexer.Literals
-import HaskellSpec.Lexer.Reserved
-import HaskellSpec.Lexer.Identifier
 import HaskellSpec.Lexer.Rules
+import HaskellSpec.Lexer.RegExp
+import HaskellSpec.Lexer.Haskell.Tokens
+import HaskellSpec.Lexer.Haskell.Literals
+import HaskellSpec.Lexer.Haskell.Reserved
+import HaskellSpec.Lexer.Haskell.Identifier

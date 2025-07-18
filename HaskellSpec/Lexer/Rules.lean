@@ -1,5 +1,5 @@
-import HaskellSpec.Lexer.Tokens
 import HaskellSpec.Lexer.RegExp
+import HaskellSpec.Lexer.Haskell.Tokens
 
 /-
 Rules

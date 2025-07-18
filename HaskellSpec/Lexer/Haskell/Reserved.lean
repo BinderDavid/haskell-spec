@@ -1,6 +1,7 @@
 import HaskellSpec.Lexer.RegExp
-import HaskellSpec.Lexer.Tokens
 import HaskellSpec.Lexer.Rules
+import HaskellSpec.Lexer.Haskell.Tokens
+
 
 namespace Reserved
 /-

@@ -1,5 +1,5 @@
 import HaskellSpec.Lexer.RegExp
-import HaskellSpec.Lexer.Literals
+import HaskellSpec.Lexer.Haskell.Literals
 
 /-
 Identifiers
