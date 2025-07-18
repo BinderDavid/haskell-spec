@@ -18,6 +18,8 @@ inductive RE : Type where
   | App : RE → RE → RE
     /-- The regular expression matching the corresponding symbol: `L(Symbol('a')) = { "a" }` -/
   | Symbol : Char → RE
+    /-- Relative Complement: `L(Minus(re₁, re₂)) = L(re₁) / L(re₂)` -/
+  | Minus : RE → RE → RE
 
 def unions (res: List RE) : RE :=
   match res with

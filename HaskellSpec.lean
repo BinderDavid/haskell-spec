@@ -19,3 +19,4 @@ import HaskellSpec.Lexer.Haskell.Tokens
 import HaskellSpec.Lexer.Haskell.Literals
 import HaskellSpec.Lexer.Haskell.Reserved
 import HaskellSpec.Lexer.Haskell.Identifier
+import HaskellSpec.Lexer.Haskell.CharClasses

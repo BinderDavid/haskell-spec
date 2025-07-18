@@ -1,62 +1,9 @@
 import HaskellSpec.Lexer.RegExp
+import HaskellSpec.Lexer.Rules
+import HaskellSpec.Lexer.Haskell.Tokens
+import HaskellSpec.Lexer.Haskell.CharClasses
 
 namespace Literals
-
-/-
-Decimal, Hexadecimals, Octals
--/
-
-def Digit : RE :=
-  unions [ RE.Symbol '0',
-           RE.Symbol '1',
-           RE.Symbol '2',
-           RE.Symbol '3',
-           RE.Symbol '4',
-           RE.Symbol '5',
-           RE.Symbol '6',
-           RE.Symbol '7',
-           RE.Symbol '8',
-           RE.Symbol '9']
-
-def Octit : RE :=
-  unions [ RE.Symbol '0',
-           RE.Symbol '1',
-           RE.Symbol '2',
-           RE.Symbol '3',
-           RE.Symbol '4',
-           RE.Symbol '5',
-           RE.Symbol '6',
-           RE.Symbol '7']
-
-def Hexit : RE :=
-  unions [ RE.Symbol '0',
-           RE.Symbol '1',
-           RE.Symbol '2',
-           RE.Symbol '3',
-           RE.Symbol '4',
-           RE.Symbol '5',
-           RE.Symbol '6',
-           RE.Symbol '7',
-           RE.Symbol '8',
-           RE.Symbol '9',
-           RE.Symbol 'a',
-           RE.Symbol 'A',
-           RE.Symbol 'b',
-           RE.Symbol 'B',
-           RE.Symbol 'c',
-           RE.Symbol 'C',
-           RE.Symbol 'd',
-           RE.Symbol 'D',
-           RE.Symbol 'e',
-           RE.Symbol 'E',
-           RE.Symbol 'f',
-           RE.Symbol 'F']
-
-def Decimal : RE := RE.Plus Digit
-
-def Octal : RE := RE.Plus Octit
-
-def Hexadecimal : RE := RE.Plus Hexit
 
 /-
 Integer Literals
@@ -72,6 +19,9 @@ def Integer : RE :=
   unions [ Decimal,
            apps [OctalPrefix, Decimal],
            apps [HexPrefix, Decimal]]
+
+def IntegerR : Rule :=
+  Rule.mk Integer (λ _ => Token.LitInteger 0) -- TODO: Parse string and convert to obtain literal value
 
 /-
 Float Literals
@@ -96,5 +46,52 @@ def Float3 : RE :=
 
 def Float : RE :=
   unions [Float1, Float2, Float3]
+
+def FloatR : Rule :=
+  Rule.mk Float (λ _ => Token.LitFloat 0 0) -- TODO: Parse string and convert to obtain literal value
+
+/-
+Character Literals
+-/
+
+def CharEscape : RE :=
+  unions [ RE.Symbol 'a', -- alert
+           RE.Symbol 'b', -- backspace
+           RE.Symbol 'f', -- form feed
+           RE.Symbol 'n', -- new line
+           RE.Symbol 'r', -- carriage return
+           RE.Symbol 't', -- horizontal tab
+           RE.Symbol 'v', -- vertical tab
+           RE.Symbol '\\',
+           RE.Symbol '"',
+           RE.Symbol '\'',
+           RE.Symbol '&']
+
+def Ascii : RE := sorry
+
+def Escape : RE :=
+  RE.App (RE.Symbol '\\')
+         (unions [CharEscape, Ascii, Decimal, RE.App (RE.Symbol 'o') Octal, RE.App (RE.Symbol 'x') Hexadecimal])
+
+def Char : RE := sorry
+
+def CharR : Rule :=
+  Rule.mk Char (λ_ => Token.LitChar 'a') -- TODO: Parse string and convert to obtain literal value
+
+/-
+String Literals
+-/
+
+def String : RE := sorry
+
+def StringR : Rule :=
+  Rule.mk String (λ _ => Token.LitString "") -- TODO: Parse string and convert to obtain literal value
+
+/-
+All rules declared in this module for literals
+-/
+
+def all_literals : List Rule :=
+  [IntegerR, FloatR, CharR, StringR]
 
 end Literals
