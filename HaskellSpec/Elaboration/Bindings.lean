@@ -4,11 +4,17 @@ import HaskellSpec.Target.Lang
 
 /-
 A circle with a cross inside
+
+There is an unverified side condition:
+The intersection of the domains of the two environments must be empty
 -/
-def cross (_: Env.VE) (_: Env.VE): Env.VE := sorry
+def cross (a b: Env.VE): Env.VE :=
+  a ++ b
 
 /-
 A circle with a cross inside, with a right arrow on top
+
+Asymmetric version of ⊕ where entries in E2 shadow E if names collide
 -/
 def cross_arrow (_: Env.VE) (_: Env.VE): Env.VE := sorry
 
@@ -34,13 +40,17 @@ def concat_target_binds (n m: Target.Binds): Target.Binds :=
 
 def concat_source_binds (n m : Source.Binds): Source.Binds :=
   match n with
-  | Source.Binds.binds_binds a_sigs a_bindgroup n_binds =>
+  | Source.Binds.cons a_sigs a_bindgroup n_binds =>
     match m with
-    | Source.Binds.binds_binds b_sigs b_bindgroup _ =>
-      Source.Binds.binds_binds
+    | Source.Binds.cons b_sigs b_bindgroup m_binds =>
+      Source.Binds.cons
         (a_sigs ++ b_sigs)
         (concat_bind_groups a_bindgroup b_bindgroup)
-        n_binds -- TODO This is arbitrarily chosen.
+        (concat_source_binds n_binds m_binds)
+    | Source.Binds.empty =>
+      n
+  | Source.Binds.empty =>
+    m
 
 /--
 Cp. Fig. 29

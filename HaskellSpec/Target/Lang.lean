@@ -82,7 +82,8 @@ mutual
   ```
   --/
   inductive Binds : Type where
-    | binds_binds : Signatures → BindGroup → Binds → Binds
+    | cons : Signatures → BindGroup → Binds → Binds
+    | empty : Binds
 
   /--
   ```text
