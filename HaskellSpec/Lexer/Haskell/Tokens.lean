@@ -1,0 +1,96 @@
+inductive Token : Type where
+  | Whitespace
+  | QVarId : List String → String → Token
+  | QConId : List String → String → Token
+  | QVarSym : List String → String → Token
+  | QVarCon : List String → String → Token
+  | LitInteger : Int → Token
+  | LitFloat : Int → Int → Token
+  | LitChar : Char → Token
+  | LitString : String → Token
+    /-- `(` -/
+  | OpenParen
+    /-- `)` -/
+  | CloseParen
+    /-- `[` -/
+  | OpenBracket
+    /-- `]` -/
+  | CloseBracket
+    /-- `{` -/
+  | OpenBrace
+    /-- `}` -/
+  | CloseBrace
+    /-- `,` -/
+  | Comma
+    /-- `:` -/
+  | Colon
+    /-- `::` -/
+  | DoubleColon
+    /-- `;` -/
+  | Semicolon
+    /-- `\`` -/
+  | Backtick
+    /-- `\` -/
+  | Backslash
+    /-- `..` -/
+  | DotDot
+    /-- `=` -/
+  | Equal
+    /-- `<-` -/
+  | ArrowLeft
+    /-- `->` -/
+  | ArrowRight
+    /-- `=>` -/
+  | DoubleArrowRight
+    /-- `~` -/
+  | Tilde
+    /-- `@` -/
+  | Ampersand
+    /-- `|` -/
+  | Solidus
+    /-- `_` -/
+  | Underscore
+    /-- `case` -/
+  | Case
+    /-- `class` -/
+  | Class
+    /-- `data` -/
+  | Data
+    /-- `default` -/
+  | Default
+    /-- `deriving` -/
+  | Deriving
+    /-- `do` -/
+  | Do
+    /-- `else` -/
+  | Else
+    /-- `foreign` -/
+  | Foreign
+    /-- `if` -/
+  | If
+    /-- `import` -/
+  | Import
+    /-- `in` -/
+  | In
+    /-- `infix` -/
+  | Infix
+    /-- `infixl` -/
+  | Infixl
+    /-- `infixr` -/
+  | Infixr
+    /-- `instance` -/
+  | Instance
+    /-- `let` -/
+  | Let
+    /-- `module` -/
+  | Module
+    /-- `newtype` -/
+  | Newtype
+    /-- `of` -/
+  | Of
+    /-- `then` -/
+  | Then
+    /-- `type` -/
+  | TypeT
+    /-- `where` -/
+  | Where
