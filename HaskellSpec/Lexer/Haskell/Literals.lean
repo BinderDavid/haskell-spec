@@ -61,22 +61,22 @@ def parse_hexit (c : Char) : Nat :=
   | 'F' => 15
   | _ => 0
 
-def parse_octal (s : String) : Nat :=
-  let ls_inv : List Char        := s.toList.reverse
+def parse_octal (ls : List Char) : Nat :=
+  let ls_inv : List Char        := ls.reverse
   let octits : List Nat         := ls_inv.map parse_octit
   let zipped : List (Nat × Nat) := octits.zipIdx 0
   let comped : List Nat         := zipped.map (λ ⟨o,pos⟩ => o * (8^pos))
   comped.sum
 
-def parse_decimal (s : String) : Nat :=
-  let ls_inv : List Char        := s.toList.reverse
+def parse_decimal (ls : List Char) : Nat :=
+  let ls_inv : List Char        := ls.reverse
   let digits : List Nat         := ls_inv.map parse_digit
   let zipped : List (Nat × Nat) := digits.zipIdx 0
   let comped : List Nat         := zipped.map (λ ⟨o,pos⟩ => o * (10^pos))
   comped.sum
 
-def parse_hexadecimal (s : String) : Nat :=
-  let ls_inv : List Char        := s.toList.reverse
+def parse_hexadecimal (ls : List Char) : Nat :=
+  let ls_inv : List Char        := ls.reverse
   let hexits : List Nat         := ls_inv.map parse_hexit
   let zipped : List (Nat × Nat) := hexits.zipIdx 0
   let comped : List Nat         := zipped.map (λ ⟨o,pos⟩ => o * (16^pos))
@@ -84,15 +84,12 @@ def parse_hexadecimal (s : String) : Nat :=
 
 
 def parse_integer (s : String) : Nat :=
-  match s.dropPrefix? "0o" with
-    | some s => parse_octal s.str
-    | none => match s.dropPrefix? "0O" with
-      | some s => parse_octal s.str
-      | none => match s.dropPrefix? "0x" with
-        | some s => parse_hexadecimal s.str
-        | none => match s.dropPrefix? "0X" with
-          | some s => parse_hexadecimal s.str
-          | none => parse_decimal s
+  match s.toList with
+  | '0' :: 'o' :: ls => parse_octal ls
+  | '0' :: 'O' :: ls => parse_octal ls
+  | '0' :: 'x' :: ls => parse_hexadecimal ls
+  | '0' :: 'X' :: ls => parse_hexadecimal ls
+  | ls => parse_decimal ls
 
 def OctalPrefix : RE :=
   RE.Union (RE.App (RE.Symbol '0') (RE.Symbol 'o')) (RE.App (RE.Symbol '0') (RE.Symbol 'O'))
@@ -230,7 +227,7 @@ def String : RE :=
          RE.Symbol '"']
 
 def StringR : Rule :=
-  Rule.mk String (λ _ => Token.LitString "") -- TODO: Parse string and convert to obtain literal value
+  Rule.mk String (λ s => Token.LitString s) -- TODO: Check if we want to trim
 
 /-
 All rules declared in this module for literals
