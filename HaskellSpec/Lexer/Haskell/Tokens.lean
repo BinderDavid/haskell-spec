@@ -4,8 +4,8 @@ inductive Token : Type where
   | QConId : List String → String → Token
   | QVarSym : List String → String → Token
   | QVarCon : List String → String → Token
-  | LitInteger : Int → Token
-  | LitFloat : Int → Int → Token
+  | LitInteger : Nat → Token
+  | LitFloat : Nat → Nat → Token
   | LitChar : Char → Token
   | LitString : String → Token
     /-- `(` -/

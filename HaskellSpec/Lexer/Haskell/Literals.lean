@@ -9,7 +9,7 @@ namespace Literals
 Integer Literals
 -/
 
-def parse_octit (c : Char) : Int :=
+def parse_octit (c : Char) : Nat :=
   match c with
   | '0' => 0
   | '1' => 1
@@ -21,7 +21,7 @@ def parse_octit (c : Char) : Int :=
   | '7' => 7
   | _ => 0
 
-def parse_digit (c : Char) : Int :=
+def parse_digit (c : Char) : Nat :=
   match c with
   | '0' => 0
   | '1' => 1
@@ -35,7 +35,7 @@ def parse_digit (c : Char) : Int :=
   | '9' => 9
   | _ => 0
 
-def parse_hexit (c : Char) : Int :=
+def parse_hexit (c : Char) : Nat :=
   match c with
   | '0' => 0
   | '1' => 1
@@ -61,18 +61,29 @@ def parse_hexit (c : Char) : Int :=
   | 'F' => 15
   | _ => 0
 
+def parse_octal (s : String) : Nat :=
+  let ls_inv : List Char        := s.toList.reverse
+  let octits : List Nat         := ls_inv.map parse_octit
+  let zipped : List (Nat × Nat) := octits.zipIdx 0
+  let comped : List Nat         := zipped.map (λ ⟨o,pos⟩ => o * (8^pos))
+  comped.sum
 
-def parse_octal (_ : String) : Int :=
-  0 -- TODO
+def parse_decimal (s : String) : Nat :=
+  let ls_inv : List Char        := s.toList.reverse
+  let digits : List Nat         := ls_inv.map parse_digit
+  let zipped : List (Nat × Nat) := digits.zipIdx 0
+  let comped : List Nat         := zipped.map (λ ⟨o,pos⟩ => o * (10^pos))
+  comped.sum
 
-def parse_decimal (_ : String) : Int :=
-  0 -- TODO
+def parse_hexadecimal (s : String) : Nat :=
+  let ls_inv : List Char        := s.toList.reverse
+  let hexits : List Nat         := ls_inv.map parse_hexit
+  let zipped : List (Nat × Nat) := hexits.zipIdx 0
+  let comped : List Nat         := zipped.map (λ ⟨o,pos⟩ => o * (16^pos))
+  comped.sum
 
-def parse_hexadecimal (_ : String) : Int :=
-  0 -- TODO
 
-
-def parse_integer (s : String) : Int :=
+def parse_integer (s : String) : Nat :=
   match s.dropPrefix? "0o" with
     | some s => parse_octal s.str
     | none => match s.dropPrefix? "0O" with
