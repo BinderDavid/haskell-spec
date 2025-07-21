@@ -206,13 +206,103 @@ def EscapeWithoutAmpersand : RE :=
   RE.App (RE.Symbol '\\')
          (unions [CharEscapeWithoutAmpersand, Ascii, Decimal, RE.App (RE.Symbol 'o') Octal, RE.App (RE.Symbol 'x') Hexadecimal])
 
+/-- This function defines the canonical meaning of all escape sequences allowed in character literals. -/
+def parse_char (s : String) : Char :=
+  match s.toList with
+  -- Character escapes
+  | '\\' :: 'a' :: [] => '\x07' -- alert
+  | '\\' :: 'b' :: [] => '\x08' -- backspace
+  | '\\' :: 'f' :: [] => '\x0c' -- form feed
+  | '\\' :: 'n' :: [] => '\x0a' -- new line / line feed
+  | '\\' :: 'r' :: [] => '\x0d' -- carriage return
+  | '\\' :: 't' :: [] => '\x09' -- horizontal tab
+  | '\\' :: 'v' :: [] => '\x0b' -- vertical tab
+  | '\\' :: '\\' :: [] => '\\'
+  | '\\' :: '"' :: [] => '"'
+  | '\\' :: '\'' :: [] => '\''
+  -- Control Escapes
+  | '\\' :: '^' :: 'A' :: [] => 'X'
+  | '\\' :: '^' :: 'B' :: [] => 'X'
+  | '\\' :: '^' :: 'C' :: [] => 'X'
+  | '\\' :: '^' :: 'D' :: [] => 'X'
+  | '\\' :: '^' :: 'E' :: [] => 'X'
+  | '\\' :: '^' :: 'F' :: [] => 'X'
+  | '\\' :: '^' :: 'G' :: [] => 'X'
+  | '\\' :: '^' :: 'H' :: [] => 'X'
+  | '\\' :: '^' :: 'I' :: [] => 'X'
+  | '\\' :: '^' :: 'J' :: [] => 'X'
+  | '\\' :: '^' :: 'K' :: [] => 'X'
+  | '\\' :: '^' :: 'L' :: [] => 'X'
+  | '\\' :: '^' :: 'M' :: [] => 'X'
+  | '\\' :: '^' :: 'N' :: [] => 'X'
+  | '\\' :: '^' :: 'O' :: [] => 'X'
+  | '\\' :: '^' :: 'P' :: [] => 'X'
+  | '\\' :: '^' :: 'Q' :: [] => 'X'
+  | '\\' :: '^' :: 'R' :: [] => 'X'
+  | '\\' :: '^' :: 'S' :: [] => 'X'
+  | '\\' :: '^' :: 'T' :: [] => 'X'
+  | '\\' :: '^' :: 'U' :: [] => 'X'
+  | '\\' :: '^' :: 'V' :: [] => 'X'
+  | '\\' :: '^' :: 'W' :: [] => 'X'
+  | '\\' :: '^' :: 'X' :: [] => 'X'
+  | '\\' :: '^' :: 'Y' :: [] => 'X'
+  | '\\' :: '^' :: 'Z' :: [] => 'X'
+  | '\\' :: '^' :: '@' :: [] => 'X'
+  | '\\' :: '^' :: '[' :: [] => 'X'
+  | '\\' :: '^' :: '\\' :: [] => 'X'
+  | '\\' :: '^' :: ']' :: [] => 'X'
+  | '\\' :: '^' :: '^' :: [] => 'X'
+  | '\\' :: '^' :: '_' :: [] => 'X'
+  -- ASCII Escapes
+  | '\\' :: 'N' :: 'U' :: 'L' :: [] => 'X'
+  | '\\' :: 'S' :: 'O' :: 'H' :: [] => 'X'
+  | '\\' :: 'S' :: 'T' :: 'X' :: [] => 'X'
+  | '\\' :: 'E' :: 'T' :: 'X' :: [] => 'X'
+  | '\\' :: 'E' :: 'O' :: 'T' :: [] => 'X'
+  | '\\' :: 'E' :: 'N' :: 'Q' :: [] => 'X'
+  | '\\' :: 'A' :: 'C' :: 'K' :: [] => 'X'
+  | '\\' :: 'B' :: 'E' :: 'L' :: [] => 'X'
+  | '\\' :: 'B' :: 'S' :: [] => 'X'
+  | '\\' :: 'H' :: 'T' :: [] => 'X'
+  | '\\' :: 'L' :: 'F' :: [] => 'X'
+  | '\\' :: 'V' :: 'T' :: [] => 'X'
+  | '\\' :: 'F' :: 'F' :: [] => 'X'
+  | '\\' :: 'C' :: 'R' :: [] => 'X'
+  | '\\' :: 'S' :: 'O' :: [] => 'X'
+  | '\\' :: 'S' :: 'I' :: [] => 'X'
+  | '\\' :: 'D' :: 'L' :: 'E' :: [] => 'X'
+  | '\\' :: 'D' :: 'C' :: '1' :: [] => 'X'
+  | '\\' :: 'D' :: 'C' :: '2' :: [] => 'X'
+  | '\\' :: 'D' :: 'C' :: '3' :: [] => 'X'
+  | '\\' :: 'D' :: 'C' :: '4' :: [] => 'X'
+  | '\\' :: 'N' :: 'A' :: 'K' :: [] => 'X'
+  | '\\' :: 'S' :: 'Y' :: 'N' :: [] => 'X'
+  | '\\' :: 'E' :: 'T' :: 'B' :: [] => 'X'
+  | '\\' :: 'C' :: 'A' :: 'N' :: [] => 'X'
+  | '\\' :: 'E' :: 'M' :: [] => 'X'
+  | '\\' :: 'S' :: 'U' :: 'B' :: [] => 'X'
+  | '\\' :: 'E' :: 'S' :: 'C' :: [] => 'X'
+  | '\\' :: 'F' :: 'S' :: [] => 'X'
+  | '\\' :: 'G' :: 'S' :: [] => 'X'
+  | '\\' :: 'U' :: 'S' :: [] => 'X'
+  | '\\' :: 'S' :: 'P' :: [] => 'X'
+  | '\\' :: 'D' :: 'E' :: 'L' :: [] => 'X'
+  -- Numeric Escapes
+  | '\\' :: 'o' :: _s => 'X'
+  | '\\' :: 'x' :: _s => 'X'
+  | '\\' :: _s => 'X'
+  -- Single characters
+  | s :: [] => s
+  -- Anything else should not occur
+  | _ => 'X'
+
 def Char : RE :=
   apps [ RE.Symbol '\'',
          unions [RE.Symbol ' ', EscapeWithoutAmpersand, GraphicChar],
          RE.Symbol '\'']
 
 def CharR : Rule :=
-  Rule.mk Char (λ_ => Token.LitChar 'a') -- TODO: Parse string and convert to obtain literal value
+  Rule.mk Char (λ s => Token.LitChar (parse_char s))
 
 /-
 String Literals
@@ -227,7 +317,7 @@ def String : RE :=
          RE.Symbol '"']
 
 def StringR : Rule :=
-  Rule.mk String (λ s => Token.LitString s) -- TODO: Check if we want to trim
+  Rule.mk String (λ s => Token.LitString s) -- TODO: Have to escape control characters.
 
 /-
 All rules declared in this module for literals
