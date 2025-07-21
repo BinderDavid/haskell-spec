@@ -126,7 +126,7 @@ def Hexadecimal : RE := RE.Plus Hexit
 Graphic / Any etc
 -/
 
-def SymbolWithoutBackslash : RE :=
+def SymbolWithoutBackslashDash : RE :=
   unions [ RE.Symbol '!',
            RE.Symbol '#',
            RE.Symbol '$',
@@ -143,15 +143,22 @@ def SymbolWithoutBackslash : RE :=
            RE.Symbol '\\',
            RE.Symbol '^',
            RE.Symbol '|',
-           RE.Symbol '-',
            RE.Symbol '~',
            RE.Symbol ':'
            ]
 
-def Symbol : RE :=
-  RE.Union SymbolWithoutBackslash (RE.Symbol '\\')
+def SymbolWithoutBackslash : RE :=
+  RE.Union SymbolWithoutBackslashDash (RE.Symbol '-')
 
-def Special : RE :=
+def SymbolWithoutDash : RE :=
+  RE.Union SymbolWithoutBackslashDash (RE.Symbol '\\')
+
+def Symbol : RE :=
+  unions [ SymbolWithoutBackslashDash,
+           RE.Symbol '\\',
+           RE.Symbol '-']
+
+def SpecialWithoutCloseCurly : RE :=
   unions [ RE.Symbol '(',
            RE.Symbol ')',
            RE.Symbol ',',
@@ -159,7 +166,11 @@ def Special : RE :=
            RE.Symbol '[',
            RE.Symbol ']',
            RE.Symbol '`',
-           RE.Symbol '{',
+           RE.Symbol '{']
+
+
+def Special : RE :=
+  unions [ SpecialWithoutCloseCurly,
            RE.Symbol '}']
 
 
@@ -176,6 +187,14 @@ def GraphicChar : RE :=
 /-- Graphic without " and \ -/
 def GraphicString : RE :=
   unions [Small, Large, Digit, Special, RE.Symbol '\'', SymbolWithoutBackslash]
+
+/-- Graphic without - -/
+def GraphicComment1 : RE :=
+  unions [Small, Large, Digit, Special, RE.Symbol '\'', SymbolWithoutBackslash]
+
+/-- Graphic without } -/
+def GraphicComment2 : RE :=
+  unions [Small, Large, Digit, SpecialWithoutCloseCurly, RE.Symbol '"', RE.Symbol '\'', Symbol]
 
 def AnyWithoutSymbol : RE :=
   unions [ GraphicWithoutSymbol, RE.Symbol ' ', RE.Symbol '\t']
@@ -207,12 +226,19 @@ def Comment : RE :=
   RE.Union (apps [Dashes, Newline])
            (apps [Dashes, AnyWithoutSymbol, RE.Star Any, Newline])
 
-def NComment : RE := sorry
+/-- Sequence of Graphic without `-}` -/
+def AnySeq : RE :=
+  RE.Star (unions [ GraphicComment1,
+                    apps [RE.Symbol '-', GraphicComment2]])
+
+def NComment : RE :=
+  apps [ Opencom,
+         AnySeq,
+         Closecom]
 
 /-
 Whitespace
 -/
-
 
 
 def WhiteChar : RE := -- TODO: Missing "uniWhite"
