@@ -9,6 +9,80 @@ namespace Literals
 Integer Literals
 -/
 
+def parse_octit (c : Char) : Int :=
+  match c with
+  | '0' => 0
+  | '1' => 1
+  | '2' => 2
+  | '3' => 3
+  | '4' => 4
+  | '5' => 5
+  | '6' => 6
+  | '7' => 7
+  | _ => 0
+
+def parse_digit (c : Char) : Int :=
+  match c with
+  | '0' => 0
+  | '1' => 1
+  | '2' => 2
+  | '3' => 3
+  | '4' => 4
+  | '5' => 5
+  | '6' => 6
+  | '7' => 7
+  | '8' => 8
+  | '9' => 9
+  | _ => 0
+
+def parse_hexit (c : Char) : Int :=
+  match c with
+  | '0' => 0
+  | '1' => 1
+  | '2' => 2
+  | '3' => 3
+  | '4' => 4
+  | '5' => 5
+  | '6' => 6
+  | '7' => 7
+  | '8' => 8
+  | '9' => 9
+  | 'a' => 10
+  | 'A' => 10
+  | 'b' => 11
+  | 'B' => 11
+  | 'c' => 12
+  | 'C' => 12
+  | 'd' => 13
+  | 'D' => 13
+  | 'e' => 14
+  | 'E' => 14
+  | 'f' => 15
+  | 'F' => 15
+  | _ => 0
+
+
+def parse_octal (_ : String) : Int :=
+  0 -- TODO
+
+def parse_decimal (_ : String) : Int :=
+  0 -- TODO
+
+def parse_hexadecimal (_ : String) : Int :=
+  0 -- TODO
+
+
+def parse_integer (s : String) : Int :=
+  match s.dropPrefix? "0o" with
+    | some s => parse_octal s.str
+    | none => match s.dropPrefix? "0O" with
+      | some s => parse_octal s.str
+      | none => match s.dropPrefix? "0x" with
+        | some s => parse_hexadecimal s.str
+        | none => match s.dropPrefix? "0X" with
+          | some s => parse_hexadecimal s.str
+          | none => parse_decimal s
+
 def OctalPrefix : RE :=
   RE.Union (RE.App (RE.Symbol '0') (RE.Symbol 'o')) (RE.App (RE.Symbol '0') (RE.Symbol 'O'))
 
@@ -21,7 +95,7 @@ def Integer : RE :=
            apps [HexPrefix, Decimal]]
 
 def IntegerR : Rule :=
-  Rule.mk Integer (λ _ => Token.LitInteger 0) -- TODO: Parse string and convert to obtain literal value
+  Rule.mk Integer (λ s => Token.LitInteger (parse_integer s))
 
 /-
 Float Literals
