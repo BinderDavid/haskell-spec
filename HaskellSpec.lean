@@ -15,6 +15,7 @@ import HaskellSpec.Elaboration.Bindings
 import HaskellSpec.Elaboration.Expressions
 import HaskellSpec.Lexer.Rules
 import HaskellSpec.Lexer.RegExp
+import HaskellSpec.Lexer.Brzozowski
 import HaskellSpec.Lexer.Haskell.Tokens
 import HaskellSpec.Lexer.Haskell.Literals
 import HaskellSpec.Lexer.Haskell.Reserved
