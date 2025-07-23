@@ -4,6 +4,7 @@ open ISCFG
 open XTerminal
 
 /--
+```txt
 ⟨topdecl⟩ → type ⟨simpletype⟩ = ⟨type⟩
           | data [⟨context⟩ =>] ⟨simpletype⟩ [= ⟨constrs⟩] [⟨deriving⟩]
           | newtype [⟨context⟩ =>] ⟨simpletype⟩ = ⟨newconstr⟩ [⟨deriving⟩]
@@ -12,14 +13,23 @@ open XTerminal
           | default ( ⟨type₁⟩ , … , ⟨typeₙ⟩ )
           | foreign ⟨fdecl⟩
           | ⟨decl⟩
+```
 -/
 def Topdecl : Rule :=
   { lhs := NT.TopDecl
-    rhss := [] -- TODO
+    rhss := [ [T Token.TypeT, NT NT.SimpleType, T Token.Equal, NT NT.TypeT],
+              [T Token.Data], -- TODO
+              [T Token.Newtype], -- TODO
+              [T Token.Class], -- TODO
+              [T Token.Instance], -- TODO
+              [T Token.Default], -- TODO
+              [T Token.Foreign, NT NT.Fdecl],
+              [NT NT.Decl]
+            ]
   }
 
 /--
-```
+```txt
 ⟨decls⟩ → { ⟨decl₁⟩ , … , ⟨declₙ⟩ }                (n ≥ 0)
 ```
 -/
@@ -29,7 +39,7 @@ def Decls : Rule :=
   }
 
 /--
-```
+```txt
 ⟨decl⟩ → ⟨gendecl⟩
        | ⟨funlhs⟩ ⟨rhs⟩
        | ⟨pat⟩ ⟨rhs⟩
@@ -37,12 +47,15 @@ def Decls : Rule :=
 -/
 def Decl : Rule :=
   { lhs := NT.Decl
-    rhss := [] -- TODO
+    rhss := [ [NT NT.GenDecl],
+              [NT NT.Funlhs, NT NT.Rhs],
+              [NT NT.Pat, NT NT.Rhs]
+            ]
   }
 
 
 /--
-```
+```txt
 ⟨cdecls⟩ → { ⟨cdecl₁⟩ , … , ⟨cdeclₙ⟩ }                (n ≥ 0)
 ```
 -/
@@ -52,7 +65,7 @@ def Cdecls : Rule :=
   }
 
 /--
-```
+```txt
 ⟨cdecl⟩ → ⟨gendecl⟩
         | ⟨funlhs⟩ ⟨rhs⟩
         | ⟨var⟩ ⟨rhs⟩
@@ -60,11 +73,14 @@ def Cdecls : Rule :=
 -/
 def Cdecl : Rule :=
   { lhs := NT.Cdecl
-    rhss := [] -- TODO
+    rhss := [ [NT NT.GenDecl],
+              [NT NT.Funlhs, NT NT.Rhs],
+              [NT NT.Var, NT NT.Rhs]
+            ]
   }
 
 /--
-```
+```txt
 ⟨idecls⟩ → { ⟨idecl₁⟩ , … , ⟨ideclₙ⟩ }                (n ≥ 0)
 ```
 -/
@@ -74,7 +90,7 @@ def Idecls : Rule :=
   }
 
 /--
-```
+```txt
 ⟨idecl⟩ → ⟨funlhs⟩ ⟨rhs⟩
         | ⟨var⟩ ⟨rhs⟩
         |                            (empty)
@@ -82,43 +98,59 @@ def Idecls : Rule :=
 -/
 def Idecl : Rule :=
   { lhs := NT.Idecl
-    rhss := [] -- TODO
+    rhss := [ [NT NT.Funlhs, NT NT.Rhs],
+              [NT NT.Var, NT NT.Rhs],
+              []
+            ]
   }
 
 /--
-```
-⟨gendecl⟩ → ⟨vars⟩ :: [⟨context⟩ =>] ⟨type⟩
-          | ⟨fixity⟩ [⟨integer⟩] ⟨ops⟩
+```txt
+⟨gendecl⟩ → ⟨vars⟩ :: ⟨context⟩ => ⟨type⟩
+          | ⟨vars⟩ :: ⟨type⟩
+          | ⟨fixity⟩ ⟨integer⟩ ⟨ops⟩
+          | ⟨fixity⟩ ⟨ops⟩
           |                                 (empty declaration)
 ```
 -/
 def GenDecl : Rule :=
   { lhs := NT.GenDecl
-    rhss := [] -- TODO
+    rhss := [ [NT NT.Vars, T Token.DoubleColon, NT NT.Context, T Token.DoubleArrowRight, NT NT.TypeT],
+              [NT NT.Vars, T Token.DoubleColon, NT NT.TypeT],
+              [NT NT.Fixity, NT NT.Integer, NT NT.Ops],
+              [NT NT.Fixity, NT NT.Ops],
+              []
+            ]
   }
 
 /--
-```
-⟨ops⟩ → ⟨op₁⟩ , … , ⟨opₙ⟩          (n ≥ 1)
+```txt
+⟨ops⟩ → ⟨op⟩
+      | ⟨op⟩ , ⟨ops⟩
 ```
 -/
 def Ops : Rule :=
   { lhs := NT.Ops
-    rhss := [] -- TODO
+    rhss := [ [NT NT.Op],
+              [NT NT.Op, T Token.Comma, NT NT.Ops]
+            ]
   }
 
 /--
-```
-⟨vars⟩ → ⟨var₁⟩ , … , ⟨varₙ⟩          (n ≥ 1)
+```txt
+⟨vars⟩ → ⟨var⟩
+       | ⟨var⟩ , ⟨vars⟩
 ```
 -/
 def Vars : Rule :=
   { lhs := NT.Vars
-    rhss := [] -- TODO
+    rhss := [ [NT NT.Var],
+              [NT NT.Var, T Token.Comma, NT NT.Vars]
+            ]
   }
 
 /--
-```
+```txt
 ⟨fixity⟩ → infixl
          | infixr
          | infix

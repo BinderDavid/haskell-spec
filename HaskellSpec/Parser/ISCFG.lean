@@ -35,11 +35,30 @@ inductive NT : Type where
   | Idecl
   | GenDecl
   | Ops
+  | Op
+  | Qop
   | Vars
   | Fixity
   -- Identifiers
   | Modid
   | Cname
+  | Var
+  -- Types
+  | SimpleType
+  | TypeT
+  -- Expressions
+  | Exp
+  | Infixexp
+  | Lexp
+  | Fexp
+  | Aexp
+  -- Other
+  | Fdecl
+  | Pat
+  | Funlhs
+  | Rhs
+  | Context
+  | Integer
   deriving Repr
 
 /--

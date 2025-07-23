@@ -3,8 +3,10 @@ import HaskellSpec.Parser.ISCFG
 open ISCFG
 open XTerminal
 
+namespace Module
+
 /--
-```
+```txt
 ⟨module⟩ → module ⟨modid⟩ where ⟨body⟩
          | module ⟨modid⟩ ⟨exports⟩ where ⟨body⟩
          | ⟨body⟩
@@ -19,7 +21,7 @@ def Module : Rule :=
   }
 
 /--
-```
+```txt
 ⟨body⟩ → { ⟨impdecls⟩ ; ⟨topdecls⟩ }
        | { ⟨impdecls⟩ }
        | { ⟨topdecls⟩ }
@@ -33,7 +35,7 @@ def Body : Rule :=
   }
 
 /--
-```
+```txt
 ⟨impdecls⟩ → ⟨impdecl⟩
            | ⟨impdecl⟩ ; ⟨impdecls⟩
 ```
@@ -45,7 +47,7 @@ def ImpDecls : Rule :=
   }
 
 /--
-```
+```txt
 ⟨impdecl⟩ → import [qualified] ⟨modid⟩ [as ⟨modid⟩] [⟨impspec⟩]
           |
 ```
@@ -56,7 +58,7 @@ def ImpDecl : Rule :=
   }
 
 /--
-```
+```txt
 ⟨impspec⟩ → ( ⟨import₁⟩, ..., ⟨importₙ⟩ [,])          (n ≥ 0)
           | hiding ( ⟨import₁⟩, ..., ⟨importₙ⟩ [,])   (n ≥ 0)
 ```
@@ -67,7 +69,7 @@ def ImpSpec : Rule :=
   }
 
 /--
-```
+```txt
 ⟨import⟩ → ⟨var⟩
          | ⟨tycon⟩ (..)
          | ⟨tycon⟩ ( ⟨cname₁⟩, … , ⟨cnameₙ⟩ )       (n ≥ 0)
@@ -81,7 +83,7 @@ def Import : Rule :=
   }
 
 /--
-```
+```txt
 ⟨exports⟩ → ( ⟨export₁⟩ , … , ⟨exportₙ⟩ )                   (n ≥ 0)
 ```
 -/
@@ -91,7 +93,7 @@ def Exports : Rule :=
   }
 
 /--
-```
+```txt
 ⟨export⟩ → ⟨qvar⟩
          | ⟨qtycon⟩ (..)
          | ⟨qtycon⟩ ( ⟨cname₁⟩ , … , ⟨cnameₙ⟩ )      (n ≥ 0)
@@ -106,7 +108,7 @@ def Export : Rule :=
   }
 
 /--
-```
+```txt
 ⟨topdecls⟩ → ⟨topdecl⟩
            | ⟨topdecl⟩ ; ⟨topdecls⟩
 ```
@@ -118,7 +120,7 @@ def TopDecls : Rule :=
   }
 
 /--
-```
+```txt
 ⟨cname⟩ → ⟨var⟩
         | ⟨con⟩
 ```
@@ -127,3 +129,5 @@ def Cname : Rule :=
   { lhs := NT.Cname
     rhss := [] -- TODO
   }
+
+end Module
