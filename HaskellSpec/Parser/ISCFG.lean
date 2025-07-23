@@ -9,7 +9,10 @@ import HaskellSpec.Lexer.Haskell.Tokens
 namespace ISCFG
 
 
-inductive NonTerminal : Type where
+/--
+Non Terminals
+-/
+inductive NT : Type where
   -- Modules
   | Module
   | Body
@@ -23,28 +26,32 @@ inductive NonTerminal : Type where
   | Export
   -- Toplevel Declarations
   | TopDecls
+  | TopDecl
   | Modid
   deriving Repr
 
+/--
+Either a Terminal or NonTerminal
+-/
 inductive XTerminal : Type where
-  | Terminal : Token → XTerminal
-  | NonTerminal : NonTerminal → XTerminal
+  | T : Token → XTerminal
+  | NT : NT → XTerminal
   deriving Repr
 
 structure Rule where
-  lhs : NonTerminal
+  lhs : NT
   rhss : List (List XTerminal)
   deriving Repr
 
 structure Grammar where
   rules : List Rule
-  start : NonTerminal
+  start : NT
 
 inductive Step : Grammar → List XTerminal → List XTerminal → Prop where
   | STEP :
     g ∈ G.rules →
     rhs ∈ g.rhss →
-    Step G  (xs ++ [XTerminal.NonTerminal g.lhs] ++ zs) (xs ++ rhs ++ zs)
+    Step G  (xs ++ [XTerminal.NT g.lhs] ++ zs) (xs ++ rhs ++ zs)
 
 /--
 Reflexive transitive closure of Step
@@ -58,13 +65,13 @@ inductive Steps : Grammar → List XTerminal → List XTerminal → Prop where
     Steps G xs zs
 
 inductive IsTerminal : XTerminal → Prop where
-  | Yes : IsTerminal (XTerminal.Terminal t)
+  | Yes : IsTerminal (XTerminal.T t)
 
 def AllTerminal (xs : List XTerminal) : Prop :=
   ∀ x ∈ xs, IsTerminal x
 
 def Accepts (G : Grammar) (w : List XTerminal) : Prop :=
-  Steps G [ XTerminal.NonTerminal G.start ] w ∧
+  Steps G [ XTerminal.NT G.start ] w ∧
   AllTerminal w
 
 end ISCFG
