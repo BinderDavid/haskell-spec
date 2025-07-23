@@ -21,3 +21,4 @@ import HaskellSpec.Lexer.Haskell.Literals
 import HaskellSpec.Lexer.Haskell.Reserved
 import HaskellSpec.Lexer.Haskell.Identifier
 import HaskellSpec.Lexer.Haskell.CharClasses
+import HaskellSpec.Parser.ISCFG
