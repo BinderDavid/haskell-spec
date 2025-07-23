@@ -8,24 +8,33 @@ import HaskellSpec.Lexer.Haskell.Tokens
 
 namespace ISCFG
 
-/--
-We just use Strings for NonTerminals.
-Once the Grammar is finished, it might be better to replace it with an enum.
--/
-def NonTerminal : Type := String
 
-/--
-Terminals are Tokens produced by the lexer.
--/
-def Terminal : Type := Token
+inductive NonTerminal : Type where
+  -- Modules
+  | Module
+  | Body
+  -- Imports
+  | ImpDecls
+  | ImpDecl
+  | ImpSpec
+  | Import
+  -- Exports
+  | Exports
+  | Export
+  -- Toplevel Declarations
+  | TopDecls
+  | Modid
+  deriving Repr
 
 inductive XTerminal : Type where
-  | Terminal : Terminal → XTerminal
+  | Terminal : Token → XTerminal
   | NonTerminal : NonTerminal → XTerminal
+  deriving Repr
 
 structure Rule where
   lhs : NonTerminal
-  rhs : List TerminalOrNonTerminal
+  rhss : List (List XTerminal)
+  deriving Repr
 
 structure Grammar where
   rules : List Rule
@@ -34,7 +43,8 @@ structure Grammar where
 inductive Step : Grammar → List XTerminal → List XTerminal → Prop where
   | STEP :
     g ∈ G.rules →
-    Step G  (xs ++ [XTerminal.NonTerminal g.lhs] ++ zs) (xs ++ g.rhs ++ zs)
+    rhs ∈ g.rhss →
+    Step G  (xs ++ [XTerminal.NonTerminal g.lhs] ++ zs) (xs ++ rhs ++ zs)
 
 /--
 Reflexive transitive closure of Step
@@ -56,4 +66,5 @@ def AllTerminal (xs : List XTerminal) : Prop :=
 def Accepts (G : Grammar) (w : List XTerminal) : Prop :=
   Steps G [ XTerminal.NonTerminal G.start ] w ∧
   AllTerminal w
+
 end ISCFG

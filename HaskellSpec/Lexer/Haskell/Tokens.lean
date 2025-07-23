@@ -94,3 +94,4 @@ inductive Token : Type where
   | TypeT
     /-- `where` -/
   | Where
+  deriving Repr
