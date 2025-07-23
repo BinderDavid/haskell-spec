@@ -27,7 +27,9 @@ inductive NT : Type where
   -- Toplevel Declarations
   | TopDecls
   | TopDecl
+  -- Identifiers
   | Modid
+  | Cname
   deriving Repr
 
 /--
