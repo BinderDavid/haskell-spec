@@ -27,6 +27,16 @@ inductive NT : Type where
   -- Toplevel Declarations
   | TopDecls
   | TopDecl
+  | Decls
+  | Decl
+  | Cdecls
+  | Cdecl
+  | Idecls
+  | Idecl
+  | GenDecl
+  | Ops
+  | Vars
+  | Fixity
   -- Identifiers
   | Modid
   | Cname
