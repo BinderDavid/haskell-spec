@@ -85,7 +85,16 @@ def max_pref_rec (best : Option (Token × Int × List Char))
                          else max_pref_rec (some best) input rules
 
 
-def max_pref (s : List Char) (rules : List Rule) : Option (Token × List Char) :=
-    match max_pref_rec none s rules with
+def max_pref (input : List Char) (rules : List Rule) : Option (Token × List Char) :=
+    match max_pref_rec none input rules with
     | none => none
     | some (tok, _, rest) => (tok, rest)
+
+
+/- This function is actually total, since `len(rest) < len(input)`! -/
+partial def lex (input : List Char) (rules : List Rule) : List Token × List Char :=
+  match max_pref input rules with
+  | none => ([], input)
+  | some (tok, rest) =>
+    let (toks, rest') := lex rest rules
+    (tok :: toks, rest')
