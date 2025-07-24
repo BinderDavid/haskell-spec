@@ -57,5 +57,35 @@ def maxpref_one_rec (best : Option (List Char × List Char))
                then maxpref_one_rec (some (left', right')) left' right' re'
                else maxpref_one_rec best left' right' re'
 
-def maxpref_one (s : List Char) (r : Rule) : Option (List Char × List Char) :=
-  maxpref_one_rec none [] s r.re
+/--
+Given a string and a rule, compute the longest prefix that matches this rule.
+If the regular expression matches successfully, return the computed token,
+the length of the consumed input, and the remainder of the output.
+-/
+def maxpref_one (s : List Char) (r : Rule) : Option (Token × Int × List Char) :=
+  match maxpref_one_rec none [] s r.re with
+  | none => none
+  | some (pre, rest) => some (r.action pre.toString, pre.length, rest)
+
+
+def max_pref_rec (best : Option (Token × Int × List Char))
+                 (input : List Char)
+                 (rules : List Rule)
+                 : Option (Token × Int × List Char) :=
+    match rules with
+    | [] => best
+    | (r :: rules) =>
+       match maxpref_one input r with
+       | none => max_pref_rec best input rules
+       | some (tok, len, rest) =>
+          match best with
+          | none => max_pref_rec (some (tok, len, rest)) input rules
+          | some best => if len > best.2.1
+                         then max_pref_rec (some (tok, len, rest)) input rules
+                         else max_pref_rec (some best) input rules
+
+
+def max_pref (s : List Char) (rules : List Rule) : Option (Token × List Char) :=
+    match max_pref_rec none s rules with
+    | none => none
+    | some (tok, _, rest) => (tok, rest)

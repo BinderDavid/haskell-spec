@@ -2,4 +2,4 @@ import HaskellSpec.Lexer.Brzozowski
 
 import HaskellSpec.Lexer.Haskell.Reserved
 
-#eval maxpref_one "infixfoo".toList Reserved.InfixR
+#eval max_pref "infixf".toList Reserved.all_reserved
