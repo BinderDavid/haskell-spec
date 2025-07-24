@@ -33,3 +33,28 @@ def derivative (a : Char) (re : RE) : RE :=
 theorem derivative_correct (re : RE) (x : Char) (xs : List Char) :
   Matching (derivative x re) xs ↔ Matching re (x :: xs) :=
   sorry
+
+def derivative_rec (s : List Char) (re : RE) : RE :=
+  match s with
+  | [] => re
+  | s :: ss => derivative_rec ss (derivative s re)
+
+def matching (s : List Char) (re : RE) : Bool :=
+  nullable (derivative_rec s re)
+
+def maxpref_one_rec (best : Option (List Char × List Char))
+        (left right : List Char)
+        (re : RE)
+        : Option (List Char × List Char) :=
+  match right with
+  | [] => if nullable re
+          then some (left, right)
+          else best
+  | s :: right' => let re' := derivative s re
+               let left' := left ++ [s]
+               if nullable re'
+               then maxpref_one_rec (some (left', right')) left' right' re'
+               else maxpref_one_rec best left' right' re'
+
+def maxpref_one (s : List Char) (re : RE) : Option (List Char × List Char) :=
+  maxpref_one_rec none [] s re
