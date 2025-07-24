@@ -1,4 +1,5 @@
 import HaskellSpec.Lexer.RegExp
+import HaskellSpec.Lexer.Rules
 
 /-- Returns `true` if the regular expression matches the  empty string -/
 def nullable (re : RE) : Bool :=
@@ -56,5 +57,5 @@ def maxpref_one_rec (best : Option (List Char × List Char))
                then maxpref_one_rec (some (left', right')) left' right' re'
                else maxpref_one_rec best left' right' re'
 
-def maxpref_one (s : List Char) (re : RE) : Option (List Char × List Char) :=
-  maxpref_one_rec none [] s re
+def maxpref_one (s : List Char) (r : Rule) : Option (List Char × List Char) :=
+  maxpref_one_rec none [] s r.re
