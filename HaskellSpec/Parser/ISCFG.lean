@@ -18,8 +18,10 @@ inductive NT : Type where
   | Body
   -- Imports
   | ImpDecls
+  | Qualified
   | ImpDecl
   | ImpSpec
+  | ImpAs
   | Import
   -- Exports
   | Exports

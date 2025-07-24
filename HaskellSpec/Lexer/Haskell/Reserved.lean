@@ -87,6 +87,8 @@ def ReservedOp : RE :=
 /-
 Reserved Keywords
 -/
+def As : RE := from_string ['a','s']
+def AsR : Rule := Rule.mk As (λ _ => Token.As)
 
 def Case : RE := from_string ['c','a','s','e']
 def CaseR : Rule := Rule.mk Case (λ _ => Token.Case)
@@ -144,6 +146,10 @@ def NewtypeR : Rule := Rule.mk Newtype (λ _ => Token.Newtype)
 
 def Of : RE := from_string ['o','f']
 def OfR : Rule := Rule.mk Of (λ _ => Token.Of)
+
+-- Not reserved, can be used as ident.
+def Qualified : RE := from_string ['q','u','a','l','i','f','i','e','d']
+def QualifiedR : Rule := Rule.mk Qualified (λ _ => Token.Qualified)
 
 def Then : RE := from_string ['t','h','e','n']
 def ThenR : Rule := Rule.mk Then (λ _ => Token.Then)
@@ -228,6 +234,9 @@ def all_reserved : List Rule :=
     ThenR,
     TypeTR,
     WhereR,
+    /- Semi Keywords: Can be used as identifiers -/
+    AsR,
+    QualifiedR,
   ]
 
 end Reserved

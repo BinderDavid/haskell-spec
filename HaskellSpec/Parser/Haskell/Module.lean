@@ -48,19 +48,46 @@ def ImpDecls : Rule :=
 
 /--
 ```txt
-⟨impdecl⟩ → import [qualified] ⟨modid⟩ [as ⟨modid⟩] [⟨impspec⟩]
+⟨impdecl⟩ → import ⟨qualified⟩ ⟨modid⟩ ⟨impas⟩ ⟨impspec⟩
           |
 ```
 -/
 def ImpDecl : Rule :=
   { lhs := NT.ImpDecl
-    rhss := [] -- TODO
+    rhss := [ [T Token.Import, NT NT.Qualified, NT NT.Modid, NT NT.ImpAs, NT NT.ImpSpec ],
+              []
+            ]
   }
 
 /--
 ```txt
+⟨impas⟩ → as ⟨modid⟩
+        |
+```
+-/
+def ImpAs : Rule :=
+  { lhs := NT.ImpAs
+    rhss := [ [T Token.As, NT NT.Modid],
+              []
+            ]
+  }
+
+/--
+```txt
+⟨qualified⟩ → qualified
+            |
+```
+-/
+def Qualified : Rule :=
+  { lhs := NT.Qualified,
+    rhss := [ [T Token.Qualified],
+              []]
+  }
+/--
+```txt
 ⟨impspec⟩ → ( ⟨import₁⟩, ..., ⟨importₙ⟩ [,])          (n ≥ 0)
           | hiding ( ⟨import₁⟩, ..., ⟨importₙ⟩ [,])   (n ≥ 0)
+          |
 ```
 -/
 def ImpSpec : Rule :=
