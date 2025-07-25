@@ -5,20 +5,12 @@ import HaskellSpec.Lexer.Haskell.Tokens
 Rules
 -/
 
-inductive Rule : Type where
-  | mk : RE → (String → Token) → Rule
-
-
-def re : Rule → RE := λ rule =>
-  match rule with
-  | Rule.mk re _ => re
-
-def tokf : Rule → (String → Token) := λ rule =>
-  match rule with
-  | Rule.mk _ tokf => tokf
+structure Rule : Type where
+  re : RE
+  action : String → Token
 
 def MatchingR (R : Rule) (ls : List Char) : Prop :=
-  Matching (re R) ls
+  Matching R.re ls
 
 /-- `p` is a prefix of `z` -/
 def Prefix (p z : List Char) : Prop :=
@@ -46,7 +38,7 @@ def FirstToken (R : List Rule) (tok : Token) (pre z : List Char) : Prop :=
   /- There is a rule `r` in `R` which matches `pre` and produces token `tok` -/
   (∃ n r, Index n r R ∧
           MatchingR r pre ∧
-          (tokf r) pre.toString = tok ∧
+          r.action pre.toString = tok ∧
           /- All other rules which occur earlier in `R` do not match -/
           (∀ r' n', n' < n → Index n' r' R → ¬ MatchingR r' pre))
 

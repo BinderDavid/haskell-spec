@@ -50,6 +50,8 @@ inductive Token : Type where
   | Solidus
     /-- `_` -/
   | Underscore
+    /-- `as` -/
+  | As
     /-- `case` -/
   | Case
     /-- `class` -/
@@ -88,9 +90,12 @@ inductive Token : Type where
   | Newtype
     /-- `of` -/
   | Of
+    /-- `qualified` -/
+  | Qualified
     /-- `then` -/
   | Then
     /-- `type` -/
   | TypeT
     /-- `where` -/
   | Where
+  deriving Repr
