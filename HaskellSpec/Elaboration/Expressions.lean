@@ -78,7 +78,7 @@ inductive pat : Env.GE → Env.IE
               → SemTy.TypeS
               → Prop where
   | PVAR :
-    σ = (SemTy.TypeScheme.Forall [] (SemTy.Context.Mk []) τ) →
+    σ = (SemTy.TypeScheme.Forall [] [] τ) →
     pat
       ge
       ie

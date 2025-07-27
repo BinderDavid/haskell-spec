@@ -143,8 +143,8 @@ TypeS.TypeConstructor (Type_Constructor.Mk (OType_Name.Special Special_Type_Cons
 θ ∈ Context → (Γ₁ τ₁, … , Γₙ τₙ)
 ```
 -/
-inductive Context : Type where
-  | Mk : List (Class_Name × TypeS) → Context
+
+def Context := List (Class_Name × TypeS)
 
 /--
 ```text
