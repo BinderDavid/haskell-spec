@@ -7,6 +7,7 @@ import HaskellSpec.Target.Lang
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Elaboration.Modules
 import HaskellSpec.Elaboration.Bindings
+import HaskellSpec.NonEmptyList
 
 def fromRationalAfterRatio (n d : Int) : Target.Expression :=
   Target.Expression.app
@@ -134,9 +135,25 @@ inductive pat : Env.GE → Env.IE
       []
       τ
 
+-- TODO we need this immediately for type variable substitution in
+-- VAR_1 below. should probably be generalized.
+-- BEGIN
+def Subst k v := List (k × v)
 
+def SemTyVarSubst := Subst SemTy.Type_Variable SemTy.TypeS
 
+def applySubstTypeS (subst : SemTyVarSubst) : SemTy.TypeS → SemTy.TypeS
+  | SemTy.TypeS.Variable τ => Option.getD (List.lookup τ subst) (SemTy.TypeS.Variable τ)
+  | SemTy.TypeS.TypeConstructor χ => SemTy.TypeS.TypeConstructor χ
+  | SemTy.TypeS.App τ1 τ2 => SemTy.TypeS.App (applySubstTypeS subst τ1) (applySubstTypeS subst τ2)
 
+def substDomain : (Subst k v) → List k := List.map Prod.fst
+
+def applySubstContext (subst : SemTyVarSubst) : SemTy.Context → SemTy.Context :=
+  List.map (Prod.map id (applySubstTypeS subst))
+
+def substRange : (Subst k v) → List v := List.map Prod.snd
+-- END
 
 mutual
   /--
@@ -151,7 +168,14 @@ mutual
                 → SemTy.TypeS
                 → Prop where
     | VAR_1 :
-      exp ge ie ve (Source.Expression.var v) _ _
+      (x : QVariable) → (ve : Env.VE) → (σ : SemTy.TypeScheme) →
+      ⟨x, (Env.VE_Item.Ordinary x (SemTy.TypeScheme.Forall αs θ τ))⟩ ∈ ve →
+      (τsForαs : SemTyVarSubst) → (substDomain τsForαs) = αs →
+      dict ie e (applySubstContext τsForαs θ) →
+      ---------------------------------------------------------------------------------------
+      exp ge ie ve (Source.Expression.var x)
+        (Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (substRange τs)) e)
+        (applySubstTypeS τsForαs τ)
 
     | VAR_2 :
       exp ge ie ve (Source.Expression.var v) _ _
