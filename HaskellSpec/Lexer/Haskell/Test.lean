@@ -50,3 +50,28 @@ Semireserved Keywords
 #guard lex_haskell "_" == [Token.Underscore]
 #guard lex_haskell "as" == [Token.As]
 #guard lex_haskell "qualified" == [Token.Qualified]
+
+/-
+String Literals
+-/
+
+#guard lex_haskell "\"foo\"" == [Token.LitString "\"foo\""]
+
+/-
+Char Literals
+-/
+
+#guard lex_haskell "'a'" == [Token.LitChar 'a']
+
+/-
+Integer Literals
+-/
+
+#guard lex_haskell "1234" == [Token.LitInteger 1234]
+#guard lex_haskell "01234" == [Token.LitInteger 1234]
+#guard lex_haskell "0o11" == [Token.LitInteger 9]
+#guard lex_haskell "0O11" == [Token.LitInteger 9]
+
+/-
+Float Literals
+-/
