@@ -1,10 +1,14 @@
-name = "myprojectname"
+name = "haskell-spec-report"
 defaultTargets = ["textbook"]
 
 [[require]]
 name = "verso"
 git = "https://github.com/leanprover/verso"
 rev = "main"
+
+[[require]]
+name = "haskell-spec"
+path = "../"
 
 [[lean_lib]]
 name = "DemoTextbook"

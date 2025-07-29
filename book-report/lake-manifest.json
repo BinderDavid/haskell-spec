@@ -1,7 +1,14 @@
 {"version": "1.1.0",
  "packagesDir": ".lake/packages",
  "packages":
- [{"url": "https://github.com/leanprover/verso",
+ [{"type": "path",
+   "scope": "",
+   "name": "«haskell-spec»",
+   "manifestFile": "lake-manifest.json",
+   "inherited": false,
+   "dir": "../",
+   "configFile": "lakefile.toml"},
+  {"url": "https://github.com/leanprover/verso",
    "type": "git",
    "subDir": null,
    "scope": "",
@@ -31,5 +38,5 @@
    "inputRev": "main",
    "inherited": true,
    "configFile": "lakefile.lean"}],
- "name": "myprojectname",
+ "name": "«haskell-spec-report»",
  "lakeDir": ".lake"}
