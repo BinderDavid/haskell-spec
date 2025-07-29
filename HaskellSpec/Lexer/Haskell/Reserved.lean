@@ -69,7 +69,8 @@ def Solidus : RE := RE.Symbol '|'
 def SolidusR : Rule := Rule.mk Solidus (λ _ => Token.Solidus)
 
 def Underscore : RE := RE.Symbol '_'
-def UnderscoreR : Rule := Rule.mk Underscore (λ _ => Token.Solidus)
+def UnderscoreR : Rule := Rule.mk Underscore (λ _ => Token.Underscore)
+
 
 def ReservedOp : RE :=
   unions [ DotDot,
@@ -118,7 +119,7 @@ def If : RE := from_string ['i','f']
 def IfR : Rule := Rule.mk If (λ _ => Token.If)
 
 def Import : RE := from_string ['i','m','p','o','r','t']
-def ImportR : Rule := Rule.mk Import (λ _ => Token.If)
+def ImportR : Rule := Rule.mk Import (λ _ => Token.Import)
 
 def In : RE := from_string ['i','n']
 def InR : Rule := Rule.mk In (λ _ => Token.In)
@@ -210,7 +211,6 @@ def all_reserved : List Rule :=
     TildeR,
     AmpersandR,
     SolidusR,
-    UnderscoreR,
     /- Keywords-/
     CaseR,
     ClassR,
@@ -237,6 +237,7 @@ def all_reserved : List Rule :=
     /- Semi Keywords: Can be used as identifiers -/
     AsR,
     QualifiedR,
+    UnderscoreR,
   ]
 
 end Reserved
