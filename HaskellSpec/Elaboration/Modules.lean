@@ -223,7 +223,7 @@ IE ⊢ e : (Γ₁ τ₁,…,Γₙ τₙ)
 -/
 inductive dict : Env.IE
                → Target.Expression
-               → List (SemTy.Class_Name × SemTy.TypeS)
+               → SemTy.Context
                → Prop where
   | DICT_TUPLE :
     dict _ _ _
