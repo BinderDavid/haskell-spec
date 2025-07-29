@@ -2,6 +2,7 @@ import HaskellSpec.Parser.ISCFG
 
 open ISCFG
 open XTerminal
+open IndentRelation
 
 /--
 ```txt
@@ -12,9 +13,9 @@ open XTerminal
 -/
 def Exp : Rule :=
   { lhs := NT.Exp
-    rhss := [ [NT NT.Infixexp, T Token.DoubleColon, NT NT.Context, T Token.DoubleArrowRight, NT NT.TypeT],
-              [NT NT.Infixexp, T Token.DoubleColon, NT NT.TypeT],
-              [NT NT.Infixexp]
+    rhss := [ [NT DC NT.Infixexp, T DC Token.DoubleColon, NT DC NT.Context, T DC Token.DoubleArrowRight, NT DC NT.TypeT],
+              [NT DC NT.Infixexp, T DC Token.DoubleColon, NT DC NT.TypeT],
+              [NT DC NT.Infixexp]
             ]
   }
 
@@ -27,9 +28,9 @@ def Exp : Rule :=
 -/
 def Infixexp : Rule :=
   { lhs := NT.Infixexp
-    rhss := [ [NT NT.Lexp, NT NT.Qop, NT NT.Infixexp],
+    rhss := [ [NT DC NT.Lexp, NT DC NT.Qop, NT DC NT.Infixexp],
               [], -- TODO: Add Minus to Tokens!
-              [NT NT.Lexp]
+              [NT DC NT.Lexp]
             ]
   }
 
@@ -56,8 +57,8 @@ def Lexp : Rule :=
 -/
 def Fexp : Rule :=
   { lhs := NT.Fexp
-    rhss := [ [NT NT.Fexp, NT NT.Aexp],
-              [NT NT.Aexp]
+    rhss := [ [NT DC NT.Fexp, NT DC NT.Aexp],
+              [NT DC NT.Aexp]
             ]
   }
 

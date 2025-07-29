@@ -2,6 +2,7 @@ import HaskellSpec.Parser.ISCFG
 
 open ISCFG
 open XTerminal
+open IndentRelation
 
 /--
 ```txt
@@ -17,14 +18,14 @@ open XTerminal
 -/
 def Topdecl : Rule :=
   { lhs := NT.TopDecl
-    rhss := [ [T Token.TypeT, NT NT.SimpleType, T Token.Equal, NT NT.TypeT],
-              [T Token.Data], -- TODO
-              [T Token.Newtype], -- TODO
-              [T Token.Class], -- TODO
-              [T Token.Instance], -- TODO
-              [T Token.Default], -- TODO
-              [T Token.Foreign, NT NT.Fdecl],
-              [NT NT.Decl]
+    rhss := [ [T DC Token.TypeT, NT DC NT.SimpleType, T DC Token.Equal, NT DC NT.TypeT],
+              [T DC Token.Data], -- TODO
+              [T DC Token.Newtype], -- TODO
+              [T DC Token.Class], -- TODO
+              [T DC Token.Instance], -- TODO
+              [T DC Token.Default], -- TODO
+              [T DC Token.Foreign, NT DC NT.Fdecl],
+              [NT DC NT.Decl]
             ]
   }
 
@@ -47,9 +48,9 @@ def Decls : Rule :=
 -/
 def Decl : Rule :=
   { lhs := NT.Decl
-    rhss := [ [NT NT.GenDecl],
-              [NT NT.Funlhs, NT NT.Rhs],
-              [NT NT.Pat, NT NT.Rhs]
+    rhss := [ [NT DC NT.GenDecl],
+              [NT DC NT.Funlhs, NT DC NT.Rhs],
+              [NT DC NT.Pat, NT DC NT.Rhs]
             ]
   }
 
@@ -73,9 +74,9 @@ def Cdecls : Rule :=
 -/
 def Cdecl : Rule :=
   { lhs := NT.Cdecl
-    rhss := [ [NT NT.GenDecl],
-              [NT NT.Funlhs, NT NT.Rhs],
-              [NT NT.Var, NT NT.Rhs]
+    rhss := [ [NT DC NT.GenDecl],
+              [NT DC NT.Funlhs, NT DC NT.Rhs],
+              [NT DC NT.Var, NT DC NT.Rhs]
             ]
   }
 
@@ -98,8 +99,8 @@ def Idecls : Rule :=
 -/
 def Idecl : Rule :=
   { lhs := NT.Idecl
-    rhss := [ [NT NT.Funlhs, NT NT.Rhs],
-              [NT NT.Var, NT NT.Rhs],
+    rhss := [ [NT DC NT.Funlhs, NT DC NT.Rhs],
+              [NT DC NT.Var, NT DC NT.Rhs],
               []
             ]
   }
@@ -115,10 +116,10 @@ def Idecl : Rule :=
 -/
 def GenDecl : Rule :=
   { lhs := NT.GenDecl
-    rhss := [ [NT NT.Vars, T Token.DoubleColon, NT NT.Context, T Token.DoubleArrowRight, NT NT.TypeT],
-              [NT NT.Vars, T Token.DoubleColon, NT NT.TypeT],
-              [NT NT.Fixity, NT NT.Integer, NT NT.Ops],
-              [NT NT.Fixity, NT NT.Ops],
+    rhss := [ [NT DC NT.Vars, T DC Token.DoubleColon, NT DC NT.Context, T DC Token.DoubleArrowRight, NT DC NT.TypeT],
+              [NT DC NT.Vars, T DC Token.DoubleColon, NT DC NT.TypeT],
+              [NT DC NT.Fixity, NT DC NT.Integer, NT DC NT.Ops],
+              [NT DC NT.Fixity, NT DC NT.Ops],
               []
             ]
   }
@@ -131,8 +132,8 @@ def GenDecl : Rule :=
 -/
 def Ops : Rule :=
   { lhs := NT.Ops
-    rhss := [ [NT NT.Op],
-              [NT NT.Op, T Token.Comma, NT NT.Ops]
+    rhss := [ [NT DC NT.Op],
+              [NT DC NT.Op, T DC Token.Comma, NT DC NT.Ops]
             ]
   }
 
@@ -144,8 +145,8 @@ def Ops : Rule :=
 -/
 def Vars : Rule :=
   { lhs := NT.Vars
-    rhss := [ [NT NT.Var],
-              [NT NT.Var, T Token.Comma, NT NT.Vars]
+    rhss := [ [NT DC NT.Var],
+              [NT DC NT.Var, T DC Token.Comma, NT DC NT.Vars]
             ]
   }
 
@@ -158,8 +159,8 @@ def Vars : Rule :=
 -/
 def Fixity : Rule :=
   { lhs := NT.Fixity
-    rhss := [ [T Token.Infixl],
-              [T Token.Infixr],
-              [T Token.Infix]
+    rhss := [ [T DC Token.Infixl],
+              [T DC Token.Infixr],
+              [T DC Token.Infix]
             ]
   }
