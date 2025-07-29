@@ -65,7 +65,7 @@ the length of the consumed input, and the remainder of the output.
 def maxpref_one (s : List Char) (r : Rule) : Option (Token × Int × List Char) :=
   match maxpref_one_rec none [] s r.re with
   | none => none
-  | some (pre, rest) => some (r.action pre.toString, pre.length, rest)
+  | some (pre, rest) => some (r.action (String.mk pre), pre.length, rest)
 
 
 def max_pref_rec (best : Option (Token × Int × List Char))
