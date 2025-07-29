@@ -1,5 +1,5 @@
 name = "haskell-spec-report"
-defaultTargets = ["textbook"]
+defaultTargets = ["report"]
 
 [[require]]
 name = "verso"
@@ -11,8 +11,8 @@ name = "haskell-spec"
 path = "../"
 
 [[lean_lib]]
-name = "DemoTextbook"
+name = "HaskellReport"
 
 [[lean_exe]]
-name = "textbook"
-root = "DemoTextbookMain"
+name = "report"
+root = "HaskellReportMain"

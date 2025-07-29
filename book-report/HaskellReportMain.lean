@@ -6,14 +6,14 @@ Author: David Thrane Christiansen
 
 import Std.Data.HashMap
 import VersoManual
-import DemoTextbook
+import HaskellReport
 
 open Verso Doc
 open Verso.Genre Manual
 
 open Std (HashMap)
 
-open DemoTextbook
+open HaskellReport
 
 
 -- Computes the path of this very `main`, to ensure that examples get names relative to it
@@ -28,4 +28,4 @@ def config : Config where
   emitHtmlMulti := true
   htmlDepth := 2
 
-def main := manualMain (%doc DemoTextbook) (extraSteps := []) (config := config)
+def main := manualMain (%doc HaskellReport) (extraSteps := []) (config := config)

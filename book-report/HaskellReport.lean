@@ -5,11 +5,11 @@ Author: David Thrane Christiansen
 -/
 
 import VersoManual
-import DemoTextbook.Meta.Lean
-import DemoTextbook.Papers
+import HaskellReport.Meta.Lean
+import HaskellReport.Papers
 
 -- This is a chapter that's included
-import DemoTextbook.Nat
+import HaskellReport.Nat
 
 -- This gets access to most of the manual genre (which is also useful for textbooks)
 open Verso.Genre Manual
@@ -19,7 +19,7 @@ open Verso.Genre Manual
 open Verso.Genre.Manual.InlineLean
 
 
-open DemoTextbook
+open HaskellReport
 
 set_option pp.rawOnError true
 
@@ -32,4 +32,4 @@ authors := ["David Binder and contributors"]
 
 This document presents the mechanization of the Haskell 2010 language report.
 
-{include 1 DemoTextbook.Nat}
+{include 1 HaskellReport.Nat}
