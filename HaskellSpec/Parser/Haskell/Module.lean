@@ -2,6 +2,7 @@ import HaskellSpec.Parser.ISCFG
 
 open ISCFG
 open XTerminal
+open IndentRelation
 
 namespace Module
 
@@ -14,9 +15,9 @@ namespace Module
 -/
 def Module : Rule :=
   { lhs := NT.Module
-    rhss := [[T Token.Module, NT NT.Modid, T Token.Where, NT NT.Body],
-             [T Token.Module, NT NT.Modid, NT NT.Exports, T Token.Where, NT NT.Body],
-             [NT NT.Body]
+    rhss := [[T DC Token.Module, NT DC NT.Modid, T DC Token.Where, NT DC NT.Body],
+             [T DC Token.Module, NT DC NT.Modid, NT DC NT.Exports, T DC Token.Where, NT DC NT.Body],
+             [NT DC NT.Body]
             ]
   }
 
@@ -29,9 +30,9 @@ def Module : Rule :=
 -/
 def Body : Rule :=
   { lhs := NT.Body
-    rhss := [[T Token.OpenBrace, NT NT.ImpDecls, T Token.Semicolon, NT NT.TopDecls, T Token.CloseBrace],
-             [T Token.OpenBrace, NT NT.ImpDecls, T Token.CloseBrace],
-             [T Token.OpenBrace, NT NT.TopDecls, T Token.CloseBrace]]
+    rhss := [[T DC Token.OpenBrace, NT DC NT.ImpDecls, T DC Token.Semicolon, NT DC NT.TopDecls, T DC Token.CloseBrace],
+             [T DC Token.OpenBrace, NT DC NT.ImpDecls, T DC Token.CloseBrace],
+             [T DC Token.OpenBrace, NT DC NT.TopDecls, T DC Token.CloseBrace]]
   }
 
 /--
@@ -42,8 +43,8 @@ def Body : Rule :=
 -/
 def ImpDecls : Rule :=
   { lhs := NT.ImpDecls
-    rhss := [[NT NT.ImpDecl],
-             [NT NT.ImpDecl, T Token.Semicolon, NT NT.ImpDecls]]
+    rhss := [[NT DC NT.ImpDecl],
+             [NT DC NT.ImpDecl, T DC Token.Semicolon, NT DC NT.ImpDecls]]
   }
 
 /--
@@ -54,7 +55,7 @@ def ImpDecls : Rule :=
 -/
 def ImpDecl : Rule :=
   { lhs := NT.ImpDecl
-    rhss := [ [T Token.Import, NT NT.Qualified, NT NT.Modid, NT NT.ImpAs, NT NT.ImpSpec ],
+    rhss := [ [T DC Token.Import, NT DC NT.Qualified, NT DC NT.Modid, NT DC NT.ImpAs, NT DC NT.ImpSpec ],
               []
             ]
   }
@@ -67,7 +68,7 @@ def ImpDecl : Rule :=
 -/
 def ImpAs : Rule :=
   { lhs := NT.ImpAs
-    rhss := [ [T Token.As, NT NT.Modid],
+    rhss := [ [T DC Token.As, NT DC NT.Modid],
               []
             ]
   }
@@ -80,7 +81,7 @@ def ImpAs : Rule :=
 -/
 def Qualified : Rule :=
   { lhs := NT.Qualified,
-    rhss := [ [T Token.Qualified],
+    rhss := [ [T DC Token.Qualified],
               []]
   }
 /--
@@ -142,8 +143,8 @@ def Export : Rule :=
 -/
 def TopDecls : Rule :=
   { lhs := NT.TopDecls
-    rhss := [[NT NT.TopDecl],
-             [NT NT.TopDecl, T Token.Semicolon, NT NT.TopDecls]]
+    rhss := [[NT DC NT.TopDecl],
+             [NT DC NT.TopDecl, T DC Token.Semicolon, NT DC NT.TopDecls]]
   }
 
 /--

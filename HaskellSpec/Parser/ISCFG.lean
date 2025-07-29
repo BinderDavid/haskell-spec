@@ -64,11 +64,38 @@ inductive NT : Type where
   deriving Repr
 
 /--
+Indentation Relations
+-/
+inductive IndentRelation : Type where
+    /-- Equal -/
+  | EQ : IndentRelation
+    /-- Greater Than -/
+  | GT : IndentRelation
+    /-- Greater or Equal -/
+  | GE : IndentRelation
+    /-- Don't Care -/
+  | DC : IndentRelation
+  deriving Repr
+
+inductive IndentR : IndentRelation → Int → Int → Prop where
+  | EQ :
+    n₁ = n₂ →
+    IndentR IndentRelation.EQ n₁ n₂
+  | GT :
+    n₁ > n₂ →
+    IndentR IndentRelation.GT n₁ n₂
+  | GE :
+    n₁ ≥ n₂ →
+    IndentR IndentRelation.GE n₁ n₂
+  | DC :
+    IndentR IndentRelation.DC n₁ n₂
+
+/--
 Either a Terminal or NonTerminal
 -/
 inductive XTerminal : Type where
-  | T : Token → XTerminal
-  | NT : NT → XTerminal
+  | T : IndentRelation → Token → XTerminal
+  | NT : IndentRelation → NT → XTerminal
   deriving Repr
 
 structure Rule where
@@ -79,12 +106,13 @@ structure Rule where
 structure Grammar where
   rules : List Rule
   start : NT
+  start_indent : IndentRelation
 
 inductive Step : Grammar → List XTerminal → List XTerminal → Prop where
   | STEP :
     g ∈ G.rules →
     rhs ∈ g.rhss →
-    Step G  (xs ++ [XTerminal.NT g.lhs] ++ zs) (xs ++ rhs ++ zs)
+    Step G  (xs ++ [XTerminal.NT _ g.lhs] ++ zs) (xs ++ rhs ++ zs)
 
 /--
 Reflexive transitive closure of Step
@@ -98,13 +126,13 @@ inductive Steps : Grammar → List XTerminal → List XTerminal → Prop where
     Steps G xs zs
 
 inductive IsTerminal : XTerminal → Prop where
-  | Yes : IsTerminal (XTerminal.T t)
+  | Yes : IsTerminal (XTerminal.T _ t)
 
 def AllTerminal (xs : List XTerminal) : Prop :=
   ∀ x ∈ xs, IsTerminal x
 
 def Accepts (G : Grammar) (w : List XTerminal) : Prop :=
-  Steps G [ XTerminal.NT G.start ] w ∧
+  Steps G [ XTerminal.NT G.start_indent G.start ] w ∧
   AllTerminal w
 
 end ISCFG
