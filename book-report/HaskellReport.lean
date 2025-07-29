@@ -1,14 +1,6 @@
-/-
-Copyright (c) 2024-2025 Lean FRO LLC. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Author: David Thrane Christiansen
--/
-
 import VersoManual
 import HaskellReport.Meta.Lean
 import HaskellReport.Papers
-
--- This is a chapter that's included
 import HaskellReport.Nat
 
 -- This gets access to most of the manual genre (which is also useful for textbooks)
