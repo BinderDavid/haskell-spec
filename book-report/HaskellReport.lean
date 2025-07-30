@@ -1,7 +1,8 @@
 import VersoManual
-import HaskellReport.Meta.Lean
 import HaskellReport.Papers
-import HaskellReport.Nat
+import HaskellReport.LexicalSyntax
+import HaskellReport.ContextFreeSyntax
+import HaskellReport.Introduction
 
 -- This gets access to most of the manual genre (which is also useful for textbooks)
 open Verso.Genre Manual
@@ -24,4 +25,8 @@ authors := ["David Binder and contributors"]
 
 This document presents the mechanization of the Haskell 2010 language report.
 
-{include 1 HaskellReport.Nat}
+{include 1 HaskellReport.Introduction}
+
+{include 1 HaskellReport.LexicalSyntax}
+
+{include 1 HaskellReport.ContextFreeSyntax}
