@@ -1,7 +1,7 @@
 import HaskellSpec.Lexer.RegExp
 import HaskellSpec.Lexer.Rules
 
-/-- Returns `true` if the regular expression matches the  empty string -/
+/-- Returns `true` if the regular expression matches the empty string -/
 def nullable (re : RE) : Bool :=
   match re with
   | RE.Symbol _ => false
@@ -13,8 +13,86 @@ def nullable (re : RE) : Bool :=
   | RE.Plus re => nullable re
 
 theorem nullable_correct (re : RE) :
-  nullable re = true ↔ Matching re [] :=
-  sorry
+  nullable re = true ↔ Matching re [] := by
+  apply Iff.intro
+  case mp =>
+    intros H
+    induction re with
+    | Symbol _ => cases H
+    | Empty => cases H
+    | Epsilon => apply Matching.EPSILON
+    | Union re₁ re₂ IH₁ IH₂ =>
+      have H_or : nullable re₁ = true ∨ nullable re₂ = true := by
+        apply Bool.or_eq_true_iff.mp
+        exact H
+      apply Or.elim H_or
+      case left =>
+        intro H₁
+        apply Matching.UNION_L
+        exact IH₁ H₁
+      case right =>
+        intro H₂
+        apply Matching.UNION_R
+        exact IH₂ H₂
+    | App re₁ re₂ IH₁ IH₂ =>
+      have H_and : nullable re₁ ∧ nullable re₂ := by
+        apply Bool.and_eq_true_iff.mp
+        exact H
+      specialize IH₁ H_and.left
+      specialize IH₂ H_and.right
+      show Matching (RE.App re₁ re₂) ([] ++ [])
+      apply Matching.APP
+      . exact IH₁
+      . exact IH₂
+    | Star => apply Matching.STAR_0
+    | Plus re IH =>
+      have H_nullable : nullable re = true := H
+      specialize IH H_nullable
+      show Matching (RE.Plus re) ([] ++ [])
+      apply Matching.PLUS
+      . exact IH
+      . apply Matching.STAR_0
+  case mpr =>
+    intros H
+    induction re with
+    | Symbol _ => cases H
+    | Empty => cases H
+    | Epsilon => rfl
+    | Union re₁ re₂ IH₁ IH₂ =>
+      apply Bool.or_eq_true_iff.mpr
+      cases H with
+      | UNION_L H_matching =>
+        specialize IH₁ H_matching
+        exact Or.inl IH₁
+      | UNION_R H_matching =>
+        specialize IH₂ H_matching
+        exact Or.inr IH₂
+    | App re₁ re₂ IH₁ IH₂ =>
+      apply Bool.and_eq_true_iff.mpr
+      generalize H_eq : [] = x at H
+      cases H with
+      | APP w₁ w₂ H₁ H₂ =>
+        have H_w : w₁ = [] ∧ w₂ = [] := by
+          apply List.eq_nil_of_append_eq_nil
+          symm
+          assumption
+        rw [H_w.left] at H₁
+        rw [H_w.right] at H₂
+        exact ⟨IH₁ H₁, IH₂ H₂⟩
+    | Star => rfl
+    | Plus re IH =>
+      generalize H_eq : [] = x at H
+      cases H with
+      | PLUS w₁ w₂ H₁ H₂ =>
+        have H_w : w₁ = [] ∧ w₂ = [] := by
+          apply List.eq_nil_of_append_eq_nil
+          symm
+          assumption
+        rw [H_w.left] at H₁
+        apply IH
+        exact H₁
+
+
 
 /--
 Computes the Brzozowski derivative of the regular expression `re` with
@@ -42,6 +120,10 @@ def derivative_rec (s : List Char) (re : RE) : RE :=
 
 def matching (s : List Char) (re : RE) : Bool :=
   nullable (derivative_rec s re)
+
+theorem matching_correct (re : RE) (xs : List Char) :
+  Matching re xs ↔ matching xs re = true :=
+  sorry
 
 def maxpref_one_rec (best : Option (List Char × List Char))
         (left right : List Char)

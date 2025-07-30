@@ -35,7 +35,7 @@ def from_string (l : List Char) : RE :=
 inductive Matching : RE → List Char → Prop where
   | EPSILON :
     Matching RE.Epsilon []
-  | PLUS :
+  | PLUS : ∀ w₁ w₂,
     Matching re w₁ →
     Matching (RE.Star re) w₂ →
     Matching (RE.Plus re) (w₁ ++ w₂)
@@ -51,7 +51,7 @@ inductive Matching : RE → List Char → Prop where
   | UNION_R :
     Matching re₂ w →
     Matching (RE.Union re₁ re₂) w
-  | APP :
+  | APP : ∀ w₁ w₂,
     Matching re₁ w₁ →
     Matching re₂ w₂ →
     Matching (RE.App re₁ re₂) (w₁ ++ w₂)
