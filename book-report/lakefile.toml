@@ -1,0 +1,18 @@
+name = "haskell-spec-report"
+defaultTargets = ["report"]
+
+[[require]]
+name = "verso"
+git = "https://github.com/leanprover/verso"
+rev = "main"
+
+[[require]]
+name = "haskell-spec"
+path = "../"
+
+[[lean_lib]]
+name = "HaskellReport"
+
+[[lean_exe]]
+name = "report"
+root = "HaskellReportMain"
