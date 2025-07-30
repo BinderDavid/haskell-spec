@@ -246,7 +246,14 @@ theorem matching_correct (re : RE) (xs : List Char) :
     assumption
   case mpr =>
     intros H
-    sorry
+    have H₁ : Matching (derivative_rec xs re) [] := by
+      apply (nullable_correct (derivative_rec xs re)).mp
+      exact H
+    have H₂ : Matching re (xs ++ []) := by
+      apply (derivative_rec_correct xs re []).mp
+      exact H₁
+    rw [List.append_nil] at H₂
+    assumption
 
 def maxpref_one_rec (best : Option (List Char × List Char))
         (left right : List Char)
