@@ -121,7 +121,15 @@ theorem derivative_correct (x : Char) (re : RE) (xs : List Char) :
       cases H
     | Symbol y =>
       intros xs H
-      sorry
+      simp! at H
+      by_cases H_eq : y = x
+      . rw [H_eq]
+        rw [H_eq] at H
+        simp! at H
+        cases H with
+        | EPSILON => apply Matching.SYMBOL
+      . rw [if_neg H_eq] at H
+        cases H
     | Union re₁ re₂ IH₁ IH₂ =>
       intros xs H
       cases H with
@@ -167,8 +175,8 @@ theorem derivative_correct (x : Char) (re : RE) (xs : List Char) :
       intros xs H
       cases H with
       | SYMBOL =>
-        -- exact Matching.EPSILON
-        sorry
+        simp!
+        exact Matching.EPSILON
     | Union re₁ re₂ IH₁ IH₂ =>
       intros xs H
       cases H with
