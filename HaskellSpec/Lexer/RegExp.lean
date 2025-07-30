@@ -41,7 +41,7 @@ inductive Matching : RE → List Char → Prop where
     Matching (RE.Plus re) (w₁ ++ w₂)
   | STAR_0 :
     Matching (RE.Star re) []
-  | STAR_N :
+  | STAR_N : ∀ w₁ w₂,
     Matching re w₁ →
     Matching (RE.Star re) w₂ →
     Matching (RE.Star re) (w₁ ++ w₂)

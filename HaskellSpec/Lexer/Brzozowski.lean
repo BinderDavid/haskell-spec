@@ -92,8 +92,6 @@ theorem nullable_correct (re : RE) :
         apply IH
         exact H₁
 
-
-
 /--
 Computes the Brzozowski derivative of the regular expression `re` with
 respect to the character `a`.
@@ -109,21 +107,146 @@ def derivative (a : Char) (re : RE) : RE :=
   | RE.App re₁ re₂ => RE.Union (RE.App (derivative a re₁) re₂)
                                (if nullable re₁ then (derivative a re₂) else RE.Empty)
 
-theorem derivative_correct (re : RE) (x : Char) (xs : List Char) :
-  Matching (derivative x re) xs ↔ Matching re (x :: xs) :=
-  sorry
+theorem derivative_correct (x : Char) (re : RE) (xs : List Char) :
+  Matching (derivative x re) xs ↔ Matching re (x :: xs) := by
+  apply Iff.intro
+  case mp =>
+    revert xs
+    induction re with
+    | Empty =>
+      intros xs H
+      cases H
+    | Epsilon =>
+      intros xs H
+      cases H
+    | Symbol y =>
+      intros xs H
+      sorry
+    | Union re₁ re₂ IH₁ IH₂ =>
+      intros xs H
+      cases H with
+      | UNION_L H_match =>
+        apply Matching.UNION_L
+        apply IH₁
+        apply H_match
+      | UNION_R H_match =>
+        apply Matching.UNION_R
+        apply IH₂
+        apply H_match
+    | App re₁ re₂ IH₁ IH₂ =>
+      intros xs H
+      sorry
+    | Star re IH =>
+      intros xs H
+      cases H with
+      | APP w₁ w₂ H_w₁ H_w₂ =>
+        specialize IH w₁ H_w₁
+        rw [←List.cons_append]
+        apply Matching.STAR_N
+        . exact IH
+        . exact H_w₂
+    | Plus re IH =>
+      intros xs H
+      cases H with
+      | APP w₁ w₂ H_w₁ H_w₂ =>
+        specialize IH w₁ H_w₁
+        rw [←List.cons_append]
+        apply Matching.PLUS
+        . exact IH
+        . exact H_w₂
+  case mpr =>
+    revert xs
+    induction re with
+    | Empty =>
+      intros xs H
+      cases H
+    | Epsilon =>
+      intros xs H
+      cases H
+    | Symbol =>
+      intros xs H
+      cases H with
+      | SYMBOL =>
+        -- exact Matching.EPSILON
+        sorry
+    | Union re₁ re₂ IH₁ IH₂ =>
+      intros xs H
+      cases H with
+      | UNION_L H_match =>
+        apply Matching.UNION_L
+        apply IH₁
+        exact H_match
+      | UNION_R H_match =>
+        apply Matching.UNION_R
+        apply IH₂
+        exact H_match
+    | App re₁ re₂ IH₁ IH₂ =>
+      intros xs H
+      sorry
+    | Star re IH =>
+      intros xs H
+      generalize H_eq : x :: xs = q at H
+      cases H with
+      | STAR_0 => cases H_eq
+      | STAR_N w₁ w₂ H_w₁ H_w₂ =>
+        sorry
+    | Plus re IH =>
+      intros xs H
+      generalize H_eq : x :: xs = q at H
+      cases H with
+      | PLUS w₁ w₂ H_w₁ H_w₂ =>
+        specialize IH xs
+        rw [H_eq] at IH
+        sorry
 
 def derivative_rec (s : List Char) (re : RE) : RE :=
   match s with
   | [] => re
   | s :: ss => derivative_rec ss (derivative s re)
 
+theorem derivative_rec_correct (s : List Char) (re : RE) (xs : List Char) :
+  Matching (derivative_rec s re) xs ↔ Matching re (s ++ xs) := by
+  apply Iff.intro
+  case mp =>
+    revert xs re
+    induction s with
+    | nil =>
+      intros re xs H
+      exact H
+    | cons y ys IH =>
+      intros re xs H
+      rw [List.cons_append]
+      rw [←derivative_correct]
+      apply IH
+      exact H
+  case mpr =>
+    revert xs re
+    induction s with
+    | nil =>
+      intros re xs H
+      exact H
+    | cons y ys IH =>
+      intros re xs H
+      rw [List.cons_append] at H
+      rw [←derivative_correct] at H
+      apply IH
+      exact H
+
 def matching (s : List Char) (re : RE) : Bool :=
   nullable (derivative_rec s re)
 
 theorem matching_correct (re : RE) (xs : List Char) :
-  Matching re xs ↔ matching xs re = true :=
-  sorry
+  Matching re xs ↔ matching xs re = true := by
+  apply Iff.intro
+  case mp =>
+    intros H
+    apply (nullable_correct (derivative_rec xs re)).mpr
+    apply (derivative_rec_correct xs re []).mpr
+    rw [List.append_nil]
+    assumption
+  case mpr =>
+    intros H
+    sorry
 
 def maxpref_one_rec (best : Option (List Char × List Char))
         (left right : List Char)
