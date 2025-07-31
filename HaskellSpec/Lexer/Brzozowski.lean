@@ -156,7 +156,31 @@ theorem matching_star : ∀ re x xs,
   intros re x xs H
   generalize H_eq₁ : x :: xs = q at H
   generalize H_eq₂ : RE.Star re = rex at H
-  sorry
+  revert xs
+  induction H with (intros xs H_eq₁ ; cases H_eq₂)
+  | STAR_0 => cases H_eq₁
+  | STAR_N q₁ q₂ H_q₁ H_q₂ IH₁ IH₂ =>
+    have H : q₁ = [] ∧ q₂ = x :: xs ∨ ∃ q₃, q₁ = x :: q₃ ∧ xs = q₃ ++ q₂ := by
+      apply List.cons_eq_append_iff.mp
+      assumption
+    cases H with
+    | inl H =>
+      replace IH₂ : ∃ w₁ w₂, xs = w₁ ++ w₂ ∧ Matching re (x :: w₁) ∧ Matching re.Star w₂ := by
+        apply IH₂
+        . rfl
+        . symm
+          exact H.right
+      assumption
+    | inr H =>
+      let ⟨q₃ , H₁ , H₂ ⟩ := H
+      exists q₃
+      exists q₂
+      constructor
+      . assumption
+      . constructor
+        . rw [H₁] at H_q₁
+          assumption
+        . assumption
 
 theorem matching_plus : ∀ re x xs,
   Matching (RE.Plus re) (x :: xs) →
