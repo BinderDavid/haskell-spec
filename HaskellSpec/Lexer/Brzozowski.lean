@@ -143,7 +143,28 @@ theorem derivative_correct (x : Char) (re : RE) (xs : List Char) :
         apply H_match
     | App re₁ re₂ IH₁ IH₂ =>
       intros xs H
-      sorry
+      simp! at H
+      cases H with
+      | UNION_L H =>
+        cases H with
+          | APP w₁ w₂ H_w₁ H_w₂ =>
+            specialize IH₁ w₁ H_w₁
+            show Matching (RE.App re₁ re₂) ((x :: w₁) ++ w₂)
+            apply Matching.APP
+            . assumption
+            . assumption
+      | UNION_R H =>
+        by_cases H_eq : nullable re₁
+        . rw [H_eq] at H
+          simp! at H
+          specialize IH₂ xs H
+          rw [←List.nil_append (x :: xs)]
+          apply Matching.APP
+          . apply (nullable_correct re₁).mp
+            assumption
+          . assumption
+        . rw [if_neg H_eq] at H
+          cases H
     | Star re IH =>
       intros xs H
       cases H with
@@ -190,13 +211,39 @@ theorem derivative_correct (x : Char) (re : RE) (xs : List Char) :
         exact H_match
     | App re₁ re₂ IH₁ IH₂ =>
       intros xs H
-      sorry
+      generalize H_eq : x :: xs = q at H
+      cases H with
+      | APP w₁ w₂ H_w₁ H_w₂ =>
+        cases w₁ with
+        | nil =>
+          simp! at H_eq
+          rw [←H_eq] at H_w₂
+          specialize IH₂ xs H_w₂
+          have H_nullable : nullable re₁ = true := by
+            apply (nullable_correct re₁).mpr
+            assumption
+          simp!
+          rw [H_nullable]
+          simp!
+          apply Matching.UNION_R
+          assumption
+        | cons y ys =>
+          have H_eq₂ : xs = ys ++ w₂ ∧ x = y := sorry
+          rw [H_eq₂.left]
+          simp!
+          apply Matching.UNION_L
+          apply Matching.APP
+          . apply IH₁
+            rw [H_eq₂.right]
+            assumption
+          . assumption
     | Star re IH =>
       intros xs H
       generalize H_eq : x :: xs = q at H
       cases H with
       | STAR_0 => cases H_eq
       | STAR_N w₁ w₂ H_w₁ H_w₂ =>
+        simp!
         sorry
     | Plus re IH =>
       intros xs H
@@ -205,7 +252,17 @@ theorem derivative_correct (x : Char) (re : RE) (xs : List Char) :
       | PLUS w₁ w₂ H_w₁ H_w₂ =>
         specialize IH xs
         rw [H_eq] at IH
-        sorry
+        symm at H_eq
+        replace H_eq := List.append_eq_cons_iff.mp H_eq
+        cases H_eq with
+        | inl H =>
+          simp!
+          rw [H.left] at IH
+          rw [H.left] at H_w₁
+          rw [H.right] at H_w₂
+          rw [H.right] at IH
+          sorry
+        | inr H => sorry
 
 def derivative_rec (s : List Char) (re : RE) : RE :=
   match s with
