@@ -107,6 +107,67 @@ def derivative (a : Char) (re : RE) : RE :=
   | RE.App re₁ re₂ => RE.Union (RE.App (derivative a re₁) re₂)
                                (if nullable re₁ then (derivative a re₂) else RE.Empty)
 
+theorem matching_star_singleton : ∀ re x,
+  Matching (RE.Star re) [x] →
+  Matching re [x] := by
+  intros re x H
+  generalize H_eq₁ : [x] = q at H
+  generalize H_eq₂ : RE.Star re = rex at H
+  induction H with
+  | EPSILON => cases H_eq₂
+  | APP => cases H_eq₂
+  | PLUS => cases H_eq₂
+  | UNION_L => cases H_eq₂
+  | UNION_R => cases H_eq₂
+  | SYMBOL => cases H_eq₂
+  | STAR_0 => cases H_eq₁
+  | STAR_N w₁ w₂ H_w₁ H_w₂ IH₁ IH₂ =>
+    cases H_eq₂
+    have H : w₁ = [x] ∧ w₂ = [] ∨ w₁ = [] ∧ w₂ = [x] := by
+      cases w₁ with
+      | nil =>
+        apply Or.inr
+        constructor
+        . rfl
+        . symm
+          exact H_eq₁
+      | cons y ys =>
+        apply Or.inl
+        simp! at H_eq₁
+        constructor
+        . rw [H_eq₁.left]
+          rw [H_eq₁.right.left]
+        . exact H_eq₁.right.right
+    cases H with
+    | inl H =>
+      rw [H.right]
+      rw [List.append_nil]
+      assumption
+    | inr H =>
+      rw [H.left]
+      apply IH₂
+      . symm
+        exact H.right
+      . rfl
+
+theorem matching_star : ∀ re x xs,
+  Matching (RE.Star re) (x :: xs) →
+  ∃ w₁ w₂, xs = w₁ ++ w₂ ∧
+           Matching re (x :: w₁) ∧
+           Matching (RE.Star re) w₂ := by
+  intros re x xs H
+  generalize H_eq₁ : x :: xs = q at H
+  generalize H_eq₂ : RE.Star re = rex at H
+  sorry
+
+theorem matching_plus : ∀ re x xs,
+  Matching (RE.Plus re) (x :: xs) →
+  ∃ w₁ w₂, xs = w₁ ++ w₂ ∧
+           Matching re (x :: w₁) ∧
+           Matching (RE.Star re) w₂ := by
+  intros re x xs H
+  sorry
+
 theorem derivative_correct (x : Char) (re : RE) (xs : List Char) :
   Matching (derivative x re) xs ↔ Matching re (x :: xs) := by
   apply Iff.intro
@@ -228,7 +289,11 @@ theorem derivative_correct (x : Char) (re : RE) (xs : List Char) :
           apply Matching.UNION_R
           assumption
         | cons y ys =>
-          have H_eq₂ : xs = ys ++ w₂ ∧ x = y := sorry
+          have H_eq₂ : xs = ys ++ w₂ ∧ x = y := by
+            cases H_eq with
+            | refl => constructor
+                      . rfl
+                      . rfl
           rw [H_eq₂.left]
           simp!
           apply Matching.UNION_L
@@ -239,30 +304,30 @@ theorem derivative_correct (x : Char) (re : RE) (xs : List Char) :
           . assumption
     | Star re IH =>
       intros xs H
-      generalize H_eq : x :: xs = q at H
-      cases H with
-      | STAR_0 => cases H_eq
-      | STAR_N w₁ w₂ H_w₁ H_w₂ =>
-        simp!
-        sorry
+      have H_exists : ∃ w₁ w₂, xs = w₁ ++ w₂ ∧
+                      Matching re (x :: w₁) ∧
+                      Matching (RE.Star re) w₂ := by
+        apply matching_star
+        assumption
+      let ⟨w₁, w₂, H₁, H₂, H₃ ⟩ := H_exists
+      specialize IH w₁ H₂
+      rw [H₁]
+      apply Matching.APP
+      . assumption
+      . assumption
     | Plus re IH =>
       intros xs H
-      generalize H_eq : x :: xs = q at H
-      cases H with
-      | PLUS w₁ w₂ H_w₁ H_w₂ =>
-        specialize IH xs
-        rw [H_eq] at IH
-        symm at H_eq
-        replace H_eq := List.append_eq_cons_iff.mp H_eq
-        cases H_eq with
-        | inl H =>
-          simp!
-          rw [H.left] at IH
-          rw [H.left] at H_w₁
-          rw [H.right] at H_w₂
-          rw [H.right] at IH
-          sorry
-        | inr H => sorry
+      have H_exists : ∃ w₁ w₂, xs = w₁ ++ w₂ ∧
+                      Matching re (x :: w₁) ∧
+                      Matching (RE.Star re) w₂ := by
+        apply matching_plus
+        assumption
+      let ⟨w₁, w₂, H₁, H₂, H₃ ⟩ := H_exists
+      specialize IH w₁ H₂
+      rw [H₁]
+      apply Matching.APP
+      . assumption
+      . assumption
 
 def derivative_rec (s : List Char) (re : RE) : RE :=
   match s with
