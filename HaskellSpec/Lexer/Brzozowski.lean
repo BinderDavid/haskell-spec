@@ -12,85 +12,90 @@ def nullable (re : RE) : Bool :=
   | RE.Star _ => true
   | RE.Plus re => nullable re
 
+theorem nullable_correct_mp (re : RE) :
+  nullable re = true → Matching re [] := by
+  intros H
+  induction re with
+  | Symbol _ => cases H
+  | Empty => cases H
+  | Epsilon => apply Matching.EPSILON
+  | Union re₁ re₂ IH₁ IH₂ =>
+    have H_or : nullable re₁ = true ∨ nullable re₂ = true := by
+      apply Bool.or_eq_true_iff.mp
+      exact H
+    apply Or.elim H_or
+    case left =>
+      intro H₁
+      apply Matching.UNION_L
+      exact IH₁ H₁
+    case right =>
+      intro H₂
+      apply Matching.UNION_R
+      exact IH₂ H₂
+  | App re₁ re₂ IH₁ IH₂ =>
+    have H_and : nullable re₁ ∧ nullable re₂ := by
+      apply Bool.and_eq_true_iff.mp
+      exact H
+    specialize IH₁ H_and.left
+    specialize IH₂ H_and.right
+    show Matching (RE.App re₁ re₂) ([] ++ [])
+    apply Matching.APP <;> assumption
+  | Star => apply Matching.STAR_0
+  | Plus re IH =>
+    have H_nullable : nullable re = true := H
+    specialize IH H_nullable
+    show Matching (RE.Plus re) ([] ++ [])
+    apply Matching.PLUS
+    . exact IH
+    . apply Matching.STAR_0
+
+theorem nullable_correct_mpr (re : RE) :
+  Matching re [] → nullable re = true := by
+  intros H
+  induction re with
+  | Symbol _ => cases H
+  | Empty => cases H
+  | Epsilon => rfl
+  | Union re₁ re₂ IH₁ IH₂ =>
+    apply Bool.or_eq_true_iff.mpr
+    cases H with
+    | UNION_L H_matching =>
+      specialize IH₁ H_matching
+      exact Or.inl IH₁
+    | UNION_R H_matching =>
+      specialize IH₂ H_matching
+      exact Or.inr IH₂
+  | App re₁ re₂ IH₁ IH₂ =>
+    apply Bool.and_eq_true_iff.mpr
+    generalize H_eq : [] = x at H
+    cases H with
+    | APP w₁ w₂ H₁ H₂ =>
+      have H_w : w₁ = [] ∧ w₂ = [] := by
+        apply List.eq_nil_of_append_eq_nil
+        symm
+        assumption
+      rw [H_w.left] at H₁
+      rw [H_w.right] at H₂
+      exact ⟨IH₁ H₁, IH₂ H₂⟩
+  | Star => rfl
+  | Plus re IH =>
+    generalize H_eq : [] = x at H
+    cases H with
+    | PLUS w₁ w₂ H₁ H₂ =>
+      have H_w : w₁ = [] ∧ w₂ = [] := by
+        apply List.eq_nil_of_append_eq_nil
+        symm
+        assumption
+      rw [H_w.left] at H₁
+      apply IH
+      exact H₁
+
 theorem nullable_correct (re : RE) :
   nullable re = true ↔ Matching re [] := by
   apply Iff.intro
-  case mp =>
-    intros H
-    induction re with
-    | Symbol _ => cases H
-    | Empty => cases H
-    | Epsilon => apply Matching.EPSILON
-    | Union re₁ re₂ IH₁ IH₂ =>
-      have H_or : nullable re₁ = true ∨ nullable re₂ = true := by
-        apply Bool.or_eq_true_iff.mp
-        exact H
-      apply Or.elim H_or
-      case left =>
-        intro H₁
-        apply Matching.UNION_L
-        exact IH₁ H₁
-      case right =>
-        intro H₂
-        apply Matching.UNION_R
-        exact IH₂ H₂
-    | App re₁ re₂ IH₁ IH₂ =>
-      have H_and : nullable re₁ ∧ nullable re₂ := by
-        apply Bool.and_eq_true_iff.mp
-        exact H
-      specialize IH₁ H_and.left
-      specialize IH₂ H_and.right
-      show Matching (RE.App re₁ re₂) ([] ++ [])
-      apply Matching.APP
-      . exact IH₁
-      . exact IH₂
-    | Star => apply Matching.STAR_0
-    | Plus re IH =>
-      have H_nullable : nullable re = true := H
-      specialize IH H_nullable
-      show Matching (RE.Plus re) ([] ++ [])
-      apply Matching.PLUS
-      . exact IH
-      . apply Matching.STAR_0
-  case mpr =>
-    intros H
-    induction re with
-    | Symbol _ => cases H
-    | Empty => cases H
-    | Epsilon => rfl
-    | Union re₁ re₂ IH₁ IH₂ =>
-      apply Bool.or_eq_true_iff.mpr
-      cases H with
-      | UNION_L H_matching =>
-        specialize IH₁ H_matching
-        exact Or.inl IH₁
-      | UNION_R H_matching =>
-        specialize IH₂ H_matching
-        exact Or.inr IH₂
-    | App re₁ re₂ IH₁ IH₂ =>
-      apply Bool.and_eq_true_iff.mpr
-      generalize H_eq : [] = x at H
-      cases H with
-      | APP w₁ w₂ H₁ H₂ =>
-        have H_w : w₁ = [] ∧ w₂ = [] := by
-          apply List.eq_nil_of_append_eq_nil
-          symm
-          assumption
-        rw [H_w.left] at H₁
-        rw [H_w.right] at H₂
-        exact ⟨IH₁ H₁, IH₂ H₂⟩
-    | Star => rfl
-    | Plus re IH =>
-      generalize H_eq : [] = x at H
-      cases H with
-      | PLUS w₁ w₂ H₁ H₂ =>
-        have H_w : w₁ = [] ∧ w₂ = [] := by
-          apply List.eq_nil_of_append_eq_nil
-          symm
-          assumption
-        rw [H_w.left] at H₁
-        apply IH
-        exact H₁
+  case mp => apply nullable_correct_mp
+  case mpr => apply nullable_correct_mpr
+
 
 /--
 Computes the Brzozowski derivative of the regular expression `re` with
@@ -113,16 +118,9 @@ theorem matching_star_singleton : ∀ re x,
   intros re x H
   generalize H_eq₁ : [x] = q at H
   generalize H_eq₂ : RE.Star re = rex at H
-  induction H with
-  | EPSILON => cases H_eq₂
-  | APP => cases H_eq₂
-  | PLUS => cases H_eq₂
-  | UNION_L => cases H_eq₂
-  | UNION_R => cases H_eq₂
-  | SYMBOL => cases H_eq₂
+  induction H with cases H_eq₂
   | STAR_0 => cases H_eq₁
   | STAR_N w₁ w₂ H_w₁ H_w₂ IH₁ IH₂ =>
-    cases H_eq₂
     have H : w₁ = [x] ∧ w₂ = [] ∨ w₁ = [] ∧ w₂ = [x] := by
       cases w₁ with
       | nil =>
@@ -168,166 +166,134 @@ theorem matching_plus : ∀ re x xs,
   intros re x xs H
   sorry
 
+theorem derivative_correct_mp (x : Char) (re : RE) (xs : List Char) :
+  Matching (derivative x re) xs → Matching re (x :: xs) := by
+  revert xs
+  induction re with intros xs H
+  | Empty => cases H
+  | Epsilon => cases H
+  | Symbol y =>
+    simp! at H
+    by_cases H_eq : y = x
+    . rw [H_eq]
+      rw [H_eq] at H
+      simp! at H
+      cases H with
+      | EPSILON => apply Matching.SYMBOL
+    . rw [if_neg H_eq] at H ; cases H
+  | Union re₁ re₂ IH₁ IH₂ =>
+    cases H with
+    | UNION_L H_match =>
+      apply Matching.UNION_L
+      apply IH₁ ; apply H_match
+    | UNION_R H_match =>
+      apply Matching.UNION_R
+      apply IH₂ ; apply H_match
+  | App re₁ re₂ IH₁ IH₂ =>
+    simp! at H
+    cases H with
+    | UNION_L H =>
+      cases H with
+        | APP w₁ w₂ H_w₁ H_w₂ =>
+          specialize IH₁ w₁ H_w₁
+          show Matching (RE.App re₁ re₂) ((x :: w₁) ++ w₂)
+          apply Matching.APP <;> assumption
+    | UNION_R H =>
+      by_cases H_eq : nullable re₁
+      . rw [H_eq] at H
+        simp! at H
+        specialize IH₂ xs H
+        rw [←List.nil_append (x :: xs)]
+        apply Matching.APP
+        . apply (nullable_correct re₁).mp ; assumption
+        . assumption
+      . rw [if_neg H_eq] at H ; cases H
+  | Star re IH =>
+    cases H with
+    | APP w₁ w₂ H_w₁ H_w₂ =>
+      specialize IH w₁ H_w₁
+      rw [←List.cons_append]
+      apply Matching.STAR_N <;> assumption
+  | Plus re IH =>
+    cases H with
+    | APP w₁ w₂ H_w₁ H_w₂ =>
+      specialize IH w₁ H_w₁
+      rw [←List.cons_append]
+      apply Matching.PLUS <;> assumption
+
+theorem derivative_correct_mpr (x : Char) (re : RE) (xs : List Char) :
+  Matching re (x :: xs) → Matching (derivative x re) xs  := by
+  revert xs
+  induction re with intros xs H
+  | Empty => cases H
+  | Epsilon => cases H
+  | Symbol =>
+    cases H with
+    | SYMBOL =>
+      simp!
+      exact Matching.EPSILON
+  | Union re₁ re₂ IH₁ IH₂ =>
+    cases H with
+    | UNION_L H_match =>
+      apply Matching.UNION_L
+      apply IH₁ ; exact H_match
+    | UNION_R H_match =>
+      apply Matching.UNION_R
+      apply IH₂ ; exact H_match
+  | App re₁ re₂ IH₁ IH₂ =>
+    generalize H_eq : x :: xs = q at H
+    cases H with
+    | APP w₁ w₂ H_w₁ H_w₂ =>
+      cases w₁ with
+      | nil =>
+        simp! at H_eq
+        rw [←H_eq] at H_w₂
+        specialize IH₂ xs H_w₂
+        have H_nullable : nullable re₁ = true := by
+          apply (nullable_correct re₁).mpr
+          assumption
+        simp!
+        rw [H_nullable]
+        simp!
+        apply Matching.UNION_R
+        assumption
+      | cons y ys =>
+        have H_eq₂ : xs = ys ++ w₂ ∧ x = y := by
+          cases H_eq with
+          | refl => constructor <;> rfl
+        rw [H_eq₂.left]
+        simp!
+        apply Matching.UNION_L
+        apply Matching.APP
+        . apply IH₁
+          rw [H_eq₂.right]
+          assumption
+        . assumption
+  | Star re IH =>
+    have H_exists : ∃ w₁ w₂, xs = w₁ ++ w₂ ∧
+                    Matching re (x :: w₁) ∧
+                    Matching (RE.Star re) w₂ := by
+      apply matching_star ; assumption
+    let ⟨w₁, w₂, H₁, H₂, H₃ ⟩ := H_exists
+    specialize IH w₁ H₂
+    rw [H₁]
+    apply Matching.APP <;> assumption
+  | Plus re IH =>
+    have H_exists : ∃ w₁ w₂, xs = w₁ ++ w₂ ∧
+                    Matching re (x :: w₁) ∧
+                    Matching (RE.Star re) w₂ := by
+      apply matching_plus ; assumption
+    let ⟨w₁, w₂, H₁, H₂, H₃ ⟩ := H_exists
+    specialize IH w₁ H₂
+    rw [H₁]
+    apply Matching.APP <;> assumption
+
 theorem derivative_correct (x : Char) (re : RE) (xs : List Char) :
   Matching (derivative x re) xs ↔ Matching re (x :: xs) := by
   apply Iff.intro
-  case mp =>
-    revert xs
-    induction re with
-    | Empty =>
-      intros xs H
-      cases H
-    | Epsilon =>
-      intros xs H
-      cases H
-    | Symbol y =>
-      intros xs H
-      simp! at H
-      by_cases H_eq : y = x
-      . rw [H_eq]
-        rw [H_eq] at H
-        simp! at H
-        cases H with
-        | EPSILON => apply Matching.SYMBOL
-      . rw [if_neg H_eq] at H
-        cases H
-    | Union re₁ re₂ IH₁ IH₂ =>
-      intros xs H
-      cases H with
-      | UNION_L H_match =>
-        apply Matching.UNION_L
-        apply IH₁
-        apply H_match
-      | UNION_R H_match =>
-        apply Matching.UNION_R
-        apply IH₂
-        apply H_match
-    | App re₁ re₂ IH₁ IH₂ =>
-      intros xs H
-      simp! at H
-      cases H with
-      | UNION_L H =>
-        cases H with
-          | APP w₁ w₂ H_w₁ H_w₂ =>
-            specialize IH₁ w₁ H_w₁
-            show Matching (RE.App re₁ re₂) ((x :: w₁) ++ w₂)
-            apply Matching.APP
-            . assumption
-            . assumption
-      | UNION_R H =>
-        by_cases H_eq : nullable re₁
-        . rw [H_eq] at H
-          simp! at H
-          specialize IH₂ xs H
-          rw [←List.nil_append (x :: xs)]
-          apply Matching.APP
-          . apply (nullable_correct re₁).mp
-            assumption
-          . assumption
-        . rw [if_neg H_eq] at H
-          cases H
-    | Star re IH =>
-      intros xs H
-      cases H with
-      | APP w₁ w₂ H_w₁ H_w₂ =>
-        specialize IH w₁ H_w₁
-        rw [←List.cons_append]
-        apply Matching.STAR_N
-        . exact IH
-        . exact H_w₂
-    | Plus re IH =>
-      intros xs H
-      cases H with
-      | APP w₁ w₂ H_w₁ H_w₂ =>
-        specialize IH w₁ H_w₁
-        rw [←List.cons_append]
-        apply Matching.PLUS
-        . exact IH
-        . exact H_w₂
-  case mpr =>
-    revert xs
-    induction re with
-    | Empty =>
-      intros xs H
-      cases H
-    | Epsilon =>
-      intros xs H
-      cases H
-    | Symbol =>
-      intros xs H
-      cases H with
-      | SYMBOL =>
-        simp!
-        exact Matching.EPSILON
-    | Union re₁ re₂ IH₁ IH₂ =>
-      intros xs H
-      cases H with
-      | UNION_L H_match =>
-        apply Matching.UNION_L
-        apply IH₁
-        exact H_match
-      | UNION_R H_match =>
-        apply Matching.UNION_R
-        apply IH₂
-        exact H_match
-    | App re₁ re₂ IH₁ IH₂ =>
-      intros xs H
-      generalize H_eq : x :: xs = q at H
-      cases H with
-      | APP w₁ w₂ H_w₁ H_w₂ =>
-        cases w₁ with
-        | nil =>
-          simp! at H_eq
-          rw [←H_eq] at H_w₂
-          specialize IH₂ xs H_w₂
-          have H_nullable : nullable re₁ = true := by
-            apply (nullable_correct re₁).mpr
-            assumption
-          simp!
-          rw [H_nullable]
-          simp!
-          apply Matching.UNION_R
-          assumption
-        | cons y ys =>
-          have H_eq₂ : xs = ys ++ w₂ ∧ x = y := by
-            cases H_eq with
-            | refl => constructor
-                      . rfl
-                      . rfl
-          rw [H_eq₂.left]
-          simp!
-          apply Matching.UNION_L
-          apply Matching.APP
-          . apply IH₁
-            rw [H_eq₂.right]
-            assumption
-          . assumption
-    | Star re IH =>
-      intros xs H
-      have H_exists : ∃ w₁ w₂, xs = w₁ ++ w₂ ∧
-                      Matching re (x :: w₁) ∧
-                      Matching (RE.Star re) w₂ := by
-        apply matching_star
-        assumption
-      let ⟨w₁, w₂, H₁, H₂, H₃ ⟩ := H_exists
-      specialize IH w₁ H₂
-      rw [H₁]
-      apply Matching.APP
-      . assumption
-      . assumption
-    | Plus re IH =>
-      intros xs H
-      have H_exists : ∃ w₁ w₂, xs = w₁ ++ w₂ ∧
-                      Matching re (x :: w₁) ∧
-                      Matching (RE.Star re) w₂ := by
-        apply matching_plus
-        assumption
-      let ⟨w₁, w₂, H₁, H₂, H₃ ⟩ := H_exists
-      specialize IH w₁ H₂
-      rw [H₁]
-      apply Matching.APP
-      . assumption
-      . assumption
+  case mp  => apply derivative_correct_mp
+  case mpr => apply derivative_correct_mpr
+
 
 def derivative_rec (s : List Char) (re : RE) : RE :=
   match s with
@@ -340,27 +306,21 @@ theorem derivative_rec_correct (s : List Char) (re : RE) (xs : List Char) :
   case mp =>
     revert xs re
     induction s with
-    | nil =>
-      intros re xs H
-      exact H
+    | nil => intros re xs H ; exact H
     | cons y ys IH =>
       intros re xs H
       rw [List.cons_append]
       rw [←derivative_correct]
-      apply IH
-      exact H
+      apply IH ; exact H
   case mpr =>
     revert xs re
     induction s with
-    | nil =>
-      intros re xs H
-      exact H
+    | nil => intros re xs H ; exact H
     | cons y ys IH =>
       intros re xs H
       rw [List.cons_append] at H
       rw [←derivative_correct] at H
-      apply IH
-      exact H
+      apply IH ; exact H
 
 def matching (s : List Char) (re : RE) : Bool :=
   nullable (derivative_rec s re)
