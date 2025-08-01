@@ -182,13 +182,56 @@ theorem matching_star : ∀ re x xs,
           assumption
         . assumption
 
+theorem matching_plus_app_star : ∀ re xs,
+  Matching (RE.Plus re) xs ↔ Matching (RE.App re (RE.Star re)) xs := by
+  intros re xs
+  apply Iff.intro
+  case mp =>
+    intros H
+    cases H with
+    | PLUS w₁ w₂ H_w₁ H_w₂ =>
+      apply Matching.APP
+      . assumption
+      . assumption
+  case mpr =>
+    intros H
+    cases H with
+    | APP w₁ w₂ H_w₁ H_w₂ =>
+      apply Matching.PLUS
+      . assumption
+      . assumption
+
 theorem matching_plus : ∀ re x xs,
   Matching (RE.Plus re) (x :: xs) →
   ∃ w₁ w₂, xs = w₁ ++ w₂ ∧
            Matching re (x :: w₁) ∧
            Matching (RE.Star re) w₂ := by
   intros re x xs H
-  sorry
+  have H_new : Matching (RE.App re (RE.Star re)) (x :: xs) := by
+    apply (matching_plus_app_star re (x::xs)).mp
+    assumption
+  clear H
+  generalize H_eq : x :: xs = q at H_new
+  cases H_new with
+  | APP q₁ q₂ H_q₁ H_q₂ =>
+    have H : q₁ = [] ∧ q₂ = x :: xs ∨ ∃ q₃, q₁ = x :: q₃ ∧ xs = q₃ ++ q₂ := by
+      apply List.cons_eq_append_iff.mp
+      assumption
+    cases H with
+    | inl H =>
+      rw [H.right] at H_q₂
+      apply matching_star
+      assumption
+    | inr H =>
+      let ⟨ q₃, H_eq₁ , H_eq₂ ⟩ := H
+      exists q₃ , q₂
+      constructor
+      . assumption
+      . constructor
+        . rw [H_eq₁] at H_q₁
+          assumption
+        . assumption
+
 
 theorem derivative_correct_mp (x : Char) (re : RE) (xs : List Char) :
   Matching (derivative x re) xs → Matching re (x :: xs) := by
