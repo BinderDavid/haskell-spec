@@ -135,24 +135,18 @@ inductive pat : Env.GE → Env.IE
       []
       τ
 
--- TODO we need this immediately for type variable substitution in
--- VAR_1 below. should probably be generalized.
--- BEGIN
-def Subst k v := List (k × v)
-
-def SemTyVarSubst := Subst SemTy.Type_Variable SemTy.TypeS
+-- These are helpers we need for type variable substitution in VAR_1
+-- below.
+--  BEGIN
+def SemTyVarSubst := Env.Env SemTy.Type_Variable SemTy.TypeS
 
 def applySubstTypeS (subst : SemTyVarSubst) : SemTy.TypeS → SemTy.TypeS
   | SemTy.TypeS.Variable τ => Option.getD (List.lookup τ subst) (SemTy.TypeS.Variable τ)
   | SemTy.TypeS.TypeConstructor χ => SemTy.TypeS.TypeConstructor χ
   | SemTy.TypeS.App τ1 τ2 => SemTy.TypeS.App (applySubstTypeS subst τ1) (applySubstTypeS subst τ2)
 
-def substDomain : (Subst k v) → List k := List.map Prod.fst
-
 def applySubstContext (subst : SemTyVarSubst) : SemTy.Context → SemTy.Context :=
   List.map (Prod.map id (applySubstTypeS subst))
-
-def substRange : (Subst k v) → List v := List.map Prod.snd
 -- END
 
 mutual
@@ -170,11 +164,11 @@ mutual
     | VAR_1 :
       (x : QVariable) → (ve : Env.VE) → (σ : SemTy.TypeScheme) →
       ⟨x, (Env.VE_Item.Ordinary x (SemTy.TypeScheme.Forall αs θ τ))⟩ ∈ ve →
-      (τsForαs : SemTyVarSubst) → (substDomain τsForαs) = αs →
+      (τsForαs : SemTyVarSubst) → (Env.dom τsForαs) = αs →
       dict ie e (applySubstContext τsForαs θ) →
       ---------------------------------------------------------------------------------------
       exp ge ie ve (Source.Expression.var x)
-        (Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (substRange τs)) e)
+        (Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (Env.range τs)) e)
         (applySubstTypeS τsForαs τ)
 
     | VAR_2 :
