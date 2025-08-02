@@ -171,14 +171,15 @@ mutual
           _
 
     | APP :
-      exp ge ie ve e₁ e₁' _ →
-      exp ge ie ve e₂ e₂' _ →
+      exp ge ie ve e₁ e₁' (SemTy.TypeS.App (SemTy.TypeS.App SemTy.prelude_fun τ') τ) →
+      exp ge ie ve e₂ e₂' τ' →
+      ------------------------------------
       exp ge
           ie
           ve
           (Source.Expression.app e₁ e₂)
           (Target.Expression.app e₁' e₂')
-          _
+          τ
 
     | LET :
       exp ge ie ve (Source.Expression.let_bind _ _) _ _
