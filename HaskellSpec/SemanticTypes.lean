@@ -17,6 +17,8 @@ inductive Kind : Type where
   | Star : Kind
   | Fun : Kind → Kind → Kind
 
+deriving instance BEq for Kind
+
 export Kind (Star Fun)
 
 
@@ -101,6 +103,8 @@ inductive Type_Constructor : Type where
 -/
 inductive Type_Variable : Type where
   | Mk : Type_Variable → Kind → Type_Variable
+
+deriving instance BEq for Type_Variable
 
 /--
 ```text
