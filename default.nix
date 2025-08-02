@@ -9,7 +9,7 @@ rec {
     hash = "sha256-6XFcyqSTx1CwNWqQvIc25cuQMwh3YXnbgr5cDiOCxBk=";
   };
   shell = mkShell {
-    nativeBuildInputs = [ elan steam-run ];
+    nativeBuildInputs = [ elan steam-run python3 ];
     shellHook =
      ''
       ## It should be enough to add
