@@ -162,7 +162,7 @@ mutual
                 → SemTy.TypeS
                 → Prop where
     | VAR_1 :
-      (x : QVariable) → (ve : Env.VE) → (σ : SemTy.TypeScheme) →
+      (x : QVariable) → (ve : Env.VE) →
       ⟨x, (Env.VE_Item.Ordinary x (SemTy.TypeScheme.Forall αs θ τ))⟩ ∈ ve →
       (τsForαs : SemTyVarSubst) → (Env.dom τsForαs) = αs →
       dict ie e (applySubstContext τsForαs θ) →
