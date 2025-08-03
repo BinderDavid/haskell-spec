@@ -14,6 +14,9 @@ Section 2.7
 def dom (env : Env name info) : List name :=
   List.map Prod.fst env
 
+-- This one is not explicitly defined in the paper, but needed later on.
+def range : (Env.Env k v) → List v := List.map Prod.snd
+
 def remove [BEq name] (env : Env name info) (names : List name) : (Env name info) :=
   List.filter pred env
   where pred := (Bool.not ∘ (List.contains names) ∘ Prod.fst)
