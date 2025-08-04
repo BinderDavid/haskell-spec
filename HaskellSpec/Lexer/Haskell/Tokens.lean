@@ -1,5 +1,5 @@
 inductive Token : Type where
-  | Whitespace
+  | Whitespace : String → Token
   | QVarId : List String → String → Token
   | QConId : List String → String → Token
   | QVarSym : List String → String → Token
