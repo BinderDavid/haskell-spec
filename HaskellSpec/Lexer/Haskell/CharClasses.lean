@@ -259,4 +259,4 @@ def Whitestuff : RE :=
 def Whitespace : RE :=
   RE.Plus Whitestuff
 
-def WhitespaceR : Rule := Rule.mk Whitespace (λ _ => Token.Whitespace)
+def WhitespaceR : Rule := Rule.mk Whitespace (λ s => Token.Whitespace s)
