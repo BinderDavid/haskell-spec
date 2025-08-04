@@ -1,4 +1,5 @@
 import HaskellSpec.Lexer.RegExp
+import HaskellSpec.Lexer.Rules
 
 /-
 ASCII Character Classes
@@ -229,12 +230,15 @@ def Comment : RE :=
 /-- Sequence of Graphic without `-}` -/
 def AnySeq : RE :=
   RE.Star (unions [ GraphicComment1,
+                    RE.Symbol ' ',
                     apps [RE.Symbol '-', GraphicComment2]])
 
 def NComment : RE :=
   apps [ Opencom,
          AnySeq,
          Closecom]
+
+
 
 /-
 Whitespace
@@ -254,3 +258,5 @@ def Whitestuff : RE :=
 
 def Whitespace : RE :=
   RE.Plus Whitestuff
+
+def WhitespaceR : Rule := Rule.mk Whitespace (λ _ => Token.Whitespace)

@@ -75,3 +75,11 @@ Integer Literals
 /-
 Float Literals
 -/
+
+/-
+Comments
+-/
+
+#guard lex_haskell "--\n" == [Token.Whitespace]
+#guard lex_haskell "-- foo bar\n" == [Token.Whitespace]
+#guard lex_haskell "{- block comment -}" == [Token.Whitespace]
