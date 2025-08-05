@@ -113,7 +113,7 @@ The sequence of dashes must not form part of a legal lexeme.
 For example, "-->" or "|--" do not begin a comment, because both of these are legal lexemes; however "--foo" does start a comment.
 
 ```lean
-#eval lex_haskell "-- some comment"
+#eval lex_haskell "-- some comment\n"
 ```
 
 ## Block Comments
