@@ -90,6 +90,8 @@ The following list of keywords are lexed as separate tokens, since they appear e
 
 # Literals
 
+Haskell supports four kinds of literals: Integer literals, float literals, character literals and string literals.
+
 ## Integer Literals
 
 Integer literals may be given in decimal (the default), octal (prefixed by 0o or 0O) or hexadecimal notation (prefixed by 0x or 0X).
