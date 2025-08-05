@@ -5,6 +5,7 @@ inductive Token : Type where
   | QVarSym : List String → String → Token
   | QVarCon : List String → String → Token
   | LitInteger : Nat → Token
+    /-- The two numbers express the floating point number as a ratio -/
   | LitFloat : Nat → Nat → Token
   | LitChar : Char → Token
   | LitString : String → Token

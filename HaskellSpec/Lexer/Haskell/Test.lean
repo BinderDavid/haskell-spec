@@ -71,21 +71,45 @@ Integer Literals
 #guard lex_haskell "01234" == [Token.LitInteger 1234]
 #guard lex_haskell "0o11" == [Token.LitInteger 9]
 #guard lex_haskell "0O11" == [Token.LitInteger 9]
+#guard lex_haskell "0xff" == [Token.LitInteger 255]
+#guard lex_haskell "0XFF" == [Token.LitInteger 255]
 
 /-
 Float Literals
 -/
 
+-- Float1
+#guard lex_haskell "12.34" == [Token.LitFloat 1234 100]
+#guard lex_haskell "12.340" == [Token.LitFloat 1234 100]
+#guard lex_haskell "0.1" == [Token.LitFloat 1 10]
+#guard lex_haskell "0.0" == [Token.LitFloat 0 1]
+#guard lex_haskell "2.0" == [Token.LitFloat 2 1]
+-- Float2
+#guard lex_haskell "12.34e3" == [Token.LitFloat 1234000 100]
+#guard lex_haskell "12.34E3" == [Token.LitFloat 1234000 100]
+#guard lex_haskell "12.34e+3" == [Token.LitFloat 1234000 100]
+#guard lex_haskell "12.34e-3" == [Token.LitFloat 1234 100000]
+#guard lex_haskell "12.34E+3" == [Token.LitFloat 1234000 100]
+#guard lex_haskell "12.34E-3" == [Token.LitFloat 1234 100000]
+-- Float3
+#guard lex_haskell "2e3" == [Token.LitFloat 2000 1]
+#guard lex_haskell "2e+3" == [Token.LitFloat 2000 1]
+#guard lex_haskell "2e-3" == [Token.LitFloat 2 1000]
+#guard lex_haskell "2E3" == [Token.LitFloat 2000 1]
+#guard lex_haskell "2E+3" == [Token.LitFloat 2000 1]
+#guard lex_haskell "2E-3" == [Token.LitFloat 2 1000]
 
 /-
 Identifiers
 -/
 
-#guard lex_haskell "Foo" == [Token.QConId [] ""]
-#guard lex_haskell "Foo.Bar" == [Token.QConId [] ""]
+#guard lex_haskell "Foo" == [Token.QConId [] "Foo"]
+#guard lex_haskell "Foo.Bar" == [Token.QConId ["Foo"] "Bar"]
+#guard lex_haskell "Foo.Bar.Baz" == [Token.QConId ["Foo", "Bar"] "Baz"]
 
-#guard lex_haskell "foo" == [Token.QVarId [] ""]
-#guard lex_haskell "Foo.bar" == [Token.QVarId [] ""]
+#guard lex_haskell "foo" == [Token.QVarId [] "foo"]
+#guard lex_haskell "Foo.bar" == [Token.QVarId ["Foo"] "bar"]
+#guard lex_haskell "Foo.Bar.baz" == [Token.QVarId ["Foo", "Bar"] "baz"]
 
 /-
 Comments
@@ -94,3 +118,10 @@ Comments
 #guard lex_haskell "--\n" == [Token.Whitespace "--\n"]
 #guard lex_haskell "-- foo bar\n" == [Token.Whitespace "-- foo bar\n"]
 #guard lex_haskell "{- block comment -}" == [Token.Whitespace "{- block comment -}"]
+
+/-
+Stranger Things
+-/
+
+#guard lex_haskell "0o79" == [Token.LitInteger 7, Token.LitInteger 9]
+#guard lex_haskell "datatype" == [Token.QVarId [] "datatype"]

@@ -102,8 +102,8 @@ Regular expression for lexing integer literals.
 -/
 def Integer : RE :=
   unions [ Decimal,
-           apps [OctalPrefix, Decimal],
-           apps [HexPrefix, Decimal]]
+           apps [OctalPrefix, Octal],
+           apps [HexPrefix, Hexadecimal]]
 
 def IntegerR : Rule :=
   Rule.mk Integer (λ s => Token.LitInteger (parse_integer s))
@@ -129,6 +129,92 @@ def Float2 : RE :=
 def Float3 : RE :=
   apps [ Decimal, Exponent]
 
+
+inductive FloatRepr : Type where
+  | Float1 : String → String → FloatRepr
+  | Float2 : String → String → String -> FloatRepr
+  | Float3 : String → String → FloatRepr
+  | Impossible : FloatRepr
+  deriving BEq
+
+def parse_float_repr (s : String) : FloatRepr :=
+  match s.split (λ c => c == '.') with
+  | [x] =>
+    match x.split (λ c => c == 'e' || c == 'E') with
+    | [d, e] => FloatRepr.Float3 d e
+    | _ => FloatRepr.Impossible
+  | [l,r] =>
+    match r.split (λ c => c == 'e' || c == 'E') with
+    | [x] => FloatRepr.Float1 l x
+    | [d,e] => FloatRepr.Float2 l d e
+    | _ => FloatRepr.Impossible
+  | _ => FloatRepr.Impossible
+
+#guard parse_float_repr "2e3" == FloatRepr.Float3 "2" "3"
+#guard parse_float_repr "2.3" == FloatRepr.Float1 "2" "3"
+#guard parse_float_repr "2.3e4" == FloatRepr.Float2 "2" "3" "4"
+
+def trim_trailling_zeroes (s : String) : String :=
+  let xs := s.toList.reverse.dropWhile (λ c => c == '0')
+  String.mk xs.reverse
+
+#guard trim_trailling_zeroes "2" = "2"
+#guard trim_trailling_zeroes "002" = "002"
+#guard trim_trailling_zeroes "200" = "2"
+#guard trim_trailling_zeroes "0" = ""
+
+/--
+Parse a literal of the form: `n.n`
+-/
+def parse_float_1 : String → String → Nat × Nat := λ l r =>
+  let trimmed := trim_trailling_zeroes r
+  ⟨ parse_decimal (l ++ trimmed).toList, 10 ^ trimmed.length ⟩
+
+#guard parse_float_1 "2" "3" == ⟨ 23, 10 ⟩
+#guard parse_float_1 "2" "0" == ⟨ 2, 1 ⟩
+
+def parse_exponent (s : String) : Bool × Nat :=
+  match s.toList with
+  | '+' :: xs => ⟨ true, parse_decimal xs ⟩
+  | '-' :: xs => ⟨ false, parse_decimal xs ⟩
+  | xs => ⟨ true, parse_decimal xs ⟩
+
+
+def parse_float_2 : String → String → String → Nat × Nat := λ l r e =>
+  let trimmed := trim_trailling_zeroes r
+  let ⟨is_pos, val ⟩ := parse_exponent e
+  match is_pos with
+  | true =>  ⟨ parse_decimal (l ++ trimmed).toList * 10 ^ val , 10 ^ trimmed.length ⟩
+  | false =>  ⟨ parse_decimal (l ++ trimmed).toList, 10 ^ trimmed.length * 10 ^ val ⟩
+
+
+/--
+Parse a literal of the form `ne`
+-/
+def parse_float_3 : String → String → Nat × Nat := λ l r =>
+  let ⟨is_pos, val ⟩ := parse_exponent r
+  match is_pos with
+  | true => ⟨ parse_decimal l.toList * (10 ^ val) , 1 ⟩
+  | false => ⟨ parse_decimal l.toList, 10 ^ val ⟩
+
+
+#guard parse_float_3 "2" "3" == ⟨ 2000, 1 ⟩
+#guard parse_float_3 "2" "+3" == ⟨ 2000, 1 ⟩
+#guard parse_float_3 "2" "-3" == ⟨ 2, 1000 ⟩
+
+def translate_float_repr (f : FloatRepr) : Nat × Nat :=
+  match f with
+  | FloatRepr.Float1 x y => parse_float_1 x y
+  | FloatRepr.Float2 x y z => parse_float_2 x y z
+  | FloatRepr.Float3 x y => parse_float_3 x y
+  | FloatRepr.Impossible => ⟨ 0, 0 ⟩
+
+def parse_float (s : String) : Nat × Nat :=
+ let repr := parse_float_repr s
+ let ⟨left, right⟩ := translate_float_repr repr
+ ⟨left, right⟩
+
+
 /--
 Regular expression for lexing float literals.
 -/
@@ -136,7 +222,7 @@ def Float : RE :=
   unions [Float1, Float2, Float3]
 
 def FloatR : Rule :=
-  Rule.mk Float (λ _ => Token.LitFloat 0 0) -- TODO: Parse string and convert to obtain literal value
+  Rule.mk Float (λ s => let ⟨x, y⟩ := parse_float s; Token.LitFloat x y)
 
 /-
 Character Literals
