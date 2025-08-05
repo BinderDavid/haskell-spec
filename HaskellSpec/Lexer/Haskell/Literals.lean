@@ -97,6 +97,9 @@ def OctalPrefix : RE :=
 def HexPrefix : RE :=
   RE.Union (RE.App (RE.Symbol '0') (RE.Symbol 'x')) (RE.App (RE.Symbol '0') (RE.Symbol 'X'))
 
+/--
+Regular expression for lexing integer literals.
+-/
 def Integer : RE :=
   unions [ Decimal,
            apps [OctalPrefix, Decimal],
@@ -126,6 +129,9 @@ def Float2 : RE :=
 def Float3 : RE :=
   apps [ Decimal, Exponent]
 
+/--
+Regular expression for lexing float literals.
+-/
 def Float : RE :=
   unions [Float1, Float2, Float3]
 
@@ -298,6 +304,9 @@ def parse_char (s : String) : Char :=
   -- Anything else should not occur
   | _ => 'X'
 
+/--
+Regular expression for lexing character literals.
+-/
 def Char : RE :=
   apps [ RE.Symbol '\'',
          unions [RE.Symbol ' ', EscapeWithoutAmpersand, GraphicChar],
@@ -313,6 +322,9 @@ String Literals
 def Gap : RE :=
   apps [RE.Symbol '\\', RE.Plus WhiteChar, RE.Symbol '\\']
 
+/--
+Regular expression for lexing string literals.
+-/
 def String : RE :=
   apps [ RE.Symbol '"',
          RE.Star (unions [GraphicString, RE.Symbol ' ', Escape, Gap]),

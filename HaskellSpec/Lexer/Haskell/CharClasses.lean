@@ -71,6 +71,9 @@ def Small : RE :=-- TODO: Missing "uniSmall"
 Decimal, Hexadecimals, Octals
 -/
 
+/--
+Regular expression for digits `0-9`.
+-/
 def Digit : RE :=
   unions [ RE.Symbol '0',
            RE.Symbol '1',
@@ -83,6 +86,14 @@ def Digit : RE :=
            RE.Symbol '8',
            RE.Symbol '9']
 
+/--
+Regular expression for a non-empty sequence of digits.
+-/
+def Decimal : RE := RE.Plus Digit
+
+/--
+Regular expression for octits `0-7`.
+-/
 def Octit : RE :=
   unions [ RE.Symbol '0',
            RE.Symbol '1',
@@ -93,6 +104,14 @@ def Octit : RE :=
            RE.Symbol '6',
            RE.Symbol '7']
 
+/--
+Regular expression for a non-empty sequence of octits.
+-/
+def Octal : RE := RE.Plus Octit
+
+/--
+Regular expression for hexits `0-9`, `a-f` and  `A-F`.
+-/
 def Hexit : RE :=
   unions [ RE.Symbol '0',
            RE.Symbol '1',
@@ -117,10 +136,9 @@ def Hexit : RE :=
            RE.Symbol 'f',
            RE.Symbol 'F']
 
-def Decimal : RE := RE.Plus Digit
-
-def Octal : RE := RE.Plus Octit
-
+/--
+Regular expression for a non-empty sequence of hexits.
+-/
 def Hexadecimal : RE := RE.Plus Hexit
 
 /-

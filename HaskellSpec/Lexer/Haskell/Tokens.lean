@@ -99,3 +99,11 @@ inductive Token : Type where
     /-- `where` -/
   | Where
   deriving Repr, BEq
+
+/--
+A located token with the start column
+-/
+structure LToken : Type where
+  token : Token
+  column : Nat
+  deriving Repr, BEq
