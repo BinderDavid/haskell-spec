@@ -1,6 +1,7 @@
 import VersoManual
 import HaskellReport.Papers
 import HaskellSpec.Lexer.Haskell.Combined
+import HaskellSpec.Lexer.Haskell.Literals
 import HaskellSpec.Lexer.Columnizer
 
 open Verso.Genre Manual
@@ -76,6 +77,11 @@ The following list of keywords are lexed as separate tokens, since they appear e
 
 ## Integer Literals
 
+Integer literals may be given in decimal (the default), octal (prefixed by 0o or 0O) or hexadecimal notation (prefixed by 0x or 0X).
+Integer literals are parsed using the following regular expression:
+
+{docstring Literals.Integer}
+
 ```lean
 #eval lex_haskell "42"
 #eval lex_haskell "0x42"
@@ -86,17 +92,29 @@ The following list of keywords are lexed as separate tokens, since they appear e
 
 ## Float Literals
 
+Float literals are parsed using the following regular expression:
+
+{docstring Literals.Float}
+
 ```lean
 #eval lex_haskell "42.0"
 ```
 
 ## Character Literals
 
+Character literals are parsed using the following regular expression:
+
+{docstring Literals.Char}
+
 ```lean
 #eval lex_haskell "'a'"
 ```
 
 ## String Literals
+
+String literals are parsed using the following regular expression:
+
+{docstring Literals.String}
 
 ```lean
 #eval lex_haskell "\"hello world\""
