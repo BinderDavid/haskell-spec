@@ -32,7 +32,7 @@ def tab_insertion_nat (column : Nat) : Nat :=
 def tab_insertion_help (column countdown  : Nat) : List LocatedChar :=
   match countdown with
   | 0 => []
-  | Nat.succ x => { char := '_', column := column } :: tab_insertion_help (column + 1) x
+  | Nat.succ x => { char := ' ', column := column } :: tab_insertion_help (column + 1) x
 
 def tab_insertion (column : Nat) : List LocatedChar :=
   tab_insertion_help column (tab_insertion_nat column)
@@ -74,5 +74,5 @@ Tests
        [LocatedChar.mk 'a' 1, LocatedChar.mk 'b' 2, LocatedChar.mk '\r' 3, LocatedChar.mk '\n' 4, LocatedChar.mk 'c' 1, LocatedChar.mk 'd' 2]
 
 #guard columnizer ['a', '\t', 'b'] ==
-       [LocatedChar.mk 'a' 1, LocatedChar.mk '_' 2, LocatedChar.mk '_' 3, LocatedChar.mk '_' 4,
-        LocatedChar.mk '_' 5, LocatedChar.mk '_' 6, LocatedChar.mk '_' 7, LocatedChar.mk '_' 8, LocatedChar.mk 'b' 9]
+       [LocatedChar.mk 'a' 1, LocatedChar.mk ' ' 2, LocatedChar.mk ' ' 3, LocatedChar.mk ' ' 4,
+        LocatedChar.mk ' ' 5, LocatedChar.mk ' ' 6, LocatedChar.mk ' ' 7, LocatedChar.mk ' ' 8, LocatedChar.mk 'b' 9]
