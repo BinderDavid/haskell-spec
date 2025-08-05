@@ -176,10 +176,25 @@ def parse_float_1 : String → String → Nat × Nat := λ l r =>
 def parse_float_2 : String → String → String → Nat × Nat := λ l m r =>
   ⟨ 0, 0 ⟩
 
+def parse_exponent (s : String) : Bool × Nat :=
+  match s.toList with
+  | '+' :: xs => ⟨ true, parse_decimal xs ⟩
+  | '-' :: xs => ⟨ false, parse_decimal xs ⟩
+  | xs => ⟨ true, parse_decimal xs ⟩
+
+/--
+Parse a literal of the form `ne`
+-/
 def parse_float_3 : String → String → Nat × Nat := λ l r =>
-  ⟨ parse_decimal l.toList * (10 ^ parse_decimal r.toList) , 1 ⟩
+  let ⟨is_pos, val ⟩ := parse_exponent r
+  match is_pos with
+  | true => ⟨ parse_decimal l.toList * (10 ^ val) , 1 ⟩
+  | false => ⟨ parse_decimal l.toList, 10 ^ val ⟩
+
 
 #guard parse_float_3 "2" "3" == ⟨ 2000, 1 ⟩
+#guard parse_float_3 "2" "+3" == ⟨ 2000, 1 ⟩
+#guard parse_float_3 "2" "-3" == ⟨ 2, 1000 ⟩
 
 def translate_float_repr (f : FloatRepr) : Nat × Nat :=
   match f with
