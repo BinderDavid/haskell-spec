@@ -76,6 +76,14 @@ Integer Literals
 Float Literals
 -/
 
+
+/-
+Identifiers
+-/
+
+#guard lex_haskell "Foo" == [Token.QConId [] ""]
+#guard lex_haskell "Foo.Bar" == [Token.QConId [] ""]
+
 /-
 Comments
 -/
