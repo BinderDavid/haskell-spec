@@ -80,8 +80,10 @@ Float Literals
 
 
 #guard lex_haskell "12.34" == [Token.LitFloat 1234 100]
+#guard lex_haskell "12.340" == [Token.LitFloat 1234 100]
 #guard lex_haskell "0.1" == [Token.LitFloat 1 10]
-#guard lex_haskell "0.0" == [Token.LitFloat 0 10] -- Incorrect parse!
+#guard lex_haskell "0.0" == [Token.LitFloat 0 1]
+#guard lex_haskell "2.0" == [Token.LitFloat 2 1]
 #guard lex_haskell "12.34e5" == [Token.LitFloat 0 0] -- Incorrect parse!
 #guard lex_haskell "12.34E5" == [Token.LitFloat 0 0] -- Incorrect parse!
 #guard lex_haskell "12.34e+5" == [Token.LitFloat 0 0] -- Incorrect parse!

@@ -154,10 +154,24 @@ def parse_float_repr (s : String) : FloatRepr :=
 #guard parse_float_repr "2.3" == FloatRepr.Float1 "2" "3"
 #guard parse_float_repr "2.3e4" == FloatRepr.Float2 "2" "3" "4"
 
+def trim_trailling_zeroes (s : String) : String :=
+  let xs := s.toList.reverse.dropWhile (λ c => c == '0')
+  String.mk xs.reverse
+
+#guard trim_trailling_zeroes "2" = "2"
+#guard trim_trailling_zeroes "002" = "002"
+#guard trim_trailling_zeroes "200" = "2"
+#guard trim_trailling_zeroes "0" = ""
+
+/--
+Parse a literal of the form: `n.n`
+-/
 def parse_float_1 : String → String → Nat × Nat := λ l r =>
-  ⟨ parse_decimal (l ++ r).toList, 10 ^ r.length ⟩
+  let trimmed := trim_trailling_zeroes r
+  ⟨ parse_decimal (l ++ trimmed).toList, 10 ^ trimmed.length ⟩
 
 #guard parse_float_1 "2" "3" == ⟨ 23, 10 ⟩
+#guard parse_float_1 "2" "0" == ⟨ 2, 1 ⟩
 
 def parse_float_2 : String → String → String → Nat × Nat := λ l m r =>
   ⟨ 0, 0 ⟩
