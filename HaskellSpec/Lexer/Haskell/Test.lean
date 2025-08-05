@@ -78,13 +78,16 @@ Integer Literals
 Float Literals
 -/
 
-#guard lex_haskell "12.34" == [Token.LitFloat 12 34]
-#guard lex_haskell "12.34e5" == [Token.LitFloat 12 3405] -- Incorrect parse!
-#guard lex_haskell "12.34E5" == [Token.LitFloat 12 3405] -- Incorrect parse!
-#guard lex_haskell "12.34e+5" == [Token.LitFloat 12 34005] -- Incorrect parse!
-#guard lex_haskell "12.34e-5" == [Token.LitFloat 12 34005] -- Incorrect parse!
-#guard lex_haskell "12.34E+5" == [Token.LitFloat 12 34005] -- Incorrect parse!
-#guard lex_haskell "12.34E-5" == [Token.LitFloat 12 34005] -- Incorrect parse!
+
+#guard lex_haskell "12.34" == [Token.LitFloat 1234 100]
+#guard lex_haskell "0.1" == [Token.LitFloat 1 10]
+#guard lex_haskell "0.0" == [Token.LitFloat 0 10] -- Incorrect parse!
+#guard lex_haskell "12.34e5" == [Token.LitFloat 123405 10000] -- Incorrect parse!
+#guard lex_haskell "12.34E5" == [Token.LitFloat 123405 10000] -- Incorrect parse!
+#guard lex_haskell "12.34e+5" == [Token.LitFloat 1234005 100000] -- Incorrect parse!
+#guard lex_haskell "12.34e-5" == [Token.LitFloat 1234005 100000] -- Incorrect parse!
+#guard lex_haskell "12.34E+5" == [Token.LitFloat 1234005 100000] -- Incorrect parse!
+#guard lex_haskell "12.34E-5" == [Token.LitFloat 1234005 100000] -- Incorrect parse!
 
 /-
 Identifiers
@@ -105,3 +108,10 @@ Comments
 #guard lex_haskell "--\n" == [Token.Whitespace "--\n"]
 #guard lex_haskell "-- foo bar\n" == [Token.Whitespace "-- foo bar\n"]
 #guard lex_haskell "{- block comment -}" == [Token.Whitespace "{- block comment -}"]
+
+/-
+Stranger Things
+-/
+
+#guard lex_haskell "0o79" == [Token.LitInteger 7, Token.LitInteger 9]
+#guard lex_haskell "datatype" == [Token.QVarId [] "datatype"]

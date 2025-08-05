@@ -129,19 +129,38 @@ def Float2 : RE :=
 def Float3 : RE :=
   apps [ Decimal, Exponent]
 
+/--
+Split the floating point literal into the part before and after the dot.
+-/
 def split_float (s : String) : String × String :=
   match s.split (λ c => c == '.') with
   | [left,right] => ⟨ left, right ⟩
   | _ => ⟨"0", "0"⟩
 
+#guard split_float "12.34" == ⟨ "12", "34" ⟩
+#guard split_float "12.34e5" == ⟨ "12", "34e5" ⟩
+
+def split_exponent (s : String) : String × Option (Bool × String) :=
+  match s.split (λ c => c == 'e' || c == 'E') with
+  | [x] => ⟨ x, none ⟩
+  | [left,right] =>
+    match right.toList with
+    | '+' :: _ => ⟨ left, some ⟨ true, right.drop 1 ⟩ ⟩
+    | '-' :: _ => ⟨ left, some ⟨ false, right.drop 1⟩ ⟩
+    | _ => ⟨ left, some ⟨ true, right ⟩⟩
+  | _ => ⟨ "impossible", none ⟩
+
+#guard split_exponent "1234" == ⟨ "1234", none ⟩
+#guard split_exponent "1234e5" == ⟨ "1234", some ⟨true, "5" ⟩⟩
+#guard split_exponent "1234E5" == ⟨ "1234", some ⟨true, "5" ⟩⟩
+#guard split_exponent "1234e+5" == ⟨ "1234", some ⟨true, "5" ⟩⟩
+#guard split_exponent "1234e-5" == ⟨ "1234", some ⟨false, "5" ⟩⟩
 
 -- TODO: Parse exponent correctly
 def parse_float (s : String) : Nat × Nat :=
  let ⟨left, right⟩ := split_float s;
- ⟨ parse_decimal left.toList, parse_decimal right.toList ⟩
-
-#eval parse_float "8.9"
-#guard parse_float "8.9" == ⟨ 8, 9 ⟩
+ let combined := left ++ right;
+ ⟨ parse_decimal combined.toList, 10 ^ right.length ⟩
 
 /--
 Regular expression for lexing float literals.
