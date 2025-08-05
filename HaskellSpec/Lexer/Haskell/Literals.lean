@@ -173,14 +173,20 @@ def parse_float_1 : String → String → Nat × Nat := λ l r =>
 #guard parse_float_1 "2" "3" == ⟨ 23, 10 ⟩
 #guard parse_float_1 "2" "0" == ⟨ 2, 1 ⟩
 
-def parse_float_2 : String → String → String → Nat × Nat := λ l m r =>
-  ⟨ 0, 0 ⟩
-
 def parse_exponent (s : String) : Bool × Nat :=
   match s.toList with
   | '+' :: xs => ⟨ true, parse_decimal xs ⟩
   | '-' :: xs => ⟨ false, parse_decimal xs ⟩
   | xs => ⟨ true, parse_decimal xs ⟩
+
+
+def parse_float_2 : String → String → String → Nat × Nat := λ l r e =>
+  let trimmed := trim_trailling_zeroes r
+  let ⟨is_pos, val ⟩ := parse_exponent e
+  match is_pos with
+  | true =>  ⟨ parse_decimal (l ++ trimmed).toList * 10 ^ val , 10 ^ trimmed.length ⟩
+  | false =>  ⟨ parse_decimal (l ++ trimmed).toList, 10 ^ trimmed.length * 10 ^ val ⟩
+
 
 /--
 Parse a literal of the form `ne`
@@ -208,8 +214,6 @@ def parse_float (s : String) : Nat × Nat :=
  let ⟨left, right⟩ := translate_float_repr repr
  ⟨left, right⟩
 
-#guard parse_float "2.3" == ⟨ 23, 10 ⟩
-#guard parse_float "2e3" == ⟨ 2000, 1 ⟩
 
 /--
 Regular expression for lexing float literals.
