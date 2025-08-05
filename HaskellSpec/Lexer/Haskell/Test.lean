@@ -84,6 +84,9 @@ Identifiers
 #guard lex_haskell "Foo" == [Token.QConId [] ""]
 #guard lex_haskell "Foo.Bar" == [Token.QConId [] ""]
 
+#guard lex_haskell "foo" == [Token.QVarId [] ""]
+#guard lex_haskell "Foo.bar" == [Token.QVarId [] ""]
+
 /-
 Comments
 -/
