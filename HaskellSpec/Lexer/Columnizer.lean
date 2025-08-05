@@ -10,6 +10,8 @@ to the rules of section 10.3 of the Haskell2010 language report. That section sp
   - A tab character causes the insertion of enough spaces to align the current position with the next tab stop.
 -/
 
+namespace Columnizer
+
 /--
 The Haskell language report specifies that columns start with 1
 -/
@@ -22,10 +24,16 @@ def TAB_WIDTH : Nat := 8
 
 
 /--
-A located character
+A located character.
 -/
 structure LChar : Type where
+  /--
+  The character itself.
+  -/
   char : Char
+  /--
+  The logical column in which it occurs.
+  -/
   column : Nat
   deriving Repr, BEq
 
@@ -54,6 +62,9 @@ def columnizer_rec (s : List Char) (column : Nat) : List LChar :=
     -- Every other character
   | x :: xs => { char := x, column := column } :: columnizer_rec xs (column + 1)
 
+/--
+Annotates a list of characters with their logical column according to the rules of the Haskell report.
+-/
 def columnizer (s : List Char) : List LChar :=
   columnizer_rec s START_COLUMN
 
@@ -79,3 +90,5 @@ Tests
 #guard columnizer ['a', '\t', 'b'] ==
        [LChar.mk 'a' 1, LChar.mk ' ' 2, LChar.mk ' ' 3, LChar.mk ' ' 4,
         LChar.mk ' ' 5, LChar.mk ' ' 6, LChar.mk ' ' 7, LChar.mk ' ' 8, LChar.mk 'b' 9]
+
+end Columnizer

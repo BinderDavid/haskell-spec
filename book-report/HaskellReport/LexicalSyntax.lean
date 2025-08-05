@@ -2,7 +2,9 @@ import VersoManual
 import HaskellReport.Papers
 import HaskellSpec.Lexer.Haskell.Combined
 import HaskellSpec.Lexer.Haskell.Literals
+import HaskellSpec.Lexer.Haskell.CharClasses
 import HaskellSpec.Lexer.Columnizer
+import HaskellSpec.Lexer.RegExp
 
 open Verso.Genre Manual
 open Verso.Genre.Manual.InlineLean
@@ -11,7 +13,10 @@ set_option pp.rawOnError true
 
 #doc (Manual) "Lexical Syntax" =>
 
-Description of lexical syntax...
+This chapter describes the lexical syntax of Haskell 2010 by specifying how a list of characters can be transformed into a list of tokens annotated with column information.
+Tokens have to be annotated with their logical column so that the indentation sensitive context free grammar can be implemented correctly.
+The following sections describe how the the logical columns of individual characters are computed according to the Haskell report, the semantics of regular expressions and the maximum munch principle, before then discussing the individual grammar productions for keywords, symbols, identifiers, literals, comments and whitespace.
+
 
 # Column Indentation
 
@@ -25,14 +30,24 @@ The “indentation” of a lexeme is the column number of the first character of
 - Tab stops are 8 characters apart.
 - A tab character causes the insertion of enough spaces to align the current position with the next tab stop.
 
+{docstring Columnizer.LChar}
+
+{docstring Columnizer.columnizer}
+
 ```lean
-#eval columnizer ['a', 'b', 'c']
-#eval columnizer ['a', 'b', '\n', 'c', 'd']
-#eval columnizer ['a', 'b', '\r', 'c', 'd']
-#eval columnizer ['a', 'b', '\u000C', 'c', 'd']
-#eval columnizer ['a', 'b', '\r', '\n', 'c', 'd']
-#eval columnizer ['a', '\t', 'b']
+#eval Columnizer.columnizer ['a', 'b', 'c']
+#eval Columnizer.columnizer ['a', 'b', '\n', 'c', 'd']
+#eval Columnizer.columnizer ['a', 'b', '\r', 'c', 'd']
+#eval Columnizer.columnizer ['a', 'b', '\u000C', 'c', 'd']
+#eval Columnizer.columnizer ['a', 'b', '\r', '\n', 'c', 'd']
+#eval Columnizer.columnizer ['a', '\t', 'b']
 ```
+
+# Regular Expressions
+
+{docstring RE}
+
+{docstring Matching}
 
 # Keywords
 
@@ -78,6 +93,34 @@ The following list of keywords are lexed as separate tokens, since they appear e
 ## Integer Literals
 
 Integer literals may be given in decimal (the default), octal (prefixed by 0o or 0O) or hexadecimal notation (prefixed by 0x or 0X).
+
+{docstring Octit}
+
+{docstring Octal}
+
+```lean
+#print Octit
+#print Octal
+```
+
+{docstring Digit}
+
+{docstring Decimal}
+
+```lean
+#print Digit
+#print Decimal
+```
+
+{docstring Hexit}
+
+{docstring Hexadecimal}
+
+```lean
+#print Hexit
+#print Hexadecimal
+```
+
 Integer literals are parsed using the following regular expression:
 
 {docstring Literals.Integer}
@@ -117,6 +160,7 @@ String literals are parsed using the following regular expression:
 {docstring Literals.String}
 
 ```lean
+#print Literals.String
 #eval lex_haskell "\"hello world\""
 ```
 
