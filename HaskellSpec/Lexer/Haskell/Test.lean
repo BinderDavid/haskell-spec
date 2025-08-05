@@ -81,11 +81,13 @@ Float Literals
 Identifiers
 -/
 
-#guard lex_haskell "Foo" == [Token.QConId [] ""]
-#guard lex_haskell "Foo.Bar" == [Token.QConId [] ""]
+#guard lex_haskell "Foo" == [Token.QConId [] "Foo"]
+#guard lex_haskell "Foo.Bar" == [Token.QConId ["Foo"] "Bar"]
+#guard lex_haskell "Foo.Bar.Baz" == [Token.QConId ["Foo", "Bar"] "Baz"]
 
-#guard lex_haskell "foo" == [Token.QVarId [] ""]
-#guard lex_haskell "Foo.bar" == [Token.QVarId [] ""]
+#guard lex_haskell "foo" == [Token.QVarId [] "foo"]
+#guard lex_haskell "Foo.bar" == [Token.QVarId ["Foo"] "bar"]
+#guard lex_haskell "Foo.Bar.baz" == [Token.QVarId ["Foo", "Bar"] "baz"]
 
 /-
 Comments
