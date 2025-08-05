@@ -102,8 +102,8 @@ Regular expression for lexing integer literals.
 -/
 def Integer : RE :=
   unions [ Decimal,
-           apps [OctalPrefix, Decimal],
-           apps [HexPrefix, Decimal]]
+           apps [OctalPrefix, Octal],
+           apps [HexPrefix, Hexadecimal]]
 
 def IntegerR : Rule :=
   Rule.mk Integer (λ s => Token.LitInteger (parse_integer s))
@@ -129,6 +129,20 @@ def Float2 : RE :=
 def Float3 : RE :=
   apps [ Decimal, Exponent]
 
+def split_float (s : String) : String × String :=
+  match s.split (λ c => c == '.') with
+  | [left,right] => ⟨ left, right ⟩
+  | _ => ⟨"0", "0"⟩
+
+
+-- TODO: Parse exponent correctly
+def parse_float (s : String) : Nat × Nat :=
+ let ⟨left, right⟩ := split_float s;
+ ⟨ parse_decimal left.toList, parse_decimal right.toList ⟩
+
+#eval parse_float "8.9"
+#guard parse_float "8.9" == ⟨ 8, 9 ⟩
+
 /--
 Regular expression for lexing float literals.
 -/
@@ -136,7 +150,7 @@ def Float : RE :=
   unions [Float1, Float2, Float3]
 
 def FloatR : Rule :=
-  Rule.mk Float (λ _ => Token.LitFloat 0 0) -- TODO: Parse string and convert to obtain literal value
+  Rule.mk Float (λ s => let ⟨x, y⟩ := parse_float s; Token.LitFloat x y)
 
 /-
 Character Literals

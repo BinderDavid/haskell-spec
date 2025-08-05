@@ -71,11 +71,20 @@ Integer Literals
 #guard lex_haskell "01234" == [Token.LitInteger 1234]
 #guard lex_haskell "0o11" == [Token.LitInteger 9]
 #guard lex_haskell "0O11" == [Token.LitInteger 9]
+#guard lex_haskell "0xff" == [Token.LitInteger 255]
+#guard lex_haskell "0XFF" == [Token.LitInteger 255]
 
 /-
 Float Literals
 -/
 
+#guard lex_haskell "12.34" == [Token.LitFloat 12 34]
+#guard lex_haskell "12.34e5" == [Token.LitFloat 12 3405] -- Incorrect parse!
+#guard lex_haskell "12.34E5" == [Token.LitFloat 12 3405] -- Incorrect parse!
+#guard lex_haskell "12.34e+5" == [Token.LitFloat 12 34005] -- Incorrect parse!
+#guard lex_haskell "12.34e-5" == [Token.LitFloat 12 34005] -- Incorrect parse!
+#guard lex_haskell "12.34E+5" == [Token.LitFloat 12 34005] -- Incorrect parse!
+#guard lex_haskell "12.34E-5" == [Token.LitFloat 12 34005] -- Incorrect parse!
 
 /-
 Identifiers
