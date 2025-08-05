@@ -129,38 +129,58 @@ def Float2 : RE :=
 def Float3 : RE :=
   apps [ Decimal, Exponent]
 
-/--
-Split the floating point literal into the part before and after the dot.
--/
-def split_float (s : String) : String × String :=
+
+inductive FloatRepr : Type where
+  | Float1 : String → String → FloatRepr
+  | Float2 : String → String → String -> FloatRepr
+  | Float3 : String → String → FloatRepr
+  | Impossible : FloatRepr
+  deriving BEq
+
+def parse_float_repr (s : String) : FloatRepr :=
   match s.split (λ c => c == '.') with
-  | [left,right] => ⟨ left, right ⟩
-  | _ => ⟨"0", "0"⟩
+  | [x] =>
+    match x.split (λ c => c == 'e' || c == 'E') with
+    | [d, e] => FloatRepr.Float3 d e
+    | _ => FloatRepr.Impossible
+  | [l,r] =>
+    match r.split (λ c => c == 'e' || c == 'E') with
+    | [x] => FloatRepr.Float1 l x
+    | [d,e] => FloatRepr.Float2 l d e
+    | _ => FloatRepr.Impossible
+  | _ => FloatRepr.Impossible
 
-#guard split_float "12.34" == ⟨ "12", "34" ⟩
-#guard split_float "12.34e5" == ⟨ "12", "34e5" ⟩
+#guard parse_float_repr "2e3" == FloatRepr.Float3 "2" "3"
+#guard parse_float_repr "2.3" == FloatRepr.Float1 "2" "3"
+#guard parse_float_repr "2.3e4" == FloatRepr.Float2 "2" "3" "4"
 
-def split_exponent (s : String) : String × Option (Bool × String) :=
-  match s.split (λ c => c == 'e' || c == 'E') with
-  | [x] => ⟨ x, none ⟩
-  | [left,right] =>
-    match right.toList with
-    | '+' :: _ => ⟨ left, some ⟨ true, right.drop 1 ⟩ ⟩
-    | '-' :: _ => ⟨ left, some ⟨ false, right.drop 1⟩ ⟩
-    | _ => ⟨ left, some ⟨ true, right ⟩⟩
-  | _ => ⟨ "impossible", none ⟩
+def parse_float_1 : String → String → Nat × Nat := λ l r =>
+  ⟨ parse_decimal (l ++ r).toList, 10 ^ r.length ⟩
 
-#guard split_exponent "1234" == ⟨ "1234", none ⟩
-#guard split_exponent "1234e5" == ⟨ "1234", some ⟨true, "5" ⟩⟩
-#guard split_exponent "1234E5" == ⟨ "1234", some ⟨true, "5" ⟩⟩
-#guard split_exponent "1234e+5" == ⟨ "1234", some ⟨true, "5" ⟩⟩
-#guard split_exponent "1234e-5" == ⟨ "1234", some ⟨false, "5" ⟩⟩
+#guard parse_float_1 "2" "3" == ⟨ 23, 10 ⟩
 
--- TODO: Parse exponent correctly
+def parse_float_2 : String → String → String → Nat × Nat := λ l m r =>
+  ⟨ 0, 0 ⟩
+
+def parse_float_3 : String → String → Nat × Nat := λ l r =>
+  ⟨ parse_decimal l.toList * (10 ^ parse_decimal r.toList) , 1 ⟩
+
+#guard parse_float_3 "2" "3" == ⟨ 2000, 1 ⟩
+
+def translate_float_repr (f : FloatRepr) : Nat × Nat :=
+  match f with
+  | FloatRepr.Float1 x y => parse_float_1 x y
+  | FloatRepr.Float2 x y z => parse_float_2 x y z
+  | FloatRepr.Float3 x y => parse_float_3 x y
+  | FloatRepr.Impossible => ⟨ 0, 0 ⟩
+
 def parse_float (s : String) : Nat × Nat :=
- let ⟨left, right⟩ := split_float s;
- let combined := left ++ right;
- ⟨ parse_decimal combined.toList, 10 ^ right.length ⟩
+ let repr := parse_float_repr s
+ let ⟨left, right⟩ := translate_float_repr repr
+ ⟨left, right⟩
+
+#guard parse_float "2.3" == ⟨ 23, 10 ⟩
+#guard parse_float "2e3" == ⟨ 2000, 1 ⟩
 
 /--
 Regular expression for lexing float literals.
