@@ -8,3 +8,8 @@ name = "HaskellSpec"
 [[lean_exe]]
 name = "haskell-spec"
 root = "Main"
+
+[[require]]
+name = "veriflex"
+git = "https://github.com/BinderDavid/veriflex.git"
+rev = "main"

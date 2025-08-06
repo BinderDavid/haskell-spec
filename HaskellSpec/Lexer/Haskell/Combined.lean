@@ -2,9 +2,11 @@ import HaskellSpec.Lexer.Haskell.Literals
 import HaskellSpec.Lexer.Haskell.Reserved
 import HaskellSpec.Lexer.Haskell.CharClasses
 import HaskellSpec.Lexer.Haskell.Identifier
-import HaskellSpec.Lexer.Brzozowski
+import Veriflex.Lexer
 
-def all_rules : List Rule :=
+open Veriflex
+
+def all_rules : List (Rule Token) :=
   Literals.all_literals ++ Reserved.all_reserved ++ [WhitespaceR] ++ all_identifiers
 
 
