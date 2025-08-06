@@ -1,6 +1,8 @@
-import HaskellSpec.Lexer.RegExp
+import Veriflex.RegExp
 import HaskellSpec.Lexer.Haskell.CharClasses
 import HaskellSpec.Lexer.Haskell.Literals
+
+open Veriflex
 
 /-
 Identifiers
@@ -35,7 +37,7 @@ def parse_mod_prefix (s : String) : List String × String :=
 def QConId : RE :=
   RE.App (RE.Star (RE.App ModId (RE.Symbol '.'))) ConId
 
-def QConIdR : Rule :=
+def QConIdR : Rule Token :=
   Rule.mk QConId (λ s => let ⟨mods, con⟩ :=  parse_mod_prefix s; Token.QConId mods con)
 
 def VarId : RE := RE.App Small (RE.Star  (unions [Small, Large, Digit, Tick]))
@@ -43,8 +45,8 @@ def VarId : RE := RE.App Small (RE.Star  (unions [Small, Large, Digit, Tick]))
 def QVarId : RE :=
   RE.App (RE.Star (RE.App ModId (RE.Symbol '.'))) VarId
 
-def QVarIdR : Rule :=
+def QVarIdR : Rule Token :=
   Rule.mk QVarId (λ s => let ⟨mods, var⟩ := parse_mod_prefix s; Token.QVarId mods var)
 
-def all_identifiers : List Rule :=
+def all_identifiers : List (Rule Token) :=
   [QConIdR, QVarIdR]

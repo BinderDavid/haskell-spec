@@ -1,5 +1,7 @@
-import HaskellSpec.Lexer.RegExp
-import HaskellSpec.Lexer.Rules
+import Veriflex.RegExp
+import Veriflex.Grammar
+import HaskellSpec.Lexer.Haskell.Tokens
+open Veriflex
 
 /-
 ASCII Character Classes
@@ -277,4 +279,4 @@ def Whitestuff : RE :=
 def Whitespace : RE :=
   RE.Plus Whitestuff
 
-def WhitespaceR : Rule := Rule.mk Whitespace (λ s => Token.Whitespace s)
+def WhitespaceR : Rule Token := Rule.mk Whitespace (λ s => Token.Whitespace s)

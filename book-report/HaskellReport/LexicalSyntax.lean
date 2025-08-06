@@ -4,8 +4,9 @@ import HaskellSpec.Lexer.Haskell.Combined
 import HaskellSpec.Lexer.Haskell.Literals
 import HaskellSpec.Lexer.Haskell.CharClasses
 import HaskellSpec.Lexer.Columnizer
-import HaskellSpec.Lexer.RegExp
+import Veriflex.RegExp
 
+open Veriflex
 open Verso.Genre Manual
 open Verso.Genre.Manual.InlineLean
 

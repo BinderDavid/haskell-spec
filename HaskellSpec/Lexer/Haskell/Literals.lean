@@ -1,7 +1,9 @@
-import HaskellSpec.Lexer.RegExp
-import HaskellSpec.Lexer.Rules
+import Veriflex.RegExp
+import Veriflex.Grammar
 import HaskellSpec.Lexer.Haskell.Tokens
 import HaskellSpec.Lexer.Haskell.CharClasses
+
+open Veriflex
 
 namespace Literals
 
@@ -105,7 +107,7 @@ def Integer : RE :=
            apps [OctalPrefix, Octal],
            apps [HexPrefix, Hexadecimal]]
 
-def IntegerR : Rule :=
+def IntegerR : Rule Token :=
   Rule.mk Integer (λ s => Token.LitInteger (parse_integer s))
 
 /-
@@ -221,7 +223,7 @@ Regular expression for lexing float literals.
 def Float : RE :=
   unions [Float1, Float2, Float3]
 
-def FloatR : Rule :=
+def FloatR : Rule Token :=
   Rule.mk Float (λ s => let ⟨x, y⟩ := parse_float s; Token.LitFloat x y)
 
 /-
@@ -398,7 +400,7 @@ def Char : RE :=
          unions [RE.Symbol ' ', EscapeWithoutAmpersand, GraphicChar],
          RE.Symbol '\'']
 
-def CharR : Rule :=
+def CharR : Rule Token :=
   Rule.mk Char (λ s => Token.LitChar (parse_char s))
 
 /-
@@ -416,14 +418,14 @@ def String : RE :=
          RE.Star (unions [GraphicString, RE.Symbol ' ', Escape, Gap]),
          RE.Symbol '"']
 
-def StringR : Rule :=
+def StringR : Rule Token :=
   Rule.mk String (λ s => Token.LitString s) -- TODO: Have to escape control characters.
 
 /-
 All rules declared in this module for literals
 -/
 
-def all_literals : List Rule :=
+def all_literals : List (Rule Token) :=
   [IntegerR, FloatR, CharR, StringR]
 
 end Literals
