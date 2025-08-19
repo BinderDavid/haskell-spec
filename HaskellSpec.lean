@@ -1,5 +1,6 @@
 import HaskellSpec.Source.Lang
 import HaskellSpec.Source.Literals
+import HaskellSpec.Source.ImportExport
 import HaskellSpec.Source.Module
 import HaskellSpec.Source.Patterns
 import HaskellSpec.Target.Lang
