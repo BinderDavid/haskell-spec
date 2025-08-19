@@ -1,3 +1,4 @@
+import Veriflex.Located
 /-
 This module implements the `columnizer` which assigns logical columns to characters in a string according
 to the rules of section 10.3 of the Haskell2010 language report. That section specifies that:
@@ -12,6 +13,7 @@ to the rules of section 10.3 of the Haskell2010 language report. That section sp
 
 namespace Columnizer
 
+open Veriflex
 /--
 The Haskell language report specifies that columns start with 1
 -/
@@ -22,28 +24,13 @@ The Haskell language report specifies that horizontal tabs align at 8 column bou
 -/
 def TAB_WIDTH : Nat := 8
 
-
-/--
-A located character.
--/
-structure LChar : Type where
-  /--
-  The character itself.
-  -/
-  char : Char
-  /--
-  The logical column in which it occurs.
-  -/
-  column : Nat
-  deriving Repr, BEq
-
 def tab_insertion_nat (column : Nat) : Nat :=
   (TAB_WIDTH - Nat.mod column TAB_WIDTH) + 1
 
 def tab_insertion_help (column countdown  : Nat) : List LChar :=
   match countdown with
   | 0 => []
-  | Nat.succ x => { char := ' ', column := column } :: tab_insertion_help (column + 1) x
+  | Nat.succ x => Located.mk column ' ' :: tab_insertion_help (column + 1) x
 
 def tab_insertion (column : Nat) : List LChar :=
   tab_insertion_help column (tab_insertion_nat column)
@@ -52,15 +39,15 @@ def columnizer_rec (s : List Char) (column : Nat) : List LChar :=
   match s with
   | [] => []
     -- Newline = return linefeed | return | linefeed | formfeed
-  | '\r' :: '\n' :: xs => { char := '\r', column := column } :: { char := '\n', column := column + 1 } :: columnizer_rec xs START_COLUMN
-  | '\n' :: xs => { char := '\n', column := column } :: columnizer_rec xs START_COLUMN
-  | '\r' :: xs => { char := '\r', column := column } :: columnizer_rec xs START_COLUMN
-  | '\u000C' :: xs => { char := '\u000C', column := column } :: columnizer_rec xs START_COLUMN
+  | '\r' :: '\n' :: xs => Located.mk column '\r' :: Located.mk (column + 1) '\n' :: columnizer_rec xs START_COLUMN
+  | '\n' :: xs => Located.mk column '\n' :: columnizer_rec xs START_COLUMN
+  | '\r' :: xs => Located.mk column '\r' :: columnizer_rec xs START_COLUMN
+  | '\u000C' :: xs => Located.mk column '\u000C' :: columnizer_rec xs START_COLUMN
     -- Horizontal Tabs are replaced by an appropriate number of '_' so that the position of the next
     -- character is at a TAB_WIDTH aligned boundary.
   | '\t' :: xs => tab_insertion column ++ columnizer_rec xs (column + tab_insertion_nat column)
     -- Every other character
-  | x :: xs => { char := x, column := column } :: columnizer_rec xs (column + 1)
+  | x :: xs => Located.mk column x :: columnizer_rec xs (column + 1)
 
 /--
 Annotates a list of characters with their logical column according to the rules of the Haskell report.
@@ -73,22 +60,22 @@ Tests
 -/
 
 #guard columnizer ['a', 'b', 'c'] ==
-       [LChar.mk 'a' 1, LChar.mk 'b' 2, LChar.mk 'c' 3]
+       [Located.mk 1 'a', Located.mk 2 'b', Located.mk 3 'c']
 
 #guard columnizer ['a', 'b', '\n', 'c', 'd'] ==
-       [LChar.mk 'a' 1, LChar.mk 'b' 2, LChar.mk '\n' 3, LChar.mk 'c' 1, LChar.mk 'd' 2]
+       [Located.mk 1 'a', Located.mk 2 'b', Located.mk 3 '\n', Located.mk 1 'c', Located.mk 2 'd']
 
 #guard columnizer ['a', 'b', '\r', 'c', 'd'] ==
-       [LChar.mk 'a' 1, LChar.mk 'b' 2, LChar.mk '\r' 3, LChar.mk 'c' 1, LChar.mk 'd' 2]
+       [Located.mk 1 'a', Located.mk 2 'b', Located.mk 3 '\r', Located.mk 1 'c', Located.mk 2 'd']
 
 #guard columnizer ['a', 'b', '\u000C', 'c', 'd'] ==
-       [LChar.mk 'a' 1, LChar.mk 'b' 2, LChar.mk '\u000C' 3, LChar.mk 'c' 1, LChar.mk 'd' 2]
+       [Located.mk 1 'a', Located.mk 2 'b', Located.mk 3 '\u000C', Located.mk 1 'c', Located.mk 2 'd']
 
 #guard columnizer ['a', 'b', '\r', '\n', 'c', 'd'] ==
-       [LChar.mk 'a' 1, LChar.mk 'b' 2, LChar.mk '\r' 3, LChar.mk '\n' 4, LChar.mk 'c' 1, LChar.mk 'd' 2]
+       [Located.mk 1 'a', Located.mk 2 'b', Located.mk 3 '\r', Located.mk 4 '\n', Located.mk 1 'c', Located.mk 2 'd']
 
 #guard columnizer ['a', '\t', 'b'] ==
-       [LChar.mk 'a' 1, LChar.mk ' ' 2, LChar.mk ' ' 3, LChar.mk ' ' 4,
-        LChar.mk ' ' 5, LChar.mk ' ' 6, LChar.mk ' ' 7, LChar.mk ' ' 8, LChar.mk 'b' 9]
+       [Located.mk 1 'a', Located.mk 2 ' ', Located.mk 3 ' ', Located.mk 4 ' ',
+        Located.mk 5 ' ', Located.mk 6 ' ', Located.mk 7 ' ', Located.mk 8 ' ', Located.mk 9 'b']
 
 end Columnizer
