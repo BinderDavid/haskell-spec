@@ -20,33 +20,39 @@ inductive Entity : Env.EE
                  → Prop where
   | VAR_ENT :
     x ∈ Env.dom ve →
-    Entity ⟨ce, te, de, ve⟩ (Source.Entity.var x) ⟨[], ⟨[],[]⟩, _, _⟩
+    -------------------------
+    Entity ⟨ce, te, ⟨de₁,de₂⟩, ve⟩ (Source.Entity.var x) ⟨[], ⟨[],[]⟩, ⟨[],Env.restrict de₂ [x]⟩, Env.restrict ve [x]⟩
 
   | TYPE_SOME :
-    -- T : χ \in te →
-    -- xs ⊆ fields(de,χ) →
-    -- Ks ⊆ constrs(de,χ) →
-    Entity ⟨ce, te, de, ve⟩ (Source.Entity.type_some T xs Ks) ⟨[], _, _, _⟩
+    ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
+    xs ⊆ Env.fields de₂ χ →
+    Ks ⊆ Env.constrs de₁ χ →
+    -------------------------
+    Entity ⟨ce, ⟨te₁,te₂⟩, ⟨de₁,de₂⟩, ve⟩ (Source.Entity.type_some T xs Ks) ⟨[], ⟨Env.restrict te [T],[]⟩, ⟨Env.restrict de₁ Ks,Env.restrict de₂ xs⟩, Env.restrict ve xs⟩
 
   | TYPE_ALL :
-    -- T : χ \in te →
-    -- xs = fields(de,χ) →
-    -- Ks = constrs(de,χ) →
-    Entity ⟨ce, te, de, ve⟩ (Source.Entity.type_all T) ⟨[], _, _, _⟩
+    ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
+    xs = Env.fields de₂ χ →
+    Ks = Env.constrs de₁ χ →
+    -------------------------
+    Entity ⟨ce, ⟨te₁,te₂⟩, ⟨de₁,de₂⟩, ve⟩ (Source.Entity.type_all T) ⟨[], ⟨Env.restrict te [T],[]⟩, ⟨Env.restrict de₁ Ks,Env.restrict de₂ xs⟩, Env.restrict ve xs⟩
 
   | TYPE_SYN :
-    -- T : ⟨χ, h, Λα₁ … αₙ τ ⟩ ∈ te →
-    Entity ⟨ce, te, de, ve⟩ _ ⟨[], _, ⟨[], []⟩, []⟩
+    ⟨T, Env.TE_Item.TypeSynonym χ h αs τ⟩ ∈ te₁ →
+    -------------------------
+    Entity ⟨ce, ⟨te₁,te₂⟩, de, ve⟩ (Source.Entity.type_some T [] []) ⟨[], ⟨Env.restrict te₁ [T],[]⟩, ⟨[], []⟩, []⟩
 
   | CLASS_SOME :
-    -- C : ⟨Γ, h, x_def, α, IE_sup⟩ ∈ ce →
-    -- xs ⊆ ops(ve, Γ) →
-    Entity ⟨ce, te, de, ve⟩ (Source.Entity.class_some C xs) ⟨_, ⟨[], []⟩, ⟨[], []⟩, _⟩
+    ⟨C, Env.CEEntry.mk Γ h x_def α ie_sup⟩ ∈ ce →
+    xs ⊆ Env.ops ve Γ →
+    -------------------------
+    Entity ⟨ce, te, de, ve⟩ (Source.Entity.class_some C xs) ⟨Env.restrict ce [C], ⟨[], []⟩, ⟨[], []⟩, Env.restrict ve xs⟩
 
   | CLASS_ALL :
-    -- C : ⟨Γ, h, x_def, α, IE_sup⟩ ∈ ce →
-    -- xs = ops(ve, Γ) →
-    Entity ⟨ce, te, de, ve⟩ (Source.Entity.class_all C) ⟨_, ⟨[], []⟩, ⟨[], []⟩, _⟩
+    ⟨C, Env.CEEntry.mk Γ h x_def α ie_sup⟩ ∈ ce →
+    xs = Env.ops ve Γ →
+    -------------------------
+    Entity ⟨ce, te, de, ve⟩ (Source.Entity.class_all C) ⟨Env.restrict ce [C], ⟨[], []⟩, ⟨[], []⟩, Env.restrict ve xs⟩
 
 /--
 Cp. Fig 12

@@ -168,7 +168,7 @@ mutual
       dict ie e (applySubstContext τsForαs θ) →
       ---------------------------------------------------------------------------------------
       exp ge ie ve (Source.Expression.var x)
-        (Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (Env.range τsForαs)) e)
+        (Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (Env.rng τsForαs)) e)
         (applySubstTypeS τsForαs τ)
 
     | VAR_2 :
@@ -179,7 +179,7 @@ mutual
       dict ie e2 (applySubstContext τsForαs θ) →
       --------------------------------------------------------------------------------------
       exp ge ie ve (Source.Expression.var x)
-        (Target.Expression.app (Target.typ_app_ (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e1) (Env.range τsForαs)) e2)
+        (Target.Expression.app (Target.typ_app_ (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e1) (Env.rng τsForαs)) e2)
         (applySubstTypeS (List.cons (α, τ) τsForαs) τ)
 
     | LITERAL :

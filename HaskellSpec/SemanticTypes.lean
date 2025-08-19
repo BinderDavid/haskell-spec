@@ -16,6 +16,7 @@ namespace SemTy
 inductive Kind : Type where
   | Star : Kind
   | Fun : Kind → Kind → Kind
+  deriving BEq
 
 deriving instance BEq for Kind
 
@@ -31,6 +32,7 @@ export Kind (Star Fun)
 structure SClass_Name : Type where
   name : OClass_Name
   kind : Kind
+  deriving BEq
 
 
 def hs_prelude : Module_Name := Module_Name.Mk "Prelude"
@@ -94,6 +96,7 @@ def ratio_percent : QVariable :=
 -/
 inductive Type_Constructor : Type where
   | Mk : OType_Name → Kind → Type_Constructor
+  deriving BEq
 
 /--
 ```text

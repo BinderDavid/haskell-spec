@@ -4,26 +4,29 @@ import HaskellSpec.SemanticTypes
 namespace Env
 
 @[reducible]
-def Env (name : Type) (info : Type) : Type :=
+def Env (name info : Type) : Type :=
   List (name × info)
 
-/--
-Operations on Environments
-Section 2.7
+/-
+Operations on Environments from section 2.7
 -/
+
+/-- Domain of an environment -/
 def dom (env : Env name info) : List name :=
   List.map Prod.fst env
 
--- This one is not explicitly defined in the paper, but needed later on.
-def range : (Env.Env k v) → List v := List.map Prod.snd
+/-- Range of an environment -/
+def rng (env : Env name info) : List info :=
+  List.map Prod.snd env
 
-def remove [BEq name] (env : Env name info) (names : List name) : (Env name info) :=
-  List.filter pred env
-  where pred := (Bool.not ∘ (List.contains names) ∘ Prod.fst)
+/-- This is written `E / names` in the paper. -/
+def remove [BEq name] (env : Env name info) (names : List name) : Env name info :=
+  List.filter (Bool.not ∘ (List.contains names) ∘ Prod.fst) env
 
-def restrict [BEq name] (env : Env name info) (names : List name) : (Env name info) :=
-  List.filter pred env
-  where pred := (List.contains names ∘ Prod.fst)
+/-- This is written `E | names` in the paper. -/
+def restrict [BEq name] (env : Env name info) (names : List name) : Env name info :=
+  List.filter (List.contains names ∘ Prod.fst) env
+
 
 def intersect [BEq t] (l l' : List t) : (List t) :=
   List.filter (List.contains l') l
@@ -153,30 +156,38 @@ def IE := List IE_Entry
 
 Cp. section 2.7.1
 -/
-inductive CEEntry : Type where
-  | ceEntry :
-      SemTy.SClass_Name ->
-      Int ->
-      -- this is probably wrong, it should be some "dictionary variable"
-      Variable ->
-      QClassName ->
-      IE ->
-      CEEntry
+structure CEEntry : Type where
+  name : SemTy.SClass_Name
+  h : Int
+  var : Variable
+  class_name : QClassName
+  ie : IE
 
 @[reducible]
-def CE := List CEEntry
+def CE := List (QClassName × CEEntry)
+
 
 /--
 Cp. Fig 16
 -/
 def CE_init : CE := []
 
+
+def DE₁ : Type := Env QConstructor (QConstructor × SemTy.Type_Constructor × SemTy.TypeScheme)
+def DE₂ : Type := Env QVariable (QVariable × SemTy.Type_Constructor × LE)
+
+def constrs (de : DE₁)(χ : SemTy.Type_Constructor) : List QConstructor :=
+  List.map Prod.fst (List.filter (λ ⟨_,info⟩ => info.snd.fst == χ) de)
+
+def fields (de : DE₂)(χ : SemTy.Type_Constructor) : List QVariable :=
+  List.map Prod.fst (List.filter (λ ⟨_,info⟩ => info.snd.fst == χ) de)
+
 /--
 ### Data constructor environment
 
 Cp. section 2.7.3
 -/
-def DE : Type := Env QConstructor (QConstructor × SemTy.Type_Constructor × SemTy.TypeScheme) × Env QVariable (QVariable × SemTy.Type_Constructor × LE)
+def DE : Type := DE₁ × DE₂
 
 /--
 ### Overloading Environment
@@ -190,6 +201,7 @@ inductive VE_Item : Type where
   | Ordinary : QVariable → SemTy.TypeScheme → VE_Item
   | Class : QVariable → SemTy.ClassTypeScheme → VE_Item
 
+
 /--
 ### Variable Environment
 
@@ -199,6 +211,8 @@ Cp. section 2.7.5
 def VE : Type :=
   Env QVariable VE_Item
 
+def ops (ve : VE)(Γ : SemTy.SClass_Name) : List QVariable :=
+  sorry
 
 inductive KE_Name : Type where
   | T : QType_Name -> KE_Name
@@ -228,21 +242,33 @@ inductive SE : Type where
 
 Cp. section 2.7.8
 -/
-def GE : Type := CE × TE × DE
+structure GE : Type where
+  ce : CE
+  te : TE
+  de : DE
 
 /--
 ### Full Environment
 
 Cp. section 2.7.8
 -/
-def FE : Type := CE × TE × DE × IE × VE
+structure FE : Type where
+  ce : CE
+  te : TE
+  de : DE
+  ie : IE
+  ve : VE
 
 /--
 ### Entity Environment
 
 Cp. section 2.7.8
 -/
-def EE : Type := CE × TE × DE × VE
+structure EE : Type where
+  ce : CE
+  te : TE
+  de : DE
+  ve : VE
 
 /--
 ### Module Environment

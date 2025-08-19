@@ -15,6 +15,7 @@ not have hierarchical modules, so this type does not have any structure.
 -/
 inductive Module_Name : Type where
   | Mk : String -> Module_Name
+  deriving BEq
 
 /--
 ### Variable
@@ -23,6 +24,7 @@ Unqualified variables are written `v` in the paper.
 -/
 inductive Variable : Type where
   | Mk : String → Variable
+  deriving BEq
 
 /--
 ### Original Variable
@@ -35,6 +37,7 @@ x ∈ Original variable → v
 inductive QVariable : Type where
   | Unqualified : Variable → QVariable
   | Qualified : Module_Name → Variable → QVariable
+  deriving BEq
 
 /--
 ### Special Data Constructor
@@ -51,6 +54,7 @@ inductive Special_Data_Constructor where
   | Tuple : Nat → Special_Data_Constructor
   | Nil : Special_Data_Constructor
   | Cons : Special_Data_Constructor
+  deriving BEq
 
 
 /--
@@ -60,6 +64,7 @@ Constructors are written as `J` in the paper.
 -/
 inductive Constructor : Type where
   | Mk : String → Constructor
+  deriving BEq
 
 /--
 ### Qualified Data Constructors
@@ -74,6 +79,7 @@ inductive QConstructor : Type where
   | Unqualified : Constructor → QConstructor
   | Qualified : Module_Name → Constructor → QConstructor
   | Special : Special_Data_Constructor → QConstructor
+  deriving BEq
 
 /--
 ### Special Type Constructor
@@ -90,6 +96,7 @@ inductive Special_Type_Constructor : Type where
   | Tuple : Nat → Special_Type_Constructor
   | List : Special_Type_Constructor
   | Fun : Special_Type_Constructor
+  deriving BEq
 
 /--
 ```text
@@ -98,6 +105,7 @@ S ∈ Type constructor
 -/
 inductive Type_Name : Type where
   | Mk : String -> Type_Name
+  deriving BEq
 
 /--
 ### Qualified Type Name
@@ -112,6 +120,7 @@ inductive QType_Name : Type where
   | Unqualified : Type_Name → QType_Name
   | Qualified : Module_Name → Type_Name → QType_Name
   | Special : Special_Type_Constructor → QType_Name
+  deriving BEq
 
 
 /--
@@ -127,6 +136,7 @@ inductive OType_Name : Type where
   | Unqualified : Type_Name → OType_Name
   | Qualified : Module_Name → Type_Name → OType_Name
   | Special : Special_Type_Constructor → OType_Name
+  deriving BEq
 
 /--
 ### Type Variable
@@ -149,6 +159,7 @@ Class names are written as `B` in the paper.
 -/
 structure Class_Name : Type where
   name : String
+  deriving BEq
 
 /--
 ### Qualified Class Name
@@ -161,6 +172,7 @@ C ∈ Qualified class name → B
 inductive QClassName : Type where
   | Unqualified : Class_Name → QClassName
   | Qualified : Module_Name → Class_Name → QClassName
+  deriving BEq
 
 
 /--
@@ -174,6 +186,7 @@ C ∈ Original class name → B
 inductive OClass_Name : Type where
   | Unqualified : Class_Name → OClass_Name
   | Qualified : Module_Name → Class_Name → OClass_Name
+  deriving BEq
 
 
 
