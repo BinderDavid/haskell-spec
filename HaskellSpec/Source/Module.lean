@@ -8,7 +8,7 @@ namespace Source
 ```text
 qualifer ∈ Qualifier → [qualified]
 ```
---/
+-/
 inductive Qualifier : Type where
   | qualified
   | unqualified
@@ -24,7 +24,7 @@ ent ∈ Entity → x
              | C (..)
              | module M
 ```
---/
+-/
 inductive Entity : Type where
   | var        : QVariable → Entity
   | cons       : QConstructor → Entity
@@ -38,7 +38,7 @@ inductive Entity : Type where
 implist ∈ Import list → [[hiding] (ent₁,...,entₙ)]
                         n ≥ 0
 ```
---/
+-/
 inductive ImportList : Type where
   | hide_some  : List Entity → ImportList
   | list_some : List Entity → ImportList
@@ -48,14 +48,12 @@ inductive ImportList : Type where
 ```text
 imp ∈ Import → import qualifier M as M' implist
 ```
---/
-inductive Import : Type where
-  | imp :
-      Qualifier
-    → Module_Name
-    → Module_Name
-    → ImportList
-    → Import
+-/
+structure Import : Type where
+  qualified : Qualifier
+  from_mod : Module_Name
+  as_mod : Module_Name
+  entities : ImportList
 
 /--
 ```text
@@ -80,7 +78,7 @@ ctDecl ∈ Class or type → type S u₁ ... uₖ = t                           
                        | data cx => S u₁ ... uₖ = conDecls                 k ≥ 0
                        | class cx => B u where sigs; bind₁; ...; bindₙ     k ≥ 0
 ```
---/
+-/
 inductive ClassOrType : Type where
   | ct_type :
       Type_Name
@@ -124,14 +122,14 @@ def InstanceDecls : Type := List InstanceDecl
 ctDecls ∈ Classes and types → [ctDecl₁;...;ctDeclₙ then ctDecls]
                               n ≥ 1
 ```
---/
+-/
 inductive ClassesAndTypes : Type where
   | empty
   | decls : NonEmpty ClassOrType → ClassesAndTypes → ClassesAndTypes
 
 
 
-/-
+/--
 Reconstruct the type of the class assertion. e.g.
    classAssertionType (C u (t₁ … tₖ)) = u t₁ … tₖ
 -/
@@ -142,7 +140,7 @@ def classAssertionType (ca : ClassAssertion) : TypeExpression :=
 ```text
 body ∈ Module body → ctDecls; instDecls; binds
 ```
---/
+-/
 structure ModuleBody : Type where
   ctDecls : ClassesAndTypes
   instDecls : InstanceDecls
@@ -153,7 +151,7 @@ structure ModuleBody : Type where
 mod ∈ Module → module M (ent₁,..., entₖ) where imp₁;...;impₙ;body
                k, n ≥ 0
 ```
---/
+-/
 structure Module : Type where
   name : Module_Name
   exports : List Entity

@@ -318,7 +318,7 @@ inductive gde : Env.GE → Env.IE → Env.VE
   | GDE :
     exp ge ie ve e1 e1' SemTy.prelude_bool →
     exp ge ie ve e2 e2' τ →
-    gde ge ie ve (Source.GuardedExp.mk e1 e2) (Target.GuardedExp.gExp_eq e1' e2') τ
+    gde ge ie ve (Source.GuardedExp.mk e1 e2) (Target.GuardedExp.mk e1' e2') τ
 
 
 /--

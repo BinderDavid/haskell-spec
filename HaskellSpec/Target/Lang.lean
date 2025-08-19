@@ -119,8 +119,9 @@ mutual
     gde ∈ GuardedExpr → | e₁ = e₂
   ```
   -/
-  inductive GuardedExp : Type where
-    | gExp_eq : Expression → Expression → GuardedExp
+  structure GuardedExp : Type where
+    guard : Expression
+    body : Expression
 
   /--
   ```text
