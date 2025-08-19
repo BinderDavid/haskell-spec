@@ -20,20 +20,22 @@ inductive Entity : Env.EE
                  → Prop where
   | VAR_ENT :
     x ∈ Env.dom ve →
-    -----------------------
+    -------------------------
     Entity ⟨ce, te, ⟨de₁,de₂⟩, ve⟩ (Source.Entity.var x) ⟨[], ⟨[],[]⟩, ⟨[],Env.restrict de₂ [x]⟩, Env.restrict ve [x]⟩
 
   | TYPE_SOME :
     ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
-    -- xs ⊆ fields(de,χ) →
-    -- Ks ⊆ constrs(de,χ) →
+    xs ⊆ Env.fields de₂ χ →
+    Ks ⊆ Env.constrs de₁ χ →
+    -------------------------
     Entity ⟨ce, ⟨te₁,te₂⟩, ⟨de₁,de₂⟩, ve⟩ (Source.Entity.type_some T xs Ks) ⟨[], ⟨Env.restrict te [T],[]⟩, ⟨Env.restrict de₁ Ks,Env.restrict de₂ xs⟩, Env.restrict ve xs⟩
 
   | TYPE_ALL :
     ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
-    -- xs = fields(de,χ) →
-    -- Ks = constrs(de,χ) →
-    Entity ⟨ce, ⟨te₁,te₂⟩, ⟨de₁,de₂⟩, ve⟩ (Source.Entity.type_all T) ⟨[], _, _, _⟩
+    xs = Env.fields de₂ χ →
+    Ks = Env.constrs de₁ χ →
+    -------------------------
+    Entity ⟨ce, ⟨te₁,te₂⟩, ⟨de₁,de₂⟩, ve⟩ (Source.Entity.type_all T) ⟨[], ⟨Env.restrict te [T],[]⟩, ⟨Env.restrict de₁ Ks,Env.restrict de₂ xs⟩, Env.restrict ve xs⟩
 
   | TYPE_SYN :
     ⟨T, Env.TE_Item.TypeSynonym χ h αs τ⟩ ∈ te₁ →

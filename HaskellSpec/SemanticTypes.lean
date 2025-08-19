@@ -16,6 +16,7 @@ namespace SemTy
 inductive Kind : Type where
   | Star : Kind
   | Fun : Kind → Kind → Kind
+  deriving BEq
 
 deriving instance BEq for Kind
 
@@ -94,6 +95,7 @@ def ratio_percent : QVariable :=
 -/
 inductive Type_Constructor : Type where
   | Mk : OType_Name → Kind → Type_Constructor
+  deriving BEq
 
 /--
 ```text

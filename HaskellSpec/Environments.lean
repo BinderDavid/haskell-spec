@@ -174,12 +174,22 @@ Cp. Fig 16
 -/
 def CE_init : CE := []
 
+
+def DE₁ : Type := Env QConstructor (QConstructor × SemTy.Type_Constructor × SemTy.TypeScheme)
+def DE₂ : Type := Env QVariable (QVariable × SemTy.Type_Constructor × LE)
+
+def constrs (de : DE₁)(χ : SemTy.Type_Constructor) : List QConstructor :=
+  List.map Prod.fst (List.filter (λ ⟨_,info⟩ => info.snd.fst == χ) de)
+
+def fields (de : DE₂)(χ : SemTy.Type_Constructor) : List QVariable :=
+  List.map Prod.fst (List.filter (λ ⟨_,info⟩ => info.snd.fst == χ) de)
+
 /--
 ### Data constructor environment
 
 Cp. section 2.7.3
 -/
-def DE : Type := Env QConstructor (QConstructor × SemTy.Type_Constructor × SemTy.TypeScheme) × Env QVariable (QVariable × SemTy.Type_Constructor × LE)
+def DE : Type := DE₁ × DE₂
 
 /--
 ### Overloading Environment
