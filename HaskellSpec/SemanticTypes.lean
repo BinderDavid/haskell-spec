@@ -28,43 +28,42 @@ export Kind (Star Fun)
 Γ ∈ Class name → Cᵏ
 ```
 -/
-inductive Class_Name : Type where
-  | Mk : OClass_Name → Kind → Class_Name
+structure SClass_Name : Type where
+  name : OClass_Name
+  kind : Kind
 
 
-def hs_prelude : Module_Name :=
-  Module_Name.Mk "Prelude"
+def hs_prelude : Module_Name := Module_Name.Mk "Prelude"
 
-def hs_ratio : Module_Name :=
-  Module_Name.Mk "Ratio"
+def hs_ratio : Module_Name := Module_Name.Mk "Ratio"
 
-def prelude_eq : Class_Name :=
-  Class_Name.Mk (OClass_Name.Qualified hs_prelude (_root_.Class_Name.Mk
+def prelude_eq : SClass_Name :=
+  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
   "Eq")) Kind.Star
 
 
-def prelude_ord : Class_Name :=
-  Class_Name.Mk (OClass_Name.Qualified hs_prelude (_root_.Class_Name.Mk
+def prelude_ord : SClass_Name :=
+  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
   "Ord")) Kind.Star
 
-def prelude_num : Class_Name :=
-  Class_Name.Mk (OClass_Name.Qualified hs_prelude (_root_.Class_Name.Mk
+def prelude_num : SClass_Name :=
+  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
   "Num")) Kind.Star
 
-def prelude_integral : Class_Name :=
-  Class_Name.Mk (OClass_Name.Qualified hs_prelude (_root_.Class_Name.Mk
+def prelude_integral : SClass_Name :=
+  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
   "Integral")) Kind.Star
 
-def prelude_fractional : Class_Name :=
-  Class_Name.Mk (OClass_Name.Qualified hs_prelude (_root_.Class_Name.Mk
+def prelude_fractional : SClass_Name :=
+  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
   "Fractional")) Kind.Star
 
-def prelude_enum : Class_Name :=
-  Class_Name.Mk (OClass_Name.Qualified hs_prelude (_root_.Class_Name.Mk
+def prelude_enum : SClass_Name :=
+  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
   "Enum")) Kind.Star
 
-def prelude_monad : Class_Name :=
-  Class_Name.Mk (OClass_Name.Qualified hs_prelude (_root_.Class_Name.Mk
+def prelude_monad : SClass_Name :=
+  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
   "Monad")) (Kind.Fun Kind.Star Kind.Star)
 
 def prelude_enum_from : QVariable :=
@@ -148,7 +147,7 @@ TypeS.TypeConstructor (Type_Constructor.Mk (OType_Name.Special Special_Type_Cons
 ```
 -/
 
-def Context := List (Class_Name × TypeS)
+def Context := List (SClass_Name × TypeS)
 
 /--
 ```text
@@ -169,5 +168,5 @@ ceiling : ∀ α. RealFrac α ⇒c ∀ β. Integral β ⇒ α → β
 ```
 -/
 inductive ClassTypeScheme : Type where
-  | Forall : Type_Variable → Class_Name → TypeScheme → ClassTypeScheme
+  | Forall : Type_Variable → SClass_Name → TypeScheme → ClassTypeScheme
 end SemTy
