@@ -1,5 +1,6 @@
 import HaskellSpec.Source.Lang
 import HaskellSpec.Names
+import HaskellSpec.NonEmpty
 
 namespace Source
 
@@ -71,7 +72,7 @@ inductive ConstructorDecl : Type where
 conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
 ```
 -/
-def ConstructorDecls : Type := NonEmptyList ConstructorDecl
+def ConstructorDecls : Type := NonEmpty ConstructorDecl
 
 /--
 ```text
@@ -126,19 +127,16 @@ ctDecls ∈ Classes and types → [ctDecl₁;...;ctDeclₙ then ctDecls]
 --/
 inductive ClassesAndTypes : Type where
   | empty
-  | decls : NonEmptyList ClassOrType → ClassesAndTypes → ClassesAndTypes
+  | decls : NonEmpty ClassOrType → ClassesAndTypes → ClassesAndTypes
 
 
-
-def classAssertionName : ClassAssertion → QClassName
-  | ClassAssertion.classAssert C _ _ => C
 
 /-
 Reconstruct the type of the class assertion. e.g.
    classAssertionType (C u (t₁ … tₖ)) = u t₁ … tₖ
 -/
-def classAssertionType : ClassAssertion → TypeExpression
-   | ClassAssertion.classAssert _ TV TS => List.foldl TypeExpression.app (TypeExpression.var TV) TS
+def classAssertionType (ca : ClassAssertion) : TypeExpression :=
+   List.foldl TypeExpression.app (TypeExpression.var ca.var) ca.args
 
 /--
 ```text

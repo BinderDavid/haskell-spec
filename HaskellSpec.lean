@@ -6,7 +6,7 @@ import HaskellSpec.Target.Lang
 import HaskellSpec.Names
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Environments
-import HaskellSpec.NonEmptyList
+import HaskellSpec.NonEmpty
 import HaskellSpec.Forall2
 import HaskellSpec.Elaboration.Kinding
 import HaskellSpec.Elaboration.Modules

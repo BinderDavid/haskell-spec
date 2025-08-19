@@ -1,5 +1,5 @@
 import HaskellSpec.Names
-import HaskellSpec.NonEmptyList
+import HaskellSpec.NonEmpty
 import HaskellSpec.SemanticTypes
 /-!
 Figure 6
@@ -91,7 +91,7 @@ mutual
   ```
   --/
   inductive BindGroup : Type where
-    | bind_group : NonEmptyList Binding → BindGroup
+    | bind_group : NonEmpty Binding → BindGroup
 
   /--
   ```text
@@ -100,7 +100,7 @@ mutual
   ```
   --/
   inductive Binding : Type where
-    | bind_match : QVariable → NonEmptyList Match → Binding
+    | bind_match : QVariable → NonEmpty Match → Binding
     | bind_pat : Pattern → GuardedExprs → Binding
 
   /--
@@ -109,7 +109,7 @@ mutual
   ```
   --/
   inductive Match : Type where
-    | mk : NonEmptyList Pattern → GuardedExprs → Match
+    | mk : NonEmpty Pattern → GuardedExprs → Match
 
   /--
   ```text
@@ -117,7 +117,7 @@ mutual
   ```
   --/
   inductive GuardedExprs : Type where
-    | gExp_where : NonEmptyList GuardedExp → Binds → GuardedExprs
+    | gExp_where : NonEmpty GuardedExp → Binds → GuardedExprs
 
   /--
   ```text
@@ -147,15 +147,15 @@ mutual
     | var : QVariable → Expression
     | lit : Literal → Expression
     | constr : QConstructor → Expression
-    | abs : NonEmptyList Pattern → Expression → Expression
+    | abs : NonEmpty Pattern → Expression → Expression
     | app : Expression → Expression → Expression
     | let_bind : Binds → Expression → Expression
-    | case : Expression → NonEmptyList Match → Expression
+    | case : Expression → NonEmpty Match → Expression
     | listComp : Expression → Qualifiers → Expression
     | recUpd : Expression → List FieldBinding → Expression
     | recConstr : Expression → List FieldBinding → Expression
-    | typ_app : Expression → NonEmptyList SemTy.TypeS → Expression
-    | typ_abs : NonEmptyList Type_Variable → Expression → Expression
+    | typ_app : Expression → NonEmpty SemTy.TypeS → Expression
+    | typ_abs : NonEmpty Type_Variable → Expression → Expression
 
   /--
   ```text
@@ -245,7 +245,7 @@ conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
 ```
 -/
 inductive ConstructorDecls : Type where
-    | conDecls : NonEmptyList ConstructorDecl → ConstructorDecls
+    | conDecls : NonEmpty ConstructorDecl → ConstructorDecls
 
 /--
 ```text
@@ -299,7 +299,7 @@ ctDecls ∈ Classes and types → [ctDecl₁;...;ctDeclₙ then ctDecls]
 --/
 inductive ClassesAndTypes : Type where
   | ct_empty
-  | ct_Decls : NonEmptyList ClassOrType → ClassesAndTypes → ClassesAndTypes
+  | ct_Decls : NonEmpty ClassOrType → ClassesAndTypes → ClassesAndTypes
 
 /--
 ```text
@@ -323,7 +323,7 @@ inductive TypeDeclaration : Type where
   | typeDecl :
       -- Chi ->
       -- List Alphas ->
-      NonEmptyList ConstructorDecl ->
+      NonEmpty ConstructorDecl ->
       TypeDeclaration
 
 /--
