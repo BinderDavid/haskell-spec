@@ -161,7 +161,7 @@ inductive classR : Env.CE → Env.TE → Int
               (h' : Int) ->
               (x: Variable) ->
               (ie: Env.IE) ->
-              ((Env.CEEntry.ceEntry Γ h' x className ie) ∈ ce) ->
+              ((_, Env.CEEntry.mk Γ h' x className ie) ∈ ce) ->
               (h' < h) ->
               (h'' : Int) ->
               (type te h'' (List.foldl Source.TypeExpression.app (Source.TypeExpression.var u) ts) τ) ->
