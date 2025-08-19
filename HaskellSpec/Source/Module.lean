@@ -71,8 +71,7 @@ inductive ConstructorDecl : Type where
 conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
 ```
 -/
-inductive ConstructorDecls : Type where
-  | conDecls : NonEmptyList ConstructorDecl → ConstructorDecls
+def ConstructorDecls : Type := NonEmptyList ConstructorDecl
 
 /--
 ```text
@@ -106,16 +105,18 @@ inductive ClassOrType : Type where
 instDecl ∈ InstanceDecl → instance cx => C t where bind₁; …; bindₙ    n ≥ 0
 ```
 -/
-inductive InstanceDecl : Type where
-  | instDecl : Context → Class_Name → TypeExpression → List Binding → InstanceDecl
+structure InstanceDecl : Type where
+  context : Context
+  className : Class_Name
+  instance_head : TypeExpression
+  binds : List Binding
 
 /--
 ```text
 instDecls ∈ InstanceDecls → instDecl₁; …; instDeclₙ   n ≥ 0
 ```
 -/
-inductive InstanceDecls : Type where
-  | instDecls : List InstanceDecl → InstanceDecls
+def InstanceDecls : Type := List InstanceDecl
 
 /--
 ```text
@@ -144,12 +145,10 @@ def classAssertionType : ClassAssertion → TypeExpression
 body ∈ Module body → ctDecls; instDecls; binds
 ```
 --/
-inductive ModuleBody : Type where
-  | body :
-      ClassesAndTypes
-    → InstanceDecls
-    → Binds
-    → ModuleBody
+structure ModuleBody : Type where
+  ctDecls : ClassesAndTypes
+  instDecls : InstanceDecls
+  binds : Binds
 
 /--
 ```text
@@ -157,11 +156,10 @@ mod ∈ Module → module M (ent₁,..., entₖ) where imp₁;...;impₙ;body
                k, n ≥ 0
 ```
 --/
-inductive Module : Type where
-  | module :
-      Module_Name
-    → List Entity
-    → List Import
-    → Module
+structure Module : Type where
+  name : Module_Name
+  exports : List Entity
+  imports : List Import
+  body : ModuleBody
 
 end Source
