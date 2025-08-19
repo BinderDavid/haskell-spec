@@ -4,26 +4,29 @@ import HaskellSpec.SemanticTypes
 namespace Env
 
 @[reducible]
-def Env (name : Type) (info : Type) : Type :=
+def Env (name info : Type) : Type :=
   List (name × info)
 
-/--
-Operations on Environments
-Section 2.7
+/-
+Operations on Environments from section 2.7
 -/
+
+/-- Domain of an environment -/
 def dom (env : Env name info) : List name :=
   List.map Prod.fst env
 
--- This one is not explicitly defined in the paper, but needed later on.
-def range : (Env.Env k v) → List v := List.map Prod.snd
+/-- Range of an environment -/
+def rng (env : Env name info) : List info :=
+  List.map Prod.snd env
 
-def remove [BEq name] (env : Env name info) (names : List name) : (Env name info) :=
-  List.filter pred env
-  where pred := (Bool.not ∘ (List.contains names) ∘ Prod.fst)
+/-- This is written `E / names` in the paper. -/
+def remove [BEq name] (env : Env name info) (names : List name) : Env name info :=
+  List.filter (Bool.not ∘ (List.contains names) ∘ Prod.fst) env
 
-def restrict [BEq name] (env : Env name info) (names : List name) : (Env name info) :=
-  List.filter pred env
-  where pred := (List.contains names ∘ Prod.fst)
+/-- This is written `E | names` in the paper. -/
+def restrict [BEq name] (env : Env name info) (names : List name) : Env name info :=
+  List.filter (List.contains names ∘ Prod.fst) env
+
 
 def intersect [BEq t] (l l' : List t) : (List t) :=
   List.filter (List.contains l') l

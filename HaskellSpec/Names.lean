@@ -15,6 +15,7 @@ not have hierarchical modules, so this type does not have any structure.
 -/
 inductive Module_Name : Type where
   | Mk : String -> Module_Name
+  deriving BEq
 
 /--
 ### Variable
@@ -23,6 +24,7 @@ Unqualified variables are written `v` in the paper.
 -/
 inductive Variable : Type where
   | Mk : String → Variable
+  deriving BEq
 
 /--
 ### Original Variable
@@ -35,6 +37,7 @@ x ∈ Original variable → v
 inductive QVariable : Type where
   | Unqualified : Variable → QVariable
   | Qualified : Module_Name → Variable → QVariable
+  deriving BEq
 
 /--
 ### Special Data Constructor

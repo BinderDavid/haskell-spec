@@ -20,7 +20,7 @@ inductive Entity : Env.EE
                  → Prop where
   | VAR_ENT :
     x ∈ Env.dom ve →
-    Entity ⟨ce, te, de, ve⟩ (Source.Entity.var x) ⟨[], ⟨[],[]⟩, _, _⟩
+    Entity ⟨ce, te, ⟨de₁,de₂⟩, ve⟩ (Source.Entity.var x) ⟨[], ⟨[],[]⟩, ⟨[],Env.restrict de₂ [x]⟩, Env.restrict ve [x]⟩
 
   | TYPE_SOME :
     -- T : χ \in te →
