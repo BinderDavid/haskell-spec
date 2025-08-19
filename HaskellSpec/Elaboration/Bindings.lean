@@ -18,19 +18,6 @@ Asymmetric version of ⊕ where entries in E2 shadow E if names collide
 -/
 def cross_arrow (_: Env.VE) (_: Env.VE): Env.VE := sorry
 
-def extract_binds (bg: Source.BindGroup) : NonEmptyList Source.Binding :=
-  match bg with
-  | Source.BindGroup.bind_group binds => binds
-
-def concat_bind_groups (n m: Source.BindGroup): Source.BindGroup :=
-  let
-    nel : NonEmptyList Source.Binding :=
-      { head := (extract_binds n).head
-      , tail :=  (extract_binds n).tail ++
-                [(extract_binds m).head] ++
-                 (extract_binds m).tail
-      }
-  Source.BindGroup.bind_group nel
 
 def concat_target_binds (n m: Target.Binds): Target.Binds :=
   -- TODO Looks like Target.Binds isn't completely
@@ -39,18 +26,7 @@ def concat_target_binds (n m: Target.Binds): Target.Binds :=
   sorry
 
 def concat_source_binds (n m : Source.Binds): Source.Binds :=
-  match n with
-  | Source.Binds.cons a_sigs a_bindgroup n_binds =>
-    match m with
-    | Source.Binds.cons b_sigs b_bindgroup m_binds =>
-      Source.Binds.cons
-        (a_sigs ++ b_sigs)
-        (concat_bind_groups a_bindgroup b_bindgroup)
-        (concat_source_binds n_binds m_binds)
-    | Source.Binds.empty =>
-      n
-  | Source.Binds.empty =>
-    m
+  sorry
 
 /--
 Cp. Fig. 29
@@ -93,7 +69,7 @@ GE, IE, VE ⊢ bindG ⇝ binds : VE
 ```
 -/
 inductive monobinds : Env.GE → Env.IE → Env.VE
-                    → Source.BindGroup
+                    → List Source.Binds
                     → Target.Binds
                     → Env.VE
                     → Prop where

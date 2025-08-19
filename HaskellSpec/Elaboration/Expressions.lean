@@ -7,7 +7,7 @@ import HaskellSpec.Target.Lang
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Elaboration.Modules
 import HaskellSpec.Elaboration.Bindings
-import HaskellSpec.NonEmptyList
+import HaskellSpec.NonEmpty
 
 def fromRationalAfterRatio (n d : Int) : Target.Expression :=
   Target.Expression.app
@@ -318,7 +318,7 @@ inductive gde : Env.GE → Env.IE → Env.VE
   | GDE :
     exp ge ie ve e1 e1' SemTy.prelude_bool →
     exp ge ie ve e2 e2' τ →
-    gde ge ie ve (Source.GuardedExp.gExp_eq e1 e2) (Target.GuardedExp.gExp_eq e1' e2') τ
+    gde ge ie ve (Source.GuardedExp.mk e1 e2) (Target.GuardedExp.mk e1' e2') τ
 
 
 /--

@@ -107,7 +107,7 @@ v : Γ (α τ_1 … τ_k)
 ```
 -/
   | BoundInDictionaryAbstraction : Variable
-    -> SemTy.Class_Name -> SemTy.Type_Variable
+    -> SemTy.SClass_Name -> SemTy.Type_Variable
     -> List SemTy.TypeS -> IE_Entry
 /--
 x represents a superclass in classinfo
@@ -115,7 +115,7 @@ x represents a superclass in classinfo
 x : Γ α
 ```
 -/
-  | SuperclassInClassinfo : QVariable -> SemTy.Class_Name
+  | SuperclassInClassinfo : QVariable -> SemTy.SClass_Name
     -> SemTy.Type_Variable-> IE_Entry
 /--
 x is a dictionary from an instance declaration
@@ -126,7 +126,7 @@ x : ∀α_1 … α_k . θ ⇒ Γ (χ α_1 … α_k)
   | DictioanryFromInstanceDeclaration : QVariable
     -> List SemTy.Type_Variable
     -> SemTy.Context
-    -> SemTy.Class_Name
+    -> SemTy.SClass_Name
     -> SemTy.Type_Constructor
     -> SemTy.Type_Variable-> IE_Entry
 /--
@@ -137,8 +137,8 @@ x : ∀α . Γ'α ⇒ Γα
 -/
   | ExtractsADictionaryForTheSuperclass : QVariable
     -> SemTy.Type_Variable
-    -> SemTy.Class_Name
-    -> SemTy.Class_Name
+    -> SemTy.SClass_Name
+    -> SemTy.SClass_Name
     -> IE_Entry
 
 /--
@@ -155,7 +155,7 @@ Cp. section 2.7.1
 -/
 inductive CEEntry : Type where
   | ceEntry :
-      SemTy.Class_Name ->
+      SemTy.SClass_Name ->
       Int ->
       -- this is probably wrong, it should be some "dictionary variable"
       Variable ->

@@ -69,14 +69,14 @@ inductive kctx : KE
                → Prop where
   | KIND_CTX_NIL :
     ------------------------------
-    kctx ke (Source.Context.cx [])
+    kctx ke []
 
   | KIND_CTX_CONS :
-    (Env.KE_Name.C (Source.classAssertionName CA), κ) ∈ ke →
+    (Env.KE_Name.C CA.name, κ) ∈ ke →
     ktype ke (Source.classAssertionType CA) κ →
-    kctx ke (Source.Context.cx CAS) →
+    kctx ke CAS →
     ---------------------------------------------------------
-    kctx ke (Source.Context.cx (CA :: CAS))
+    kctx ke (CA :: CAS)
 
 
 /--
@@ -92,7 +92,7 @@ inductive ksig : Env.KE
     kctx _ /- (Env.oplus ke ke') -/ cx →
     ktype _ /- (Env.oplus ke ke') -/ t SemTy.Kind.Star →
     -----------------------------------------------------
-    ksig ke (Source.Signature.sig v cx t)
+    ksig ke (Source.Signature.mk v cx t)
 
 /--
 Cp. fig 9

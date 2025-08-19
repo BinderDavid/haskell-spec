@@ -123,4 +123,4 @@ inductive Import : Env.ME
     Implist M' ⟨ CE, TE, DE, VE ⟩ implist ee →
     Qualifier ee qualifier ⟨ce', te', de', ve'⟩ →
     -- SE = ⟨ dome(CE'), dom(TE'), dom(DE'), dom(VE') ⟩ : M →
-    Import me (Source.Import.imp qualifier M M' implist) ⟨ce', te', de', ie, ve'⟩ se
+    Import me (Source.Import.mk qualifier M M' implist) ⟨ce', te', de', ie, ve'⟩ se

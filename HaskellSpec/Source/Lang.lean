@@ -1,5 +1,5 @@
 import HaskellSpec.Names
-import HaskellSpec.NonEmptyList
+import HaskellSpec.NonEmpty
 import HaskellSpec.Source.Patterns
 import HaskellSpec.Source.Literals
 
@@ -26,8 +26,10 @@ inductive TypeExpression : Type where
 class ∈ ClassAssertion → C (u t₁ … tₖ)   k ≥ 0
 ```
 -/
-inductive ClassAssertion : Type where
-  | classAssert : QClassName → Type_Variable → List TypeExpression → ClassAssertion
+structure ClassAssertion : Type where
+  name : QClassName
+  var : Type_Variable
+  args : List TypeExpression
 
 /--
 ```text
@@ -35,8 +37,7 @@ cx ∈ Context → (class₁,...,classₖ)
                 k ≥ 0
 ```
 -/
-inductive Context : Type where
-  | cx : List ClassAssertion → Context
+def Context : Type := List ClassAssertion
 
 /--
 ```text
@@ -44,27 +45,23 @@ sig  ∈ Signature  → v :: cx => t
 sigs ∈ Signatures → sig₁; …; sigₙ   n ≥ 0
 ```
 -/
-inductive Signature : Type where
-  | sig : QVariable → Context → TypeExpression → Signature
+structure Signature : Type where
+  var : QVariable
+  context : Context
+  type : TypeExpression
 
 
 mutual
   /--
   ```text
     binds ∈ Binds → [ sigs; bindG then binds]
-  ```
-  --/
-  inductive Binds : Type where
-    | cons : List Signature → BindGroup → Binds → Binds
-    | empty : Binds
-
-  /--
-  ```text
     bindG ∈ BindGroup → bind₁; …; bindₙ   n ≥ 1
   ```
   --/
-  inductive BindGroup : Type where
-    | bind_group : NonEmptyList Binding → BindGroup
+  inductive Binds : Type where
+    | cons : List Signature → List Binds → Binds → Binds
+    | empty : Binds
+
 
   /--
   ```text
@@ -73,7 +70,7 @@ mutual
   ```
   --/
   inductive Binding : Type where
-    | bind_match : QVariable → NonEmptyList Match → Binding
+    | bind_match : QVariable → NonEmpty Match → Binding
     | bind_pat : Pattern → GuardedExprs → Binding
 
   /--
@@ -81,24 +78,27 @@ mutual
     match ∈ Match → p₁ … pₖ gdes    k ≥ 1
   ```
   --/
-  inductive Match : Type where
-    | mk : NonEmptyList Pattern → GuardedExprs → Match
+  structure Match : Type where
+    patterns : NonEmpty Pattern
+    gdes : GuardedExprs
 
   /--
   ```text
     gdes ∈ GuardedExprs → gde₁ … gdeₙ where binds   n ≥ 1
   ```
   --/
-  inductive GuardedExprs : Type where
-    | mk : NonEmptyList GuardedExp → Binds → GuardedExprs
+  structure GuardedExprs : Type where
+    gdes : NonEmpty GuardedExp
+    binds : Binds
 
   /--
   ```text
     gde ∈ GuardedExpr → | e₁ = e₂
   ```
   --/
-  inductive GuardedExp : Type where
-    | gExp_eq : Expression → Expression → GuardedExp
+  structure GuardedExp : Type where
+    guard : Expression
+    body : Expression
 
   /--
   ```text
@@ -121,10 +121,10 @@ mutual
     | var : QVariable → Expression
     | lit : Literal → Expression
     | constr : QConstructor → Expression
-    | abs : NonEmptyList Pattern → Expression → Expression
+    | abs : NonEmpty Pattern → Expression → Expression
     | app : Expression → Expression → Expression
     | let_bind : Binds → Expression → Expression
-    | case : Expression → NonEmptyList Match → Expression
+    | case : Expression → NonEmpty Match → Expression
     | do_block : Statements → Expression
     | listComp : Expression → Qualifiers → Expression
     | listRange : Expression → Option Expression → Option Expression → Expression

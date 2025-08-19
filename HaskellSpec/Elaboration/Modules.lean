@@ -147,7 +147,7 @@ CE, TE, h ⊢ class : Γ τ
 -/
 inductive classR : Env.CE → Env.TE → Int
                  → Source.ClassAssertion
-                 → SemTy.Class_Name
+                 → SemTy.SClass_Name
                  → SemTy.TypeS
                  → Prop where
   | classR :  (ce: Env.CE) ->
@@ -156,7 +156,7 @@ inductive classR : Env.CE → Env.TE → Int
               (className : QClassName) →
               (u: Type_Variable) →
               (ts: List Source.TypeExpression) ->
-              (Γ : SemTy.Class_Name) ->
+              (Γ : SemTy.SClass_Name) ->
               (τ : SemTy.TypeS) ->
               (h' : Int) ->
               (x: Variable) ->
@@ -165,7 +165,7 @@ inductive classR : Env.CE → Env.TE → Int
               (h' < h) ->
               (h'' : Int) ->
               (type te h'' (List.foldl Source.TypeExpression.app (Source.TypeExpression.var u) ts) τ) ->
-              classR ce te h (Source.ClassAssertion.classAssert className u ts) Γ τ
+              classR ce te h (Source.ClassAssertion.mk className u ts) Γ τ
 
 /--
 Cp. Fig 25

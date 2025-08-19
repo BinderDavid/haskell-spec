@@ -147,8 +147,8 @@ inductive QType_Variable : Type where
 
 Class names are written as `B` in the paper.
 -/
-inductive Class_Name : Type where
-  | Mk : String → Class_Name
+structure Class_Name : Type where
+  name : String
 
 /--
 ### Qualified Class Name

@@ -1,5 +1,5 @@
 import HaskellSpec.Names
-import HaskellSpec.NonEmptyList
+import HaskellSpec.NonEmpty
 import HaskellSpec.SemanticTypes
 /-!
 Figure 6
@@ -27,7 +27,7 @@ t ∈ Type expression → u
                     | T
                     | t₁ t₂
 ```
---/
+-/
 inductive TypeExpression : Type where
   | var      : Type_Variable → TypeExpression
   | typename : Type_Name → TypeExpression
@@ -38,17 +38,18 @@ inductive TypeExpression : Type where
 class ∈ ClassAssertion → C (u t₁ … tₖ)   k ≥ 0
 ```
 -/
-inductive ClassAssertion : Type where
-  | classAssert : Class_Name → Type_Variable → List TypeExpression → ClassAssertion
+structure ClassAssertion : Type where
+  name : Class_Name
+  var : Type_Variable
+  args : List TypeExpression
 
 /--
 ```text
 cx ∈ Context → (class₁,...,classₖ)
                 k ≥ 0
 ```
---/
-inductive Context : Type where
-  | cx : List ClassAssertion → Context
+-/
+def Context : Type := List ClassAssertion
 
 mutual
   /--
@@ -63,7 +64,7 @@ mutual
                 | v : σ {e1, e2}
     fp ∈ FieldPattern → x = p
   ```
-  --/
+  -/
   inductive Pattern : Type where
     | var : Variable → SemTy.TypeScheme →  Pattern
     | constr_pat : QConstructor → List Pattern → Pattern
@@ -79,53 +80,48 @@ mutual
   /--
   ```text
     binds ∈ Binds → [ sigs; bindG then binds]
+    bindG ∈ BindGroup → bind₁; …; bindₙ   n ≥ 1
   ```
-  --/
+  -/
   inductive Binds : Type where
     | cons : Signatures → BindGroup → Binds → Binds
     | empty : Binds
 
   /--
   ```text
-    bindG ∈ BindGroup → bind₁; …; bindₙ   n ≥ 1
-  ```
-  --/
-  inductive BindGroup : Type where
-    | bind_group : NonEmptyList Binding → BindGroup
-
-  /--
-  ```text
     bind ∈ Binding → x match₁ [] … [] matchₙ    n ≥ 1
                    | p gdes
   ```
-  --/
+  -/
   inductive Binding : Type where
-    | bind_match : QVariable → NonEmptyList Match → Binding
+    | bind_match : QVariable → NonEmpty Match → Binding
     | bind_pat : Pattern → GuardedExprs → Binding
 
   /--
   ```text
     match ∈ Match → p₁ … pₖ gdes    k ≥ 1
   ```
-  --/
-  inductive Match : Type where
-    | mk : NonEmptyList Pattern → GuardedExprs → Match
+  -/
+  structure Match : Type where
+    patterns : NonEmpty Pattern
+    gdes : GuardedExprs
 
   /--
   ```text
     gdes ∈ GuardedExprs → gde₁ … gdeₙ where binds   n ≥ 1
   ```
-  --/
+  -/
   inductive GuardedExprs : Type where
-    | gExp_where : NonEmptyList GuardedExp → Binds → GuardedExprs
+    | gExp_where : NonEmpty GuardedExp → Binds → GuardedExprs
 
   /--
   ```text
     gde ∈ GuardedExpr → | e₁ = e₂
   ```
-  --/
-  inductive GuardedExp : Type where
-    | gExp_eq : Expression → Expression → GuardedExp
+  -/
+  structure GuardedExp : Type where
+    guard : Expression
+    body : Expression
 
   /--
   ```text
@@ -142,20 +138,20 @@ mutual
                    | e τ₁ … τₖ                         k ≥ 1
                    | Λ α₁ … αₖ.e                       k ≥ 1
   ```
-  --/
+  -/
   inductive Expression : Type where
     | var : QVariable → Expression
     | lit : Literal → Expression
     | constr : QConstructor → Expression
-    | abs : NonEmptyList Pattern → Expression → Expression
+    | abs : NonEmpty Pattern → Expression → Expression
     | app : Expression → Expression → Expression
     | let_bind : Binds → Expression → Expression
-    | case : Expression → NonEmptyList Match → Expression
+    | case : Expression → NonEmpty Match → Expression
     | listComp : Expression → Qualifiers → Expression
     | recUpd : Expression → List FieldBinding → Expression
     | recConstr : Expression → List FieldBinding → Expression
-    | typ_app : Expression → NonEmptyList SemTy.TypeS → Expression
-    | typ_abs : NonEmptyList Type_Variable → Expression → Expression
+    | typ_app : Expression → NonEmpty SemTy.TypeS → Expression
+    | typ_abs : NonEmpty Type_Variable → Expression → Expression
 
   /--
   ```text
@@ -245,7 +241,7 @@ conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
 ```
 -/
 inductive ConstructorDecls : Type where
-    | conDecls : NonEmptyList ConstructorDecl → ConstructorDecls
+    | conDecls : NonEmpty ConstructorDecl → ConstructorDecls
 
 /--
 ```text
@@ -270,7 +266,7 @@ ctDecl ∈ Class or type → type S u₁ ... uₖ = t                           
                        | data cx => S u₁ ... uₖ = conDecls                 k ≥ 0
                        | class cx => B u where sigs; bind₁; ...; bindₙ     k ≥ 0
 ```
---/
+-/
 inductive ClassOrType : Type where
   | ct_type :
       Type_Name
@@ -296,16 +292,16 @@ inductive ClassOrType : Type where
 ctDecls ∈ Classes and types → [ctDecl₁;...;ctDeclₙ then ctDecls]
                               n ≥ 1
 ```
---/
+-/
 inductive ClassesAndTypes : Type where
   | ct_empty
-  | ct_Decls : NonEmptyList ClassOrType → ClassesAndTypes → ClassesAndTypes
+  | ct_Decls : NonEmpty ClassOrType → ClassesAndTypes → ClassesAndTypes
 
 /--
 ```text
 body ∈ Module body → ctDecls; instDecls; binds
 ```
---/
+-/
 inductive ModuleBody : Type where
   | body :
       ClassesAndTypes
@@ -318,19 +314,19 @@ inductive ModuleBody : Type where
 typeDecl ∈ TypeDeclaration → data χ α₁ … αₖ = conDecl₁ | … | conDeclsₙ    k ≥ 0
                                                                           n ≥ 1
 ```
---/
+-/
 inductive TypeDeclaration : Type where
   | typeDecl :
       -- Chi ->
       -- List Alphas ->
-      NonEmptyList ConstructorDecl ->
+      NonEmpty ConstructorDecl ->
       TypeDeclaration
 
 /--
 ```text
 typeDecls ∈ TypeDeclarations → typeDecl₁; …; typeDeclₙ    n ≥ 0
 ```
---/
+-/
 inductive TypeDeclarations : Type where
   | typeDecls : List TypeDeclaration -> TypeDeclarations
 
@@ -338,11 +334,9 @@ inductive TypeDeclarations : Type where
 ```text
 mod ∈ Module → module M where typeDecls; binds
 ```
---/
-inductive Module : Type where
-  | module :
-      Module_Name -- Use QModule:Name in the future?
-    → List TypeDeclarations
-    → Module
+-/
+structure Module : Type where
+  name : Module_Name -- Use QModule:Name in the future?
+  decls : List TypeDeclarations
 
 end Target

@@ -1,12 +1,13 @@
 import HaskellSpec.Source.Lang
 import HaskellSpec.Source.Literals
+import HaskellSpec.Source.ImportExport
 import HaskellSpec.Source.Module
 import HaskellSpec.Source.Patterns
 import HaskellSpec.Target.Lang
 import HaskellSpec.Names
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Environments
-import HaskellSpec.NonEmptyList
+import HaskellSpec.NonEmpty
 import HaskellSpec.Forall2
 import HaskellSpec.Elaboration.Kinding
 import HaskellSpec.Elaboration.Modules
