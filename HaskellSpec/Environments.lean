@@ -228,21 +228,33 @@ inductive SE : Type where
 
 Cp. section 2.7.8
 -/
-def GE : Type := CE × TE × DE
+structure GE : Type where
+  ce : CE
+  te : TE
+  de : DE
 
 /--
 ### Full Environment
 
 Cp. section 2.7.8
 -/
-def FE : Type := CE × TE × DE × IE × VE
+structure FE : Type where
+  ce : CE
+  te : TE
+  de : DE
+  ie : IE
+  ve : VE
 
 /--
 ### Entity Environment
 
 Cp. section 2.7.8
 -/
-def EE : Type := CE × TE × DE × VE
+structure EE : Type where
+  ce : CE
+  te : TE
+  de : DE
+  ve : VE
 
 /--
 ### Module Environment
