@@ -1,4 +1,7 @@
 import HaskellSpec.Lexer.Haskell.Combined
+import Veriflex.Located
+
+open Veriflex
 
 /-
 Reserved Symbols
@@ -125,3 +128,12 @@ Stranger Things
 
 #guard lex_haskell "0o79" == [Token.LitInteger 7, Token.LitInteger 9]
 #guard lex_haskell "datatype" == [Token.QVarId [] "datatype"]
+
+
+/-
+Combination with columnizer
+-/
+
+#guard lex_haskell_located "hello 123" == [ Located.mk 1 (Token.QVarId [] "hello")
+                                          , Located.mk 6 (Token.Whitespace " ")
+                                          , Located.mk 7 (Token.LitInteger 123) ]

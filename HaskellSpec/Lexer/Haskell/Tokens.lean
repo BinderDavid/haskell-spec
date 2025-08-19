@@ -1,3 +1,7 @@
+import Veriflex.Located
+
+open Veriflex
+
 inductive Token : Type where
   | Whitespace : String → Token
   | QVarId : List String → String → Token
@@ -104,7 +108,4 @@ inductive Token : Type where
 /--
 A located token with the start column
 -/
-structure LToken : Type where
-  token : Token
-  column : Nat
-  deriving Repr, BEq
+abbrev LToken := Located Token
