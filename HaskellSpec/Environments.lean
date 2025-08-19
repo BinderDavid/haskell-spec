@@ -156,18 +156,16 @@ def IE := List IE_Entry
 
 Cp. section 2.7.1
 -/
-inductive CEEntry : Type where
-  | ceEntry :
-      SemTy.SClass_Name ->
-      Int ->
-      -- this is probably wrong, it should be some "dictionary variable"
-      Variable ->
-      QClassName ->
-      IE ->
-      CEEntry
+structure CEEntry : Type where
+  name : SemTy.SClass_Name
+  h : Int
+  var : Variable
+  class_name : QClassName
+  ie : IE
 
 @[reducible]
-def CE := List CEEntry
+def CE := List (QClassName × CEEntry)
+
 
 /--
 Cp. Fig 16
@@ -203,6 +201,7 @@ inductive VE_Item : Type where
   | Ordinary : QVariable → SemTy.TypeScheme → VE_Item
   | Class : QVariable → SemTy.ClassTypeScheme → VE_Item
 
+
 /--
 ### Variable Environment
 
@@ -212,6 +211,8 @@ Cp. section 2.7.5
 def VE : Type :=
   Env QVariable VE_Item
 
+def ops (ve : VE)(Γ : SemTy.SClass_Name) : List QVariable :=
+  sorry
 
 inductive KE_Name : Type where
   | T : QType_Name -> KE_Name

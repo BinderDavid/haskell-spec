@@ -159,6 +159,7 @@ Class names are written as `B` in the paper.
 -/
 structure Class_Name : Type where
   name : String
+  deriving BEq
 
 /--
 ### Qualified Class Name
@@ -171,6 +172,7 @@ C ∈ Qualified class name → B
 inductive QClassName : Type where
   | Unqualified : Class_Name → QClassName
   | Qualified : Module_Name → Class_Name → QClassName
+  deriving BEq
 
 
 /--
@@ -184,6 +186,7 @@ C ∈ Original class name → B
 inductive OClass_Name : Type where
   | Unqualified : Class_Name → OClass_Name
   | Qualified : Module_Name → Class_Name → OClass_Name
+  deriving BEq
 
 
 

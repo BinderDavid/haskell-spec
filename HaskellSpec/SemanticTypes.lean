@@ -32,6 +32,7 @@ export Kind (Star Fun)
 structure SClass_Name : Type where
   name : OClass_Name
   kind : Kind
+  deriving BEq
 
 
 def hs_prelude : Module_Name := Module_Name.Mk "Prelude"

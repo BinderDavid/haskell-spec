@@ -39,17 +39,20 @@ inductive Entity : Env.EE
 
   | TYPE_SYN :
     ⟨T, Env.TE_Item.TypeSynonym χ h αs τ⟩ ∈ te₁ →
-    Entity ⟨ce, ⟨te₁,te₂⟩, de, ve⟩ _ ⟨[], ⟨Env.restrict te₁ [T],[]⟩, ⟨[], []⟩, []⟩
+    -------------------------
+    Entity ⟨ce, ⟨te₁,te₂⟩, de, ve⟩ (Source.Entity.type_some T [] []) ⟨[], ⟨Env.restrict te₁ [T],[]⟩, ⟨[], []⟩, []⟩
 
   | CLASS_SOME :
-    -- C : ⟨Γ, h, x_def, α, IE_sup⟩ ∈ ce →
-    -- xs ⊆ ops(ve, Γ) →
-    Entity ⟨ce, te, de, ve⟩ (Source.Entity.class_some C xs) ⟨_, ⟨[], []⟩, ⟨[], []⟩, _⟩
+    ⟨C, Env.CEEntry.mk Γ h x_def α ie_sup⟩ ∈ ce →
+    xs ⊆ Env.ops ve Γ →
+    -------------------------
+    Entity ⟨ce, te, de, ve⟩ (Source.Entity.class_some C xs) ⟨Env.restrict ce [C], ⟨[], []⟩, ⟨[], []⟩, Env.restrict ve xs⟩
 
   | CLASS_ALL :
-    -- C : ⟨Γ, h, x_def, α, IE_sup⟩ ∈ ce →
-    -- xs = ops(ve, Γ) →
-    Entity ⟨ce, te, de, ve⟩ (Source.Entity.class_all C) ⟨_, ⟨[], []⟩, ⟨[], []⟩, _⟩
+    ⟨C, Env.CEEntry.mk Γ h x_def α ie_sup⟩ ∈ ce →
+    xs = Env.ops ve Γ →
+    -------------------------
+    Entity ⟨ce, te, de, ve⟩ (Source.Entity.class_all C) ⟨Env.restrict ce [C], ⟨[], []⟩, ⟨[], []⟩, Env.restrict ve xs⟩
 
 /--
 Cp. Fig 12
