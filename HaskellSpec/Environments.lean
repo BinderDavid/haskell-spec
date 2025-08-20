@@ -31,8 +31,9 @@ def restrict [BEq name] (env : Env name info) (names : List name) : Env name inf
 def intersect [BEq t] (l l' : List t) : (List t) :=
   List.filter (List.contains l') l
 
-def oplus [BEq name] [BEq info] (env env' : Env name info) (_ : (intersect (dom env) (dom env') = empty)) : (Env name info) :=
-  List.append env env'
+def oplus [BEq name] [BEq info] (env₁ env₂ : Env name info)
+          : intersect (dom env₁) (dom env₂) = empty → Env name info :=
+  λ _ => List.append env₁ env₂
 
 -- ⊕ from Section 2.7 as a ternary relation
 -- asserts that the environments have no overlapping domains
@@ -54,12 +55,18 @@ def oplusbar [BEq name] (env env' : Env name info) (_ : (restrict env (dom env')
 def oplusarrow [BEq name] [BEq info] (env env' : Env name info) : (Env name info) :=
   List.append (remove env (dom env')) env'
 
+/-- This operation is written `⊕^~` in the paper.-/
 class OplusTilde (env : Type) where
   oplustilde (env₁ env₂ : env) : env
 
 instance instOplusTildeEnv : OplusTilde (Env name info) where
   oplustilde env₁ env₂ := List.append env₁ env₂
 
+class Qualify (env : Type) where
+  qualify  (m : Module_Name) (e : env) : env
+
+instance instQualifyEnv : Qualify (Env name info) where
+  qualify := sorry
 
 def unQual [Unqual name] : Env name info -> Env name info :=
   List.map (λ(n, i) => (Unqual.unQual n, i))
@@ -332,11 +339,15 @@ instance instOplusTildeEE : OplusTilde EE where
       ve := OplusTilde.oplustilde ee₁.ve ee₂.ve
     }
 
+instance instQualifyEE : Qualify EE where
+  qualify := sorry
+
 /--
 ### Module Environment
 
 Cp. section 2.7.9
 -/
+@[reducible]
 def ME : Type := Env Module_Name FE
 
 end Env

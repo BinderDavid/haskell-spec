@@ -107,7 +107,7 @@ inductive Implist : Module_Name
     -------------------------
     Implist M ee
             (Source.ImportList.list_some ents)
-            (Env.OplusTilde.oplustilde ee' _ /- M.EE' -/)
+            (Env.OplusTilde.oplustilde ee' (Env.Qualify.qualify m ee'))
 
   | HIDE_SOME :
     Forall2 ents ees (λ ent eeᵢ => Entity ee ent eeᵢ) →
@@ -117,13 +117,13 @@ inductive Implist : Module_Name
     -------------------------
     Implist M ee
            (Source.ImportList.hide_some ents)
-           (Env.OplusTilde.oplustilde ee' _ /- M.EE' -/)
+           (Env.OplusTilde.oplustilde ee' (Env.Qualify.qualify m ee'))
 
   | ALL :
     -------------------------
     Implist M ee
             Source.ImportList.empty
-            (Env.OplusTilde.oplustilde ee _ /- M.EE -/)
+            (Env.OplusTilde.oplustilde ee (Env.Qualify.qualify m ee))
 
 /--
 Cp. Fig 13
@@ -155,8 +155,8 @@ inductive Import : Env.ME
                  → Env.SE
                  → Prop where
   | IMPORT :
-    -- M : ⟨ CE, TE, DE, IE, VE ⟩ ∈ ME →
-    Implist M' ⟨ CE, TE, DE, VE ⟩ implist ee →
+    ⟨M, ⟨ce, te, de, ie,ve⟩⟩ ∈ me →
+    Implist M' ⟨ ce, te, de, ve ⟩ implist ee →
     Qualifier ee qualifier ⟨ce', te', de', ve'⟩ →
     -- SE = ⟨ dome(CE'), dom(TE'), dom(DE'), dom(VE') ⟩ : M →
     -------------------------
