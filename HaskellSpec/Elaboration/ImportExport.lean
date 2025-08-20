@@ -111,9 +111,9 @@ inductive Implist : Module_Name
 
   | HIDE_SOME :
     Forall2 ents ees (λ ent eeᵢ => Entity ee ent eeᵢ) →
-    -- ⟨CE, TE, DE, VE ⟩ = EE \ (EE₁ ∪ … ∪ EEₙ) →
-    -- Ks = { K | K ∈ {ent₁, …, entₙ}} →
-    -- EE' = ⟨CE, TE, DE \ Ks, VE ⟩ →
+    ⟨ce, te, de, ve⟩ = ee /- ee \ ees -/ →
+    Ks = Source.constrs ents →
+    ee' = ⟨ce, te, _ /- de \ Ks -/, ve ⟩ →
     -------------------------
     Implist M ee
            (Source.ImportList.hide_some ents)
