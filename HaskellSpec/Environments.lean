@@ -270,6 +270,13 @@ structure EE : Type where
   de : DE
   ve : VE
 
+def ee_justQs (ee : EE) : EE :=
+ { ce := justQs ee.ce
+   te := ⟨justQs ee.te.fst, ee.te.snd⟩
+   de := ⟨justQs ee.de.fst,justQs ee.de.snd⟩
+   ve := justQs ee.ve
+ }
+
 /--
 ### Module Environment
 

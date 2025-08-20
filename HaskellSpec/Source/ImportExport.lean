@@ -5,7 +5,8 @@ namespace Source
 /--
 Distinguishes between qualified and unqualified imports.
 ```text
-qualifer ∈ Qualifier → [qualified]
+qualifer ∈ Qualifier → qualified
+                     | ε
 ```
 -/
 inductive Qualifier : Type where

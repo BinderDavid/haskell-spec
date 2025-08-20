@@ -224,3 +224,14 @@ instance instIsqualQConstructor : IsQual QConstructor where
     | QConstructor.Unqualified _ => False
     | QConstructor.Qualified _ _ => True
     | QConstructor.Special _ => False
+
+instance instIsQualQTypeName : IsQual QType_Name where
+  isQual
+    | QType_Name.Unqualified _ => False
+    | QType_Name.Qualified _ _=> True
+    | QType_Name.Special _ => True -- TODO: Check if these count as qualified.
+
+instance instIsQualQVariable : IsQual QVariable where
+  isQual
+    | QVariable.Qualified _ _ => True
+    | QVariable.Unqualified _ => False

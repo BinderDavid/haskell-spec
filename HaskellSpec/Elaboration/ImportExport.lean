@@ -108,7 +108,7 @@ inductive Qualifier : Env.EE
                     → Env.EE
                     → Prop where
   | QUALIFIED :
-    Qualifier ee Source.Qualifier.qualified _
+    Qualifier ee Source.Qualifier.qualified (Env.ee_justQs ee)
 
   | UNQUALIFIED :
     Qualifier ee Source.Qualifier.unqualified ee
