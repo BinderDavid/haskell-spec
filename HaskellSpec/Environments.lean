@@ -54,8 +54,12 @@ def oplusbar [BEq name] (env env' : Env name info) (_ : (restrict env (dom env')
 def oplusarrow [BEq name] [BEq info] (env env' : Env name info) : (Env name info) :=
   List.append (remove env (dom env')) env'
 
-def oplustilde (env env' : Env name info) : (Env name info) :=
-  List.append env env'
+class OplusTilde (env : Type) where
+  oplustilde (env₁ env₂ : env) : env
+
+instance instOplusTildeEnv : OplusTilde (Env name info) where
+  oplustilde env₁ env₂ := List.append env₁ env₂
+
 
 def unQual [Unqual name] : Env name info -> Env name info :=
   List.map (λ(n, i) => (Unqual.unQual n, i))
@@ -294,6 +298,10 @@ structure EE : Type where
   de : DE
   ve : VE
 
+/-- An empty entity environment -/
+def ee_empty : EE :=
+  EE.mk [] ⟨[],[]⟩ ⟨[],[]⟩ []
+
 instance instJustQsEE : JustQs EE where
   justQs ee :=
    { ce := JustQs.justQs ee.ce
@@ -301,6 +309,28 @@ instance instJustQsEE : JustQs EE where
      de := JustQs.justQs ee.de
      ve := JustQs.justQs ee.ve
    }
+
+def ee_union (ee₁ ee₂ : EE) : EE :=
+  { ce := ee₁.ce ++ ee₂.ce
+    te := ⟨ee₁.te.te₁ ++ ee₂.te.te₁,ee₁.te.te₂ ++ ee₂.te.te₂⟩
+    de := ⟨ee₁.de.de₁ ++ ee₂.de.de₁,ee₁.de.de₂ ++ ee₂.de.de₂⟩
+    ve := ee₁.ve ++ ee₂.ve
+  }
+
+
+def ee_unions (ees : List EE) : EE :=
+  ees.foldl ee_union ee_empty
+
+
+instance instOplusTildeEE : OplusTilde EE where
+  oplustilde ee₁ ee₂ :=
+    { ce := OplusTilde.oplustilde ee₁.ce ee₂.ce
+      te := ⟨ OplusTilde.oplustilde ee₁.te.te₁ ee₂.te.te₁
+            , OplusTilde.oplustilde ee₁.te.te₂ ee₂.te.te₂ ⟩
+      de := ⟨ OplusTilde.oplustilde ee₁.de.de₁ ee₂.de.de₁
+            , OplusTilde.oplustilde ee₁.de.de₂ ee₂.de.de₂ ⟩
+      ve := OplusTilde.oplustilde ee₁.ve ee₂.ve
+    }
 
 /--
 ### Module Environment

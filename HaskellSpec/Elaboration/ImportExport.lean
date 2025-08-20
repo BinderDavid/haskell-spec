@@ -2,6 +2,7 @@ import HaskellSpec.Environments
 import HaskellSpec.Source.Lang
 import HaskellSpec.Source.Module
 import HaskellSpec.Names
+import HaskellSpec.Forall2
 
 
 /-!
@@ -21,38 +22,50 @@ inductive Entity : Env.EE
   | VAR_ENT :
     x ∈ Env.dom ve →
     -------------------------
-    Entity ⟨ce, te, ⟨de₁,de₂⟩, ve⟩ (Source.Entity.var x) ⟨[], ⟨[],[]⟩, ⟨[],Env.restrict de₂ [x]⟩, Env.restrict ve [x]⟩
+    Entity ⟨ce, te, ⟨de₁,de₂⟩, ve⟩
+           (Source.Entity.var x)
+           ⟨[], ⟨[],[]⟩, ⟨[],Env.restrict de₂ [x]⟩, Env.restrict ve [x]⟩
 
   | TYPE_SOME :
     ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
     xs ⊆ Env.fields de₂ χ →
     Ks ⊆ Env.constrs de₁ χ →
     -------------------------
-    Entity ⟨ce, ⟨te₁,te₂⟩, ⟨de₁,de₂⟩, ve⟩ (Source.Entity.type_some T xs Ks) ⟨[], ⟨Env.restrict te [T],[]⟩, ⟨Env.restrict de₁ Ks,Env.restrict de₂ xs⟩, Env.restrict ve xs⟩
+    Entity ⟨ce, ⟨te₁,te₂⟩, ⟨de₁,de₂⟩, ve⟩
+           (Source.Entity.type_some T xs Ks)
+           ⟨[], ⟨Env.restrict te [T],[]⟩, ⟨Env.restrict de₁ Ks, Env.restrict de₂ xs⟩, Env.restrict ve xs⟩
 
   | TYPE_ALL :
     ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
     xs = Env.fields de₂ χ →
     Ks = Env.constrs de₁ χ →
     -------------------------
-    Entity ⟨ce, ⟨te₁,te₂⟩, ⟨de₁,de₂⟩, ve⟩ (Source.Entity.type_all T) ⟨[], ⟨Env.restrict te [T],[]⟩, ⟨Env.restrict de₁ Ks,Env.restrict de₂ xs⟩, Env.restrict ve xs⟩
+    Entity ⟨ce, ⟨te₁,te₂⟩, ⟨de₁,de₂⟩, ve⟩
+           (Source.Entity.type_all T)
+           ⟨[], ⟨Env.restrict te [T],[]⟩, ⟨Env.restrict de₁ Ks,Env.restrict de₂ xs⟩, Env.restrict ve xs⟩
 
   | TYPE_SYN :
     ⟨T, Env.TE_Item.TypeSynonym χ h αs τ⟩ ∈ te₁ →
     -------------------------
-    Entity ⟨ce, ⟨te₁,te₂⟩, de, ve⟩ (Source.Entity.type_some T [] []) ⟨[], ⟨Env.restrict te₁ [T],[]⟩, ⟨[], []⟩, []⟩
+    Entity ⟨ce, ⟨te₁,te₂⟩, de, ve⟩
+           (Source.Entity.type_some T [] [])
+           ⟨[], ⟨Env.restrict te₁ [T],[]⟩, ⟨[], []⟩, []⟩
 
   | CLASS_SOME :
     ⟨C, Env.CEEntry.mk Γ h x_def α ie_sup⟩ ∈ ce →
     xs ⊆ Env.ops ve Γ →
     -------------------------
-    Entity ⟨ce, te, de, ve⟩ (Source.Entity.class_some C xs) ⟨Env.restrict ce [C], ⟨[], []⟩, ⟨[], []⟩, Env.restrict ve xs⟩
+    Entity ⟨ce, te, de, ve⟩
+           (Source.Entity.class_some C xs)
+           ⟨Env.restrict ce [C], ⟨[], []⟩, ⟨[], []⟩, Env.restrict ve xs⟩
 
   | CLASS_ALL :
     ⟨C, Env.CEEntry.mk Γ h x_def α ie_sup⟩ ∈ ce →
     xs = Env.ops ve Γ →
     -------------------------
-    Entity ⟨ce, te, de, ve⟩ (Source.Entity.class_all C) ⟨Env.restrict ce [C], ⟨[], []⟩, ⟨[], []⟩, Env.restrict ve xs⟩
+    Entity ⟨ce, te, de, ve⟩
+           (Source.Entity.class_all C)
+           ⟨Env.restrict ce [C], ⟨[], []⟩, ⟨[], []⟩, Env.restrict ve xs⟩
 
 /--
 Cp. Fig 12
@@ -89,13 +102,28 @@ inductive Implist : Module_Name
                   → Env.EE
                   → Prop where
   | LIST_SOME :
-    Implist M ee (Source.ImportList.list_some ents) _
+    Forall2 ents ees (λ ent eeᵢ => Entity ee ent eeᵢ) →
+    ee' = Env.ee_unions ees →
+    -------------------------
+    Implist M ee
+            (Source.ImportList.list_some ents)
+            (Env.OplusTilde.oplustilde ee' _ /- M.EE' -/)
 
   | HIDE_SOME :
-    Implist M ee (Source.ImportList.hide_some ents) _
+    Forall2 ents ees (λ ent eeᵢ => Entity ee ent eeᵢ) →
+    -- ⟨CE, TE, DE, VE ⟩ = EE \ (EE₁ ∪ … ∪ EEₙ) →
+    -- Ks = { K | K ∈ {ent₁, …, entₙ}} →
+    -- EE' = ⟨CE, TE, DE \ Ks, VE ⟩ →
+    -------------------------
+    Implist M ee
+           (Source.ImportList.hide_some ents)
+           (Env.OplusTilde.oplustilde ee' _ /- M.EE' -/)
 
   | ALL :
-    Implist M ee Source.ImportList.empty _
+    -------------------------
+    Implist M ee
+            Source.ImportList.empty
+            (Env.OplusTilde.oplustilde ee _ /- M.EE -/)
 
 /--
 Cp. Fig 13
@@ -108,9 +136,11 @@ inductive Qualifier : Env.EE
                     → Env.EE
                     → Prop where
   | QUALIFIED :
+    -------------------------
     Qualifier ee Source.Qualifier.qualified (Env.JustQs.justQs ee)
 
   | UNQUALIFIED :
+    -------------------------
     Qualifier ee Source.Qualifier.unqualified ee
 
 /--
@@ -129,4 +159,5 @@ inductive Import : Env.ME
     Implist M' ⟨ CE, TE, DE, VE ⟩ implist ee →
     Qualifier ee qualifier ⟨ce', te', de', ve'⟩ →
     -- SE = ⟨ dome(CE'), dom(TE'), dom(DE'), dom(VE') ⟩ : M →
+    -------------------------
     Import me (Source.Import.mk qualifier M M' implist) ⟨ce', te', de', ie, ve'⟩ se
