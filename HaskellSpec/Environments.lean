@@ -31,8 +31,9 @@ def restrict [BEq name] (env : Env name info) (names : List name) : Env name inf
 def intersect [BEq t] (l l' : List t) : (List t) :=
   List.filter (List.contains l') l
 
-def oplus [BEq name] [BEq info] (env env' : Env name info) (_ : (intersect (dom env) (dom env') = empty)) : (Env name info) :=
-  List.append env env'
+def oplus [BEq name] [BEq info] (env₁ env₂ : Env name info)
+          : intersect (dom env₁) (dom env₂) = empty → Env name info :=
+  λ _ => List.append env₁ env₂
 
 -- ⊕ from Section 2.7 as a ternary relation
 -- asserts that the environments have no overlapping domains
@@ -54,14 +55,28 @@ def oplusbar [BEq name] (env env' : Env name info) (_ : (restrict env (dom env')
 def oplusarrow [BEq name] [BEq info] (env env' : Env name info) : (Env name info) :=
   List.append (remove env (dom env')) env'
 
-def oplustilde (env env' : Env name info) : (Env name info) :=
-  List.append env env'
+/-- This operation is written `⊕^~` in the paper.-/
+class OplusTilde (env : Type) where
+  oplustilde (env₁ env₂ : env) : env
+
+instance instOplusTildeEnv : OplusTilde (Env name info) where
+  oplustilde env₁ env₂ := List.append env₁ env₂
+
+class Qualify (env : Type) where
+  qualify  (m : Module_Name) (e : env) : env
+
+instance instQualifyEnv : Qualify (Env name info) where
+  qualify := sorry
 
 def unQual [Unqual name] : Env name info -> Env name info :=
   List.map (λ(n, i) => (Unqual.unQual n, i))
 
-def justQs [IsQual name] : Env name info -> Env name info :=
-  List.filter (IsQual.isQual ∘ Prod.fst)
+class JustQs (env : Type) where
+  justQs : env -> env
+
+instance instJustQsEnv [IsQual name] : JustQs (Env name info) where
+  justQs := List.filter (IsQual.isQual ∘ Prod.fst)
+
 
 def justSingle [BEq name] [BEq info] : Env name info -> Env name info :=
   sorry -- TODO My first attempt at defining this did not satisfy the
@@ -71,7 +86,8 @@ inductive TE_Item : Type where
   | DataType : SemTy.Type_Constructor →  TE_Item
   | TypeSynonym : SemTy.Type_Constructor → Int → List SemTy.Type_Variable → SemTy.TypeS → TE_Item
 
-/--
+
+/-
 ### Type environment
 
 The type environment contains information about type constructors and type variables.
@@ -80,11 +96,22 @@ the type variable information records in-scope type variables.
 
 Cp. section 2.7.2
 -/
-def TE : Type := Env QType_Name TE_Item × Env Type_Variable SemTy.Type_Variable
+abbrev TE₁ : Type := Env QType_Name TE_Item
+abbrev TE₂ : Type := Env Type_Variable SemTy.Type_Variable
+structure TE : Type where
+  te₁ : TE₁
+  te₂ : TE₂
+
+instance instJustQsTE : JustQs TE where
+  justQs te :=
+    { te₁ := JustQs.justQs te.te₁
+      te₂ := te.te₂
+    }
 
 def TE_init : TE :=
-  ([(QType_Name.Special Special_Type_Constructor.List, TE_Item.DataType (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star)))],
-   [])
+  { te₁ := [(QType_Name.Special Special_Type_Constructor.List, TE_Item.DataType (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star)))]
+    te₂ := []
+  }
 
 /--
 ### Label Environment
@@ -173,8 +200,8 @@ Cp. Fig 16
 def CE_init : CE := []
 
 
-def DE₁ : Type := Env QConstructor (QConstructor × SemTy.Type_Constructor × SemTy.TypeScheme)
-def DE₂ : Type := Env QVariable (QVariable × SemTy.Type_Constructor × LE)
+abbrev DE₁ : Type := Env QConstructor (QConstructor × SemTy.Type_Constructor × SemTy.TypeScheme)
+abbrev DE₂ : Type := Env QVariable (QVariable × SemTy.Type_Constructor × LE)
 
 def constrs (de : DE₁)(χ : SemTy.Type_Constructor) : List QConstructor :=
   List.map Prod.fst (List.filter (λ ⟨_,info⟩ => info.snd.fst == χ) de)
@@ -187,7 +214,15 @@ def fields (de : DE₂)(χ : SemTy.Type_Constructor) : List QVariable :=
 
 Cp. section 2.7.3
 -/
-def DE : Type := DE₁ × DE₂
+structure DE : Type where
+  de₁ : DE₁
+  de₂ : DE₂
+
+instance instJustQsDE : JustQs DE where
+  justQs de :=
+    { de₁ := JustQs.justQs de.de₁
+      de₂ := JustQs.justQs de.de₂
+    }
 
 /--
 ### Overloading Environment
@@ -270,11 +305,49 @@ structure EE : Type where
   de : DE
   ve : VE
 
+/-- An empty entity environment -/
+def ee_empty : EE :=
+  EE.mk [] ⟨[],[]⟩ ⟨[],[]⟩ []
+
+instance instJustQsEE : JustQs EE where
+  justQs ee :=
+   { ce := JustQs.justQs ee.ce
+     te := JustQs.justQs ee.te
+     de := JustQs.justQs ee.de
+     ve := JustQs.justQs ee.ve
+   }
+
+def ee_union (ee₁ ee₂ : EE) : EE :=
+  { ce := ee₁.ce ++ ee₂.ce
+    te := ⟨ee₁.te.te₁ ++ ee₂.te.te₁,ee₁.te.te₂ ++ ee₂.te.te₂⟩
+    de := ⟨ee₁.de.de₁ ++ ee₂.de.de₁,ee₁.de.de₂ ++ ee₂.de.de₂⟩
+    ve := ee₁.ve ++ ee₂.ve
+  }
+
+
+def ee_unions (ees : List EE) : EE :=
+  ees.foldl ee_union ee_empty
+
+
+instance instOplusTildeEE : OplusTilde EE where
+  oplustilde ee₁ ee₂ :=
+    { ce := OplusTilde.oplustilde ee₁.ce ee₂.ce
+      te := ⟨ OplusTilde.oplustilde ee₁.te.te₁ ee₂.te.te₁
+            , OplusTilde.oplustilde ee₁.te.te₂ ee₂.te.te₂ ⟩
+      de := ⟨ OplusTilde.oplustilde ee₁.de.de₁ ee₂.de.de₁
+            , OplusTilde.oplustilde ee₁.de.de₂ ee₂.de.de₂ ⟩
+      ve := OplusTilde.oplustilde ee₁.ve ee₂.ve
+    }
+
+instance instQualifyEE : Qualify EE where
+  qualify := sorry
+
 /--
 ### Module Environment
 
 Cp. section 2.7.9
 -/
+@[reducible]
 def ME : Type := Env Module_Name FE
 
 end Env

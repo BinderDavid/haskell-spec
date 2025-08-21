@@ -5,7 +5,8 @@ namespace Source
 /--
 Distinguishes between qualified and unqualified imports.
 ```text
-qualifer ∈ Qualifier → [qualified]
+qualifer ∈ Qualifier → qualified
+                     | ε
 ```
 -/
 inductive Qualifier : Type where
@@ -32,6 +33,13 @@ inductive Entity : Type where
   | class_some : QClassName → List QVariable → Entity
   | class_all  : QClassName → Entity
   | module     : Module_Name → Entity -- use QModule_Name
+
+def constrs (ents : List Entity) : List QConstructor :=
+  let pred ent := match ent with
+    | Entity.cons K => some K
+    | _ => none
+  ents.filterMap pred
+
 /--
 ```text
 implist ∈ Import list → [[hiding] (ent₁,...,entₙ)]
