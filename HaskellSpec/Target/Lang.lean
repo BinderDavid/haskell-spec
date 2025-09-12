@@ -79,12 +79,12 @@ mutual
 
   /--
   ```text
-    binds ∈ Binds → [ sigs; bindG then binds]
-    bindG ∈ BindGroup → bind₁; …; bindₙ   n ≥ 1
+    binds ∈ Bindings → bind₁; ... ; bindₙ n > 0
+                     | rec bind₁; ... ; bind n
   ```
   -/
   inductive Binds : Type where
-    | cons : Signatures → BindGroup → Binds → Binds
+    | cons : Binding → Binds → Binds -- using this directly corresponds to the `rec` case
     | empty : Binds
 
   /--
