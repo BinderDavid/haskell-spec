@@ -155,11 +155,50 @@ def applySubstContext (subst : SemTyVarSubst) : SemTy.Context → SemTy.Context 
 
 mutual
   /--
-  Cp. Fig 36. 38. 39. 42
+  Cp. Fig 40
   ```text
-  GE, IE, VE ⊢ e ⇝ e : τ
+  GE, IE, VE ⊢ quals ⇝ quals : VE
   ```
   -/
+  inductive quals : Env.GE → Env.IE → Env.VE
+                  → Source.Qualifiers
+                  → Target.Qualifiers
+                  → Env.VE
+                  → Prop where
+    | QGEN :
+      exp ge ie ve e e' (SemTy.TypeS.App SemTy.prelude_list τ) →
+      pat ge ie p p' ve_p τ →
+      quals ge ie (Env.oplusarrow ve ve_p) qs qs' ve_quals →
+      quals ge ie ve
+        (Source.Qualifiers.list_bind p e qs)
+        (Target.Qualifiers.list_bind p' e' qs')
+        (Env.oplusarrow ve_p ve_quals)
+
+    | QLET :
+      binds ge ie ve bs bs' ve_binds →
+      quals ge ie (Env.oplusarrow ve ve_binds) qs qs' ve_quals →
+      quals ge ie ve
+        (Source.Qualifiers.lbind bs qs)
+        (Target.Qualifiers.lbind bs' qs')
+        (Env.oplusarrow ve ve_binds)
+
+    | QFILTER :
+      exp ge ie ve e e' SemTy.prelude_bool →
+      quals ge ie ve qs qs' ve_quals →
+      quals ge ie ve
+        (Source.Qualifiers.guard e qs)
+        (Target.Qualifiers.guard e' qs')
+        ve_quals
+
+    | QEMPTY :
+      quals ge ie ve Source.Qualifiers.empty Target.Qualifiers.empty []
+    /--
+    Cp. Fig 36. 38. 39. 42
+    ```text
+    GE, IE, VE ⊢ e ⇝ e : τ
+    ```
+    -/
+
   inductive exp : Env.GE → Env.IE → Env.VE
                 → Source.Expression
                 → Target.Expression
@@ -223,7 +262,12 @@ mutual
         τ
 
     | LIST_COMP :
-      exp ge ie ve (Source.Expression.listComp _ _) _ _
+      quals ge ie ve quals_source quals_target ve_quals ->
+      exp ge ie (Env.oplusarrow ve ve_quals) e_source e_target  τ ->
+      exp ge ie ve
+       (Source.Expression.listComp e_source quals_source)
+       (Target.Expression.listComp e_target quals_target) 
+       (SemTy.mk_list τ)
 
     | DO :
       stmts ge ie ve s e τ →
@@ -368,41 +412,3 @@ end
 
 
 
-/--
-Cp. Fig 40
-```text
-GE, IE, VE ⊢ quals ⇝ quals : VE
-```
--/
-inductive quals : Env.GE → Env.IE → Env.VE
-                → Source.Qualifiers
-                → Target.Qualifiers
-                → Env.VE
-                → Prop where
-  | QGEN :
-    exp ge ie ve e e' (SemTy.TypeS.App SemTy.prelude_list τ) →
-    pat ge ie p p' ve_p τ →
-    quals ge ie (Env.oplusarrow ve ve_p) qs qs' ve_quals →
-    quals ge ie ve
-      (Source.Qualifiers.list_bind p e qs)
-      (Target.Qualifiers.list_bind p' e' qs')
-      (Env.oplusarrow ve_p ve_quals)
-
-  | QLET :
-    binds ge ie ve bs bs' ve_binds →
-    quals ge ie (Env.oplusarrow ve ve_binds) qs qs' ve_quals →
-    quals ge ie ve
-      (Source.Qualifiers.lbind bs qs)
-      (Target.Qualifiers.lbind bs' qs')
-      (Env.oplusarrow ve ve_binds)
-
-  | QFILTER :
-    exp ge ie ve e e' SemTy.prelude_bool →
-    quals ge ie ve qs qs' ve_quals →
-    quals ge ie ve
-      (Source.Qualifiers.guard e qs)
-      (Target.Qualifiers.guard e' qs')
-      ve_quals
-
-  | QEMPTY :
-    quals ge ie ve Source.Qualifiers.empty Target.Qualifiers.empty []
