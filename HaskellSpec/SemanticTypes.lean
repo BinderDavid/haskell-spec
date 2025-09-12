@@ -119,6 +119,7 @@ inductive TypeS : Type where
   | Variable : Type_Variable → TypeS
   | TypeConstructor : Type_Constructor → TypeS
   | App : TypeS → TypeS → TypeS
+  deriving BEq
 
 /--
 The type `Prelude!Char`
@@ -150,7 +151,7 @@ TypeS.TypeConstructor (Type_Constructor.Mk (OType_Name.Special Special_Type_Cons
 ```
 -/
 
-def Context := List (SClass_Name × TypeS)
+abbrev Context := List (SClass_Name × TypeS)
 
 /--
 ```text
@@ -159,6 +160,7 @@ def Context := List (SClass_Name × TypeS)
 -/
 inductive TypeScheme : Type where
   | Forall : List Type_Variable → Context → TypeS → TypeScheme
+  deriving BEq
 
 /--
 This is written as follows in the paper:
@@ -172,4 +174,5 @@ ceiling : ∀ α. RealFrac α ⇒c ∀ β. Integral β ⇒ α → β
 -/
 inductive ClassTypeScheme : Type where
   | Forall : Type_Variable → SClass_Name → TypeScheme → ClassTypeScheme
+  deriving BEq
 end SemTy

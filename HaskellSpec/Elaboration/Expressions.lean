@@ -367,13 +367,29 @@ inductive quals : Env.GE → Env.IE → Env.VE
                 → Env.VE
                 → Prop where
   | QGEN :
-    quals _ _ _ _ _ _
+    exp ge ie ve e e' (SemTy.TypeS.App SemTy.prelude_list τ) →
+    pat ge ie p p' ve_p τ →
+    quals ge ie (Env.oplusarrow ve ve_p) qs qs' ve_quals →
+    quals ge ie ve
+      (Source.Qualifiers.list_bind p e qs)
+      (Target.Qualifiers.list_bind p' e' qs')
+      (Env.oplusarrow ve_p ve_quals)
 
   | QLET :
-    quals _ _ _ _ _ _
+    binds ge ie ve bs bs' ve_binds →
+    quals ge ie (Env.oplusarrow ve ve_binds) qs qs' ve_quals →
+    quals ge ie ve
+      (Source.Qualifiers.lbind bs qs)
+      (Target.Qualifiers.lbind bs' qs')
+      (Env.oplusarrow ve ve_binds)
 
   | QFILTER :
-    quals _ _ _ _ _ _
+    exp ge ie ve e e' SemTy.prelude_bool →
+    quals ge ie ve qs qs' ve_quals →
+    quals ge ie ve
+      (Source.Qualifiers.guard e qs)
+      (Target.Qualifiers.guard e' qs')
+      ve_quals
 
   | QEMPTY :
-    quals _ _ _ _ _ _
+    quals ge ie ve Source.Qualifiers.empty Target.Qualifiers.empty []
