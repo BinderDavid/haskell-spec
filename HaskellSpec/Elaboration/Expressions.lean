@@ -367,13 +367,20 @@ inductive quals : Env.GE → Env.IE → Env.VE
                 → Env.VE
                 → Prop where
   | QGEN :
-    quals _ _ _ _ _ _
+    /- GE, IE, VE ⊢exp e ⇝ e : [τ] -/
+    /- GE, IE ⊢pat p ⇝ p : VEp, τ -/
+    /- GE, IE, VE ⊕ VEp ⊢ quals ⇝ quals : VEquals-/
+    quals ge ie ve (Source.Qualifiers.list_bind _ _ _) _ _
 
   | QLET :
-    quals _ _ _ _ _ _
+    /- GE, IE, VE ⊢binds binds ⇝ binds : VEbinds -/
+    /- GE, IE, VE ⊕ VEbinds ⊢quals quals ⇝ quals : VEquals -/
+    quals ge ie ve (Source.Qualifiers.lbind _ _) _ _
 
   | QFILTER :
-    quals _ _ _ _ _ _
+    /- GE, IE, VE ⊢exp e ⇝ e : Prelude!Bool* -/
+    /- GE, IE, VE ⊢quals quals ⇝ quals : VEquals -/
+    quals ge ie ve (Source.Qualifiers.guard _ _) _ _
 
   | QEMPTY :
-    quals _ _ _ _ _ _
+    quals ge ie ve Source.Qualifiers.empty Target.Qualifiers.empty []
