@@ -89,6 +89,9 @@ def prelude_fromrational : QVariable :=
 def ratio_percent : QVariable :=
   QVariable.Qualified hs_ratio (Variable.Mk "(%)")
 
+def prelude_equals : QVariable :=
+  QVariable.Qualified hs_prelude (Variable.Mk "(==)")
+
 /--
 ```text
 χ ∈ Type constructor → Tᵏ
