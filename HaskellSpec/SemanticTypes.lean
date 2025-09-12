@@ -125,6 +125,15 @@ inductive TypeS : Type where
   deriving BEq
 
 /--
+Make a type list of α
+-/
+def mk_list (α: TypeS): TypeS :=
+ SemTy.TypeS.App
+  (SemTy.TypeS.TypeConstructor
+    (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) SemTy.Kind.Star))
+  α
+
+/--
 The type `Prelude!Char`
 -/
 def prelude_char : TypeS :=
