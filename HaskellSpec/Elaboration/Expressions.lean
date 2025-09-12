@@ -66,6 +66,10 @@ def unqual_var (var : QVariable) : Variable :=
     | (QVariable.Qualified _m x) => x
     | (QVariable.Unqualified x) => x
 
+/- { (Prelude.== τ ed e) } -/
+def apply_equals : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression :=
+  λ τ ed e => Target.Expression.app (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_equals) (NonEmpty.mk τ [])) ed) e
+
 /--
 Cp. Fig 43. 44.
 ```
@@ -120,7 +124,7 @@ inductive pat : Env.GE → Env.IE
       ge
       ie
       (Source.Pattern.lit (Source.Literal.integer i))
-      (Target.Pattern.exp _) /- { (Prelude.== τ ed e) } -/
+      (Target.Pattern.exp (apply_equals τ ed e))
       []
       τ
 
@@ -131,7 +135,7 @@ inductive pat : Env.GE → Env.IE
       ge
       ie
       (Source.Pattern.lit (Source.Literal.float n d))
-      (Target.Pattern.exp _) /- { (Prelude.== τ ed e) } -/
+      (Target.Pattern.exp (apply_equals τ ed e))
       []
       τ
 
