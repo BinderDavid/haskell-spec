@@ -405,10 +405,24 @@ mutual
       Forall3NE pats pats' ves (λ p p' ve' => pat ge ie p p' ve' τ) →
       gdes ge ie _ gs gs' τ →
       matchR ge ie ve (Source.Match.mk pats gs) (Target.Match.mk pats' gs') _
+
+  /--
+  Cp. Fig 34
+  ```text
+  GE, IE, VE ⊢ bind ⇝ bind : VE
+  ```
+  -/
+  inductive bind : Env.GE → Env.IE → Env.VE
+                 → Source.Binding
+                 → Target.Binding
+                 → Env.VE
+                 → Prop where
+    | FUNBIND :
+      bind _ _ _ _ _ _
+
+    | PATBIND :
+      pat ge ie p_source p_target veₚ τ ->
+      gdes ge ie ve gdes_source gedes_target τ ->
+      bind ge ie ve (Source.Binding.bind_pat p_source gdes_source) (Target.Binding.bind_pat p_target gdes_target) veₚ
+
 end
-
-
-
-
-
-
