@@ -215,9 +215,14 @@ mutual
       exp ge ie ve (Source.Expression.let_bind _ _) _ _
 
     | CASE :
-      exp ge ie ve (Source.Expression.case _ _) _ _
+      exp ge ie ve e e' τ' →
+      exp ge ie ve
+        (Source.Expression.case e m)
+        (Target.Expression.case e' m')
+        τ
 
     | LIST_COMP :
+
       exp ge ie ve (Source.Expression.listComp _ _) _ _
 
     | DO :
@@ -306,58 +311,62 @@ mutual
       exp ge ie ve e e' (SemTy.TypeS.App τ τ₁) →
       dict ie _ [⟨SemTy.prelude_monad, τ⟩] →
       stmts ge ie ve (Source.Statements.last e) e' (SemTy.TypeS.App τ τ₁)
-end
 
-/--
-Cp. Fig 35
-```text
-GE, IE, VE ⊢ gde ⇝ gde : τ
-```
--/
-inductive gde : Env.GE → Env.IE → Env.VE
-              → Source.GuardedExp
-              → Target.GuardedExp
-              → SemTy.TypeS
-              → Prop where
-  | GDE :
-    exp ge ie ve e1 e1' SemTy.prelude_bool →
-    exp ge ie ve e2 e2' τ →
-    gde ge ie ve (Source.GuardedExp.mk e1 e2) (Target.GuardedExp.mk e1' e2') τ
+  /--
+  Cp. Fig 35
+  ```text
+  GE, IE, VE ⊢ gde ⇝ gde : τ
+  ```
+  -/
+  inductive gde : Env.GE → Env.IE → Env.VE
+                → Source.GuardedExp
+                → Target.GuardedExp
+                → SemTy.TypeS
+                → Prop where
+    | GDE :
+      exp ge ie ve e1 e1' SemTy.prelude_bool →
+      exp ge ie ve e2 e2' τ →
+      gde ge ie ve (Source.GuardedExp.mk e1 e2) (Target.GuardedExp.mk e1' e2') τ
 
-
-/--
-Cp. Fig 35
-```text
-GE, IE, VE ⊢ gdes ⇝ gdes : τ
-```
--/
-inductive gdes : Env.GE → Env.IE → Env.VE
-               → Source.GuardedExprs
-               → Target.GuardedExprs
-               → SemTy.TypeS
-               → Prop where
-  | GDES :
-    Forall2NE gs gs' (λ g g' => gde ge ie _ g g' τ) →
-    binds ge ie ve bs bs' ve_binds →
-    gdes ge ie ve (Source.GuardedExprs.mk gs bs) _ τ
-
-/--
-Cp. Fig 35
-```text
-GE, IE, VE ⊢ match ⇝ match : τ
-```
--/
-inductive matchR : Env.GE
-                 → Env.IE
-                 → Env.VE
-                 → Source.Match
-                 → Target.Match
+  /--
+  Cp. Fig 35
+  ```text
+  GE, IE, VE ⊢ gdes ⇝ gdes : τ
+  ```
+  -/
+  inductive gdes : Env.GE → Env.IE → Env.VE
+                 → Source.GuardedExprs
+                 → Target.GuardedExprs
                  → SemTy.TypeS
                  → Prop where
-  | MATCH :
-    Forall3NE pats pats' ves (λ p p' ve' => pat ge ie p p' ve' τ) →
-    gdes ge ie _ gs gs' τ →
-    matchR ge ie ve (Source.Match.mk pats gs) (Target.Match.mk pats' gs') _
+    | GDES :
+      Forall2NE gs gs' (λ g g' => gde ge ie _ g g' τ) →
+      binds ge ie ve bs bs' ve_binds →
+      gdes ge ie ve (Source.GuardedExprs.mk gs bs) _ τ
+
+  /--
+  Cp. Fig 35
+  ```text
+  GE, IE, VE ⊢ match ⇝ match : τ
+  ```
+  -/
+  inductive matchR : Env.GE
+                   → Env.IE
+                   → Env.VE
+                   → Source.Match
+                   → Target.Match
+                   → SemTy.TypeS
+                   → Prop where
+    | MATCH :
+      Forall3NE pats pats' ves (λ p p' ve' => pat ge ie p p' ve' τ) →
+      gdes ge ie _ gs gs' τ →
+      matchR ge ie ve (Source.Match.mk pats gs) (Target.Match.mk pats' gs') _
+end
+
+
+
+
+
 
 /--
 Cp. Fig 40
