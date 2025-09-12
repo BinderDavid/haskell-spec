@@ -235,6 +235,7 @@ inductive OE : Type where
 inductive VE_Item : Type where
   | Ordinary : QVariable → SemTy.TypeScheme → VE_Item
   | Class : QVariable → SemTy.ClassTypeScheme → VE_Item
+  deriving BEq
 
 
 /--
