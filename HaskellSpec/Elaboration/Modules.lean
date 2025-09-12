@@ -71,13 +71,17 @@ inductive type : Env.TE → Int
                → SemTy.TypeS
                → Prop where
   | TVAR :
-    type te h _ _
+    ⟨u, α⟩ ∈ te₂ →
+    type ⟨te₁,te₂⟩ h (Source.TypeExpression.var u) (SemTy.TypeS.Variable α)
 
   | TCON :
-    type te h _ _
+    ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
+    type ⟨te₁,te₂⟩ h (Source.TypeExpression.typename T) (SemTy.TypeS.TypeConstructor χ)
 
   | TSYN :
-    type te h _ _
+    ⟨T, Env.TE_Item.TypeSynonym χ g αs τ⟩ ∈ te₁ →
+    g < h →
+    type ⟨te₁,te₂⟩ h _ _
 
   | TAPP :
     type te h t₁ τ₁ →
