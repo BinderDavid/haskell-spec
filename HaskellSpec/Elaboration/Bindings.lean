@@ -47,7 +47,7 @@ inductive binds : Env.GE → Env.IE → Env.VE
         (cross ve_bindg ve_binds)
 
   | EMPTY_BINDS :
-    binds _ _ _ _ _ _
+    binds ge ie ve Source.Binds.empty Target.Binds.empty List.nil
 
 /--
 Cp. Fig 30
