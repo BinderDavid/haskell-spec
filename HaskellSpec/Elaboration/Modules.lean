@@ -54,10 +54,10 @@ inductive ctdecls : Env.GE → Env.IE → Env.VE
                   → Env.FE
                   → Prop where
   | CTDECL :
-    ctdecls _ _ _ _ _
+    ctdecls _ _ _ _ _ _
 
-  | CTDECL_EMPTY :
-    ctdecls _ _ _ _ _
+  | EMPTY_CTDECL :
+    ctdecls _ _ _ _ _ _
 
 
 /--
