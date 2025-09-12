@@ -216,13 +216,13 @@ mutual
 
     | CASE :
       exp ge ie ve e e' τ' →
+      /- Forall2NE ms ms' (λ m m' => matchR ge ie ve m m' (SemTy.TypeS.App (SemTy.TypeS.App SemTy.prelude_fun τ') τ)) → -/
       exp ge ie ve
-        (Source.Expression.case e m)
-        (Target.Expression.case e' m')
+        (Source.Expression.case e ms)
+        (Target.Expression.case e' ms')
         τ
 
     | LIST_COMP :
-
       exp ge ie ve (Source.Expression.listComp _ _) _ _
 
     | DO :
@@ -340,7 +340,7 @@ mutual
                  → SemTy.TypeS
                  → Prop where
     | GDES :
-      Forall2NE gs gs' (λ g g' => gde ge ie _ g g' τ) →
+      /- Forall2NE gs gs' (λ g g' => gde ge ie _ g g' τ) → -/
       binds ge ie ve bs bs' ve_binds →
       gdes ge ie ve (Source.GuardedExprs.mk gs bs) _ τ
 
