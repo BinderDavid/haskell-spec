@@ -23,6 +23,8 @@ inductive module : Env.ME
                  → Target.Module
                  → Env.ME
                  → Prop where
+  | MODULE :
+    module _ _ _ _
 
 
 /--
@@ -37,6 +39,8 @@ inductive body : Module_Name
                → Target.ModuleBody
                → Env.FE → Env.SE
                → Prop where
+  | BODY :
+    body _ _ _ _ _ _
 
 /--
 Cp. Fig 17
@@ -49,6 +53,11 @@ inductive ctdecls : Env.GE → Env.IE → Env.VE
                   → Target.ClassesAndTypes
                   → Env.FE
                   → Prop where
+  | CTDECL :
+    ctdecls _ _ _ _ _ _
+
+  | EMPTY_CTDECL :
+    ctdecls _ _ _ _ _ _
 
 
 /--
@@ -61,6 +70,21 @@ inductive type : Env.TE → Int
                → Source.TypeExpression
                → SemTy.TypeS
                → Prop where
+  | TVAR :
+    type te h _ _
+
+  | TCON :
+    type te h _ _
+
+  | TSYN :
+    type te h _ _
+
+  | TAPP :
+    type te h t₁ τ₁ →
+    type te h t₂ τ₂ →
+    type te h (Source.TypeExpression.app t₁ t₂) (SemTy.TypeS.App τ₁ τ₂)
+
+
 
 /--
 Cp. Fig 19
@@ -73,6 +97,11 @@ inductive ctdecl : Env.GE → Env.VE → Env.IE
                  → Target.ClassOrType
                  → Env.CE → Env.TE → Env.KE → Env.IE → Env.VE
                  → Prop where
+  | DATA_DECL :
+    ctdecl _ _ _ _ _ _ _ _ _ _
+
+  | TYPE_DECL :
+    ctdecl _ _ _ _ _ _ _ _ _ _
 
 /--
 Cp. Fig 20
@@ -88,7 +117,11 @@ inductive condecl : Env.TE
                   → Env.DE → Env.VE → Env.LE
                   → SemTy.Context
                   → Prop where
+  | POSCON :
+    condecl _ _ _ _ _ _ _ _ _
 
+  | LABCON :
+    condecl _ _ _ _ _ _ _ _ _
 
 /--
 Cp. Fig 22
@@ -101,6 +134,8 @@ inductive lcon : Env.IE
                → SemTy.TypeS
                → SemTy.TypeS
                → Prop where
+  | LCON :
+    lcon _ _ _
 
 /--
 Cp. Fig 23
@@ -112,6 +147,8 @@ inductive ctDecl : Env.GE → Env.IE → Env.VE
                  → Source.ClassOrType
                  → Target.ClassOrType
                  → Prop where
+  | CLASS_DECL :
+    ctDecl _ _ _ _ _
 
 /--
 Cp. Fig 24
@@ -123,6 +160,8 @@ inductive sig : Env.GE
               → Source.Signature
               → Env.VE
               → Prop where
+  | SIG :
+    sig _ _ _
 
 /--
 Cp. Fig 24
@@ -177,6 +216,8 @@ inductive context : Env.CE → Env.TE → Int
                   → Source.Context
                   → SemTy.Context
                   → Prop where
+  | CONTEXT :
+    context _ _ _ _ _
 
 
 /--
@@ -190,6 +231,8 @@ inductive instDecls : Env.GE → Env.IE → Env.VE
                     → Target.InstanceDecls
                     → Env.IE
                     → Prop where
+  | INST_DECLS :
+    instDecls _ _ _ _ _ _
 
 /--
 Cp. Fig 26
@@ -202,6 +245,9 @@ inductive instDecl : Env.GE → Env.IE → Env.VE
                    → Target.InstanceDecl
                    → EnvIE
                    → Prop where
+  | INST_DECL :
+    instDecl _ _ _ _ _ _
+
 
 /--
 Cp. Fig 27
@@ -214,6 +260,8 @@ inductive method : Env.GE → Env.IE → Env.VE
                  → Target.FieldBinding
                  → Env.VE
                  → Prop where
+  | METHOD :
+    method _ _ _ _ _ _
 
 /--
 Cp. Fig 28
