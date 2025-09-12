@@ -76,19 +76,3 @@ inductive monobinds : Env.GE → Env.IE → Env.VE
   | MONOBINDS :
     monobinds _ _ _ _ _ _
 
-/--
-Cp. Fig 34
-```text
-GE, IE, VE ⊢ bind ⇝ bind : VE
-```
--/
-inductive bind : Env.GE → Env.IE → Env.VE
-               → Source.Binding
-               → Target.Binding
-               → Env.VE
-               → Prop where
-  | FUNBIND :
-    bind _ _ _ _ _ _
-
-  | PATBIND :
-    bind _ _ _ _ _ _
