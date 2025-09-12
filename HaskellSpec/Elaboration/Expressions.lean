@@ -66,9 +66,61 @@ def unqual_var (var : QVariable) : Variable :=
     | (QVariable.Qualified _m x) => x
     | (QVariable.Unqualified x) => x
 
-/- { (Prelude.== τ ed e) } -/
-def apply_equals : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression :=
-  λ τ ed e => Target.Expression.app (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_equals) (NonEmpty.mk τ [])) ed) e
+/- Applying typeclass methods to their type, dictionary, and term arguments. -/
+
+/- Prelude.== τ ed e -/
+def apply_equals : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression := λ τ ed e =>
+  Target.Expression.app
+    (Target.Expression.app
+      (Target.Expression.typ_app
+        (Target.Expression.var SemTy.prelude_equals)
+        (NonEmpty.mk τ []))
+    ed)
+    e
+
+/- Prelude!enumFromThenTo τ e e1' e2' e3' -/
+def apply_enumFromThenTo : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression  → Target.Expression → Target.Expression :=
+  λ τ e e1' e2' e3' =>
+  Target.Expression.app
+    (Target.Expression.app
+      (Target.Expression.app
+        (Target.Expression.app
+          (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then_to) (NonEmpty.mk τ []))
+        e)
+      e1')
+    e2')
+  e3'
+
+/- Prelude!enumFromTo τ e e1' e2' -/
+def apply_enumFromTo : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression → Target.Expression :=
+  λ τ e e1' e2' =>
+  Target.Expression.app
+    (Target.Expression.app
+      (Target.Expression.app
+        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_to) (NonEmpty.mk τ []))
+      e)
+    e1')
+  e2'
+
+/- Prelude!enumFromThen τ e e1' e2' -/
+def apply_enumFromThen : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression → Target.Expression :=
+  λ τ e e1' e2' =>
+  Target.Expression.app
+    (Target.Expression.app
+      (Target.Expression.app
+        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then) (NonEmpty.mk τ []))
+      e)
+    e1')
+  e2'
+
+/- Prelude!enumFrom τ e e1' -/
+def apply_enumFrom : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression :=
+  λ τ e e1' =>
+  Target.Expression.app
+    (Target.Expression.app
+      (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from) (NonEmpty.mk τ []))
+    e)
+  e1'
 
 /--
 Cp. Fig 43. 44.
@@ -255,7 +307,7 @@ mutual
 
     | CASE :
       exp ge ie ve e e' τ' →
-      /- Forall2NE ms ms' (λ m m' => matchR ge ie ve m m' (SemTy.TypeS.App (SemTy.TypeS.App SemTy.prelude_fun τ') τ)) → -/
+      /-Forall2NE ms ms' (λ m m' => matchR ge ie ve m m' (SemTy.TypeS.App (SemTy.TypeS.App SemTy.prelude_fun τ') τ)) → -/
       exp ge ie ve
         (Source.Expression.case e ms)
         (Target.Expression.case e' ms')
@@ -289,8 +341,7 @@ mutual
       dict ie e [⟨SemTy.prelude_enum, τ⟩] →
       exp ge ie ve
         (Source.Expression.listRange e1 (some e2) (some e3))
-        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then_to) _)
-        /- Prelude!enumFromThenTo τ e e1' e2' e3' -/
+        (apply_enumFromThenTo τ e e1' e2' e3')
         (SemTy.TypeS.App SemTy.prelude_list τ)
 
     | ENUM_FROM_TO :
@@ -299,8 +350,7 @@ mutual
       dict ie e [⟨SemTy.prelude_enum, τ⟩] →
       exp ge ie ve
         (Source.Expression.listRange e1 none (some e2))
-        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_to) _)
-        /- Prelude!enumFromTo τ e e1' e2' -/
+        (apply_enumFromTo τ e e1' e2')
         (SemTy.TypeS.App SemTy.prelude_list τ)
 
     | ENUM_FROM_THEN :
@@ -309,8 +359,7 @@ mutual
       dict ie e [⟨SemTy.prelude_enum, τ⟩] →
       exp ge ie ve
         (Source.Expression.listRange e1 (some e2) none)
-        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then) _)
-        /- Prelude!enumFromThen τ e e1' e2' -/
+        (apply_enumFromThen τ e e1' e2')
         (SemTy.TypeS.App SemTy.prelude_list τ)
 
     | ENUM_FROM :
@@ -318,8 +367,7 @@ mutual
       dict ie e [⟨SemTy.prelude_enum, τ⟩] →
       exp ge ie ve
         (Source.Expression.listRange e1 none none)
-        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from) _)
-        /- Prelude!enumFrom τ e e1' -/
+        (apply_enumFrom τ e e1')
         (SemTy.TypeS.App SemTy.prelude_list τ)
 
   /--
