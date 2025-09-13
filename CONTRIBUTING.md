@@ -31,7 +31,7 @@ At some point we might want to switch to using [verso](https://github.com/leanpr
 
 The following layouting style should be used to typeset and layout typing rules:
 
-```lean
+````lean
 /--
 Fig. 10 (Kind inference, type expressions)
 ```text
@@ -57,7 +57,7 @@ inductive ktype : Env.KE
     ktype ke t₂ κ₁ →
     ---------------------------------------------
     ktype ke (Source.TypeExpression.app t₁ t₂) κ₂
-```
+````
 
 To do this, observe the following points:
 
