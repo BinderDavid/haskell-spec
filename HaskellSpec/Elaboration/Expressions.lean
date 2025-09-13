@@ -438,7 +438,7 @@ mutual
     | GDES :
       /- Forall2NE gs gs' (λ g g' => gde ge ie (Env.oplusarrow ve ve_binds) g g' τ) → -/
       binds ge ie ve bs bs' ve_binds →
-      gdes ge ie ve (Source.GuardedExprs.mk gs bs) (Target.GuardedExprs.gExp_where gs' bs') τ
+      gdes ge ie ve (Source.GuardedExprs.mk gs bs) (Target.GuardedExprs.mk gs' bs') τ
 
   /--
   Cp. Fig 35
