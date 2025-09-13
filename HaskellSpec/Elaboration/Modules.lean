@@ -129,10 +129,21 @@ inductive ctdecl : Env.GE → Env.VE → Env.IE
                  → Env.CE → Env.TE → Env.KE → Env.IE → Env.VE
                  → Prop where
   | DATA_DECL :
-    ctdecl _ _ _ _ _ _ _ _ _ _
+    ctdecl ge ie ve
+      (Source.ClassOrType.ct_data cx S us conDecls)
+      (Target.ClassOrType.ct_data _ _ _ _)
+      _ _ _ _ _
 
   | TYPE_DECL :
-    ctdecl _ _ _ _ _ _ _ _ _ _
+    /- kindsOf() ⊢ktype t : κ -/
+    type _ /- TE ⊕ TE₁ ⊕ … ⊕ TEₖ -/ h t τ →
+    /- i ∈ [1,k] : TEᵢ = { uᵢ : uᵢ^κᵢ} -/
+
+    te' = [⟨_, _⟩]/- {S : ⟨ S^… , h, Λu₁^… , uₙ^κ τ⟩ }-/ →
+    ctdecl ⟨ce,te,de⟩ ie ve
+      (Source.ClassOrType.ct_type S us t)
+      _
+      [] ⟨[], te'⟩ [] [] []
 
 /--
 Cp. Fig 20
