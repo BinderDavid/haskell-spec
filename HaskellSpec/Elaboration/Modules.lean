@@ -149,10 +149,20 @@ inductive condecl : Env.TE
                   → SemTy.Context
                   → Prop where
   | POSCON :
-    condecl _ _ _ _ _ _ _ _ _
+    Forall2 ts ts' (λ tᵢ tᵢ' => type te _ tᵢ tᵢ') →
+    /- σ = ∀ α₁ … αₙ. θ' ⇒ τ₁ → … → τₙ → χ α₁ … αₖ -/
+    /- DE = { J : ⟨J, χ, σ ⟩ }-/
+    /- θ' = θ|τ₁…τₖ -/
+    condecl te θ τ
+      (Source.ConstructorDecl.poscon J ts)
+      (Target.ConstructorDecl.poscon J ts'')
+      de ve le θ'
 
   | LABCON :
-    condecl _ _ _ _ _ _ _ _ _
+    condecl te θ τ
+      (Source.ConstructorDecl.labcon J _)
+      (Target.ConstructorDecl.labcon J _)
+      de ve le θ'
 
 /--
 Cp. Fig 22
@@ -220,22 +230,11 @@ inductive classR : Env.CE → Env.TE → Int
                  → SemTy.SClass_Name
                  → SemTy.TypeS
                  → Prop where
-  | classR :  (ce: Env.CE) ->
-              (te: Env.TE) ->
-              (h: Int) ->
-              (className : QClassName) →
-              (u: Type_Variable) →
-              (ts: List Source.TypeExpression) ->
-              (Γ : SemTy.SClass_Name) ->
-              (τ : SemTy.TypeS) ->
-              (h' : Int) ->
-              (x: Variable) ->
-              (ie: Env.IE) ->
-              ((_, Env.CEEntry.mk Γ h' x className ie) ∈ ce) ->
-              (h' < h) ->
-              (h'' : Int) ->
-              (type te h'' (List.foldl Source.TypeExpression.app (Source.TypeExpression.var u) ts) τ) ->
-              classR ce te h (Source.ClassAssertion.mk className u ts) Γ τ
+  | CLASS :
+    (_, Env.CEEntry.mk Γ h' x C ie) ∈ ce ->
+    h' < h ->
+    type te h'' (List.foldl Source.TypeExpression.app (Source.TypeExpression.var u) ts) τ ->
+    classR ce te h (Source.ClassAssertion.mk C u ts) Γ τ
 
 /--
 Cp. Fig 25
@@ -248,7 +247,8 @@ inductive context : Env.CE → Env.TE → Int
                   → SemTy.Context
                   → Prop where
   | CONTEXT :
-    context _ _ _ _ _
+    Forall3 class_assertions Γs τs (λ classᵢ Γᵢ τᵢ => classR ce te h classᵢ Γᵢ τᵢ) →
+    context ce te h class_assertions _
 
 
 /--
