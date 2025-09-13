@@ -436,9 +436,9 @@ mutual
                  → SemTy.TypeS
                  → Prop where
     | GDES :
-      /- Forall2NE gs gs' (λ g g' => gde ge ie _ g g' τ) → -/
+      /- Forall2NE gs gs' (λ g g' => gde ge ie (Env.oplusarrow ve ve_binds) g g' τ) → -/
       binds ge ie ve bs bs' ve_binds →
-      gdes ge ie ve (Source.GuardedExprs.mk gs bs) _ τ
+      gdes ge ie ve (Source.GuardedExprs.mk gs bs) (Target.GuardedExprs.gExp_where gs' bs') τ
 
   /--
   Cp. Fig 35
