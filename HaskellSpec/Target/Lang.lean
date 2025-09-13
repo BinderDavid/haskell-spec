@@ -296,8 +296,8 @@ ctDecls ∈ Classes and types → [ctDecl₁;...;ctDeclₙ then ctDecls]
 ```
 -/
 inductive ClassesAndTypes : Type where
-  | ct_empty
-  | ct_Decls : NonEmpty ClassOrType → ClassesAndTypes → ClassesAndTypes
+  | empty
+  | decls : NonEmpty ClassOrType → ClassesAndTypes → ClassesAndTypes
 
 /--
 ```text
