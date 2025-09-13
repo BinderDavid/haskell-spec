@@ -113,6 +113,16 @@ def TE_init : TE :=
     te₂ := []
   }
 
+def TE_union (te₁ te₂ : TE) : TE :=
+  { te₁ := te₁.te₁ ++ te₂.te₁
+    te₂ := te₁.te₂ ++ te₂.te₂
+  }
+
+def TE_empty : TE :=
+  { te₁ := []
+    te₂ := []
+  }
+
 /--
 ### Label Environment
 
@@ -176,6 +186,7 @@ x : ∀α . Γ'α ⇒ Γα
 
 Cp. section 2.7.4
 -/
+@[reducible]
 def IE := List IE_Entry
 
 /--
@@ -223,6 +234,16 @@ instance instJustQsDE : JustQs DE where
     { de₁ := JustQs.justQs de.de₁
       de₂ := JustQs.justQs de.de₂
     }
+
+def DE_union (de₁ de₂ : DE) : DE :=
+  { de₁ := de₁.de₁ ++ de₂.de₁
+    de₂ := de₁.de₂ ++ de₂.de₂
+  }
+
+def DE_empty : DE :=
+  { de₁ := []
+    de₂ := []
+  }
 
 /--
 ### Overloading Environment
@@ -298,6 +319,22 @@ structure FE : Type where
   de : DE
   ie : IE
   ve : VE
+
+def FE_union (fe₁ fe₂ : FE) : FE :=
+  { ce := fe₁.ce ++ fe₂.ce
+    te := TE_union fe₁.te fe₂.te
+    de := DE_union fe₁.de fe₂.de
+    ie := fe₁.ie ++ fe₂.ie
+    ve := fe₁.ve ++ fe₂.ve
+  }
+
+def FE_empty : FE :=
+  { ce := []
+    te := TE_empty
+    de := DE_empty
+    ie := []
+    ve := []
+  }
 
 /--
 ### Entity Environment

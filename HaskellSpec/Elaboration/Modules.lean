@@ -12,6 +12,62 @@ import HaskellSpec.Elaboration.Kinding
 The rules are defined in fig. 11 of the paper.
 -/
 
+/--
+Cp. Fig 18
+```text
+TE, h ⊢ t : τ
+```
+-/
+inductive type : Env.TE → Int
+               → Source.TypeExpression
+               → SemTy.TypeS
+               → Prop where
+  | TVAR :
+    ⟨u, α⟩ ∈ te₂ →
+    type ⟨te₁,te₂⟩ h (Source.TypeExpression.var u) (SemTy.TypeS.Variable α)
+
+  | TCON :
+    ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
+    type ⟨te₁,te₂⟩ h (Source.TypeExpression.typename T) (SemTy.TypeS.TypeConstructor χ)
+
+  | TSYN :
+    ⟨T, Env.TE_Item.TypeSynonym χ g αs τ⟩ ∈ te₁ →
+    g < h →
+    type ⟨te₁,te₂⟩ h _ _
+
+  | TAPP :
+    type te h t₁ τ₁ →
+    type te h t₂ τ₂ →
+    type te h (Source.TypeExpression.app t₁ t₂) (SemTy.TypeS.App τ₁ τ₂)
+
+
+/--
+Cp. Fig 19
+```text
+GE, IE, VE ⊢ ctDecl ⇝ typeDecls; binds : ⟨ CE, TE, KE, IE, VE⟩
+```
+-/
+inductive ctdecl : Env.GE → Env.VE → Env.IE
+                 → Source.ClassOrType
+                 → Target.ClassOrType
+                 → Env.FE
+                 → Prop where
+  | DATA_DECL :
+    ctdecl ge ie ve
+      (Source.ClassOrType.ct_data cx S us conDecls)
+      (Target.ClassOrType.ct_data _ _ _ _)
+      _
+
+  | TYPE_DECL :
+    /- kindsOf() ⊢ktype t : κ -/
+    type _ /- TE ⊕ TE₁ ⊕ … ⊕ TEₖ -/ h t τ →
+    /- i ∈ [1,k] : TEᵢ = { uᵢ : uᵢ^κᵢ} -/
+
+    te' = [⟨_, _⟩]/- {S : ⟨ S^… , h, Λu₁^… , uₙ^κ τ⟩ }-/ →
+    ctdecl ⟨ce,te,de⟩ ie ve
+      (Source.ClassOrType.ct_type S us t)
+      _
+      ⟨[], ⟨[], te'⟩, ⟨[],[]⟩, [], []⟩
 
 /--
 Cp. Fig 17
@@ -25,10 +81,24 @@ inductive ctdecls : Env.GE → Env.IE → Env.VE
                   → Env.FE
                   → Prop where
   | CTDECL :
-    ctdecls _ _ _ _ _ _
+    Forall3NE ctDecls typeDecls fes
+      (λ ctDeclᵢ typeDeclsᵢ feᵢ =>
+        ctdecl ge ve ie ctDeclᵢ typeDeclsᵢ feᵢ
+      ) →
+    ctdecls ge ie ve ctDecls₀ typeDecls₀ fe₀ →
+    typeDecls' = Target.ClassesAndTypes.decls typeDecls typeDecls₀ →
+    fe' = Env.FE_union fe (foldl Env.FE_union fes) →
+    -----------------------------------------------------
+    ctdecls ge ie ve
+      (Source.ClassesAndTypes.decls ctDecls ctDecls₀)
+      typeDecls'
+      fe'
 
   | EMPTY_CTDECL :
-    ctdecls _ _ _ _ _ _
+    ctdecls ge ie ve
+      Source.ClassesAndTypes.empty
+      Target.ClassesAndTypes.empty
+      ⟨[],⟨[],[]⟩,⟨[],[]⟩,[],[]⟩
 
 
 /--
@@ -80,70 +150,6 @@ inductive module : Env.ME
       (Source.Module.mk M ents imports bod)
       (Target.Module.mk M _)
       _
-
-
-
-
-
-
-
-/--
-Cp. Fig 18
-```text
-TE, h ⊢ t : τ
-```
--/
-inductive type : Env.TE → Int
-               → Source.TypeExpression
-               → SemTy.TypeS
-               → Prop where
-  | TVAR :
-    ⟨u, α⟩ ∈ te₂ →
-    type ⟨te₁,te₂⟩ h (Source.TypeExpression.var u) (SemTy.TypeS.Variable α)
-
-  | TCON :
-    ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
-    type ⟨te₁,te₂⟩ h (Source.TypeExpression.typename T) (SemTy.TypeS.TypeConstructor χ)
-
-  | TSYN :
-    ⟨T, Env.TE_Item.TypeSynonym χ g αs τ⟩ ∈ te₁ →
-    g < h →
-    type ⟨te₁,te₂⟩ h _ _
-
-  | TAPP :
-    type te h t₁ τ₁ →
-    type te h t₂ τ₂ →
-    type te h (Source.TypeExpression.app t₁ t₂) (SemTy.TypeS.App τ₁ τ₂)
-
-
-
-/--
-Cp. Fig 19
-```text
-GE, IE, VE ⊢ ctDecl ⇝ typeDecls; binds : ⟨ CE, TE, KE, IE, VE⟩
-```
--/
-inductive ctdecl : Env.GE → Env.VE → Env.IE
-                 → Source.ClassOrType
-                 → Target.ClassOrType
-                 → Env.CE → Env.TE → Env.KE → Env.IE → Env.VE
-                 → Prop where
-  | DATA_DECL :
-    ctdecl ge ie ve
-      (Source.ClassOrType.ct_data cx S us conDecls)
-      (Target.ClassOrType.ct_data _ _ _ _)
-      _ _ _ _ _
-
-  | TYPE_DECL :
-    /- kindsOf() ⊢ktype t : κ -/
-    type _ /- TE ⊕ TE₁ ⊕ … ⊕ TEₖ -/ h t τ →
-    /- i ∈ [1,k] : TEᵢ = { uᵢ : uᵢ^κᵢ} -/
-
-    te' = [⟨_, _⟩]/- {S : ⟨ S^… , h, Λu₁^… , uₙ^κ τ⟩ }-/ →
-    ctdecl ⟨ce,te,de⟩ ie ve
-      (Source.ClassOrType.ct_type S us t)
-      _
-      [] ⟨[], te'⟩ [] [] []
 
 /--
 Cp. Fig 20

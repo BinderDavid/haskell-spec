@@ -10,3 +10,6 @@ def fromList : (List α) -> Option (NonEmpty α)
 
 def concat {α : Type} (xs ys : NonEmpty α) : NonEmpty α :=
   sorry
+
+def foldl {α : Type} (f : α → α → α) (xs : NonEmpty α) : α :=
+  List.foldl f xs.head xs.tail
