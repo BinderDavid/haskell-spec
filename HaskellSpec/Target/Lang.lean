@@ -73,7 +73,6 @@ mutual
     | lazy : Pattern → Pattern
     | wildcard : Pattern
     | exp : Expression → Pattern
-    | n_plus_k : Variable → SemTy.TypeScheme → Expression → Expression → Pattern
     | char : Char → Pattern -- Seems to be omitted in Faxen?
     | string : String → Pattern -- Seems to be omitted in Faxen?
 

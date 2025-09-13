@@ -17,14 +17,13 @@ In order to build the documentation and serve it use the following target in the
 > make serve-docs
 ```
 and open the website `localhost:8000` in the browser.
-At some point we might want to switch to using [verso](https://github.com/leanprover/verso), though.
 
 ## Coding Standards
 
 ### Naming
 
-- Names of inference are in all-caps with underscores `T_APP`
-- Names of judgement forms start with lowercase
+- Names of inference rules are in all-caps with underscores. E.g.: `T_APP`
+- Names of judgement forms start with lowercase.
 - Constructors of inductive data types should not have a prefix, since constructors are namespaced w.r.t. the type.
 
 ### Type Inference Rule
@@ -67,7 +66,3 @@ To do this, observe the following points:
 - Different inference rules are separated by one empty line
 - One line of dashes is used to separate the conclusion from the premisses of the rule.
 
-
-### Import/Export Discipline
-
-TODO
