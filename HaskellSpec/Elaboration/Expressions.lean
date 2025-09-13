@@ -470,7 +470,13 @@ mutual
                  → Env.VE
                  → Prop where
     | FUNBIND :
-      bind _ _ _ _ _ _
+      /- Forall2NE match_sources match_targets (λ match_sourceᵢ match_targetᵢ =>
+      matchR ge ie ve match_sourceᵢ match_targetᵢ τ) → -/
+      x = QVariable.Unqualified (Variable.Mk "x") →
+      bind ge ie ve
+        (Source.Binding.bind_match x match_sources)
+        (Target.Binding.bind_match x match_targets)
+        (List.singleton (Prod.mk x (Env.VE_Item.Ordinary x (SemTy.TypeScheme.Forall [] [] τ))))
 
     | PATBIND :
       pat ge ie p_source p_target veₚ τ ->
