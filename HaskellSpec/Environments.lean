@@ -271,7 +271,11 @@ def KE : Type :=
 
 Cp. section 2.7.7
 -/
-inductive SE : Type where
+structure SE : Type where
+  cs : Unit
+  ts : Unit
+  ds : Unit
+  vs : Unit
 
 /--
 ### Global Environment

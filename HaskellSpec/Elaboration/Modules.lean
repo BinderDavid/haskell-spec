@@ -3,7 +3,7 @@ import HaskellSpec.Source.Module
 import HaskellSpec.Target.Lang
 import HaskellSpec.Environments
 import HaskellSpec.SemanticTypes
-
+import HaskellSpec.Elaboration.ImportExport
 
 /-!
 # Modules
@@ -24,7 +24,13 @@ inductive module : Env.ME
                  → Env.ME
                  → Prop where
   | MODULE :
-    module _ _ _ _
+    /- i ∈ [1,n] : ME ⊢import impᵢ : FEᵢ, SEᵢ -/
+    /- FE_imp = justSingle(FE₁ ⊕ … ⊕ FEₙ)-/
+    /- SE_imp = SE₁ ⊕ … ⊕ SEₙ-/
+    module me
+      (Source.Module.mk M ents imports body)
+      (Target.Module.mk M _)
+      _
 
 
 /--
