@@ -302,12 +302,10 @@ inductive ClassesAndTypes : Type where
 body ∈ Module body → ctDecls; instDecls; binds
 ```
 -/
-inductive ModuleBody : Type where
-  | body :
-      ClassesAndTypes
-    → InstanceDecls
-    → Binds
-    → ModuleBody
+structure ModuleBody : Type where
+  ctDecls : ClassesAndTypes
+  instDecls : InstanceDecls
+  binds : Binds
 
 /--
 ```text
