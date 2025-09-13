@@ -111,8 +111,10 @@ mutual
     gdes ∈ GuardedExprs → gde₁ … gdeₙ where binds   n ≥ 1
   ```
   -/
-  inductive GuardedExprs : Type where
-    | gExp_where : NonEmpty GuardedExp → Binds → GuardedExprs
+  structure GuardedExprs : Type where
+    gdes : NonEmpty GuardedExp
+    binds : Binds
+
 
   /--
   ```text
