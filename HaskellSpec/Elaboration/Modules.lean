@@ -4,6 +4,7 @@ import HaskellSpec.Target.Lang
 import HaskellSpec.Environments
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Elaboration.ImportExport
+import HaskellSpec.Elaboration.Kinding
 
 /-!
 # Modules
@@ -11,42 +12,6 @@ import HaskellSpec.Elaboration.ImportExport
 The rules are defined in fig. 11 of the paper.
 -/
 
-
-/--
-Cp. Fig 11
-```text
-ME ⊢ mod ⇝ mod, ME
-```
--/
-inductive module : Env.ME
-                 → Source.Module
-                 → Target.Module
-                 → Env.ME
-                 → Prop where
-  | MODULE :
-    /- i ∈ [1,n] : ME ⊢import impᵢ : FEᵢ, SEᵢ -/
-    /- FE_imp = justSingle(FE₁ ⊕ … ⊕ FEₙ)-/
-    /- SE_imp = SE₁ ⊕ … ⊕ SEₙ-/
-    module me
-      (Source.Module.mk M ents imports body)
-      (Target.Module.mk M _)
-      _
-
-
-/--
-Cp. Fig 15
-```text
-M, FE ⊢ body ⇝ typeDecls;binds : FE, SE
-```
--/
-inductive body : Module_Name
-               → Env.FE
-               → Source.ModuleBody
-               → Target.ModuleBody
-               → Env.FE → Env.SE
-               → Prop where
-  | BODY :
-    body _ _ _ _ _ _
 
 /--
 Cp. Fig 17
@@ -64,6 +29,62 @@ inductive ctdecls : Env.GE → Env.IE → Env.VE
 
   | EMPTY_CTDECL :
     ctdecls _ _ _ _ _ _
+
+
+/--
+Cp. Fig 15
+```text
+M, FE ⊢ body ⇝ typeDecls;binds : FE, SE
+```
+-/
+inductive body : Module_Name
+               → Env.FE
+               → Source.ModuleBody
+               → Target.ModuleBody
+               → Env.FE → Env.SE
+               → Prop where
+  | BODY :
+    Kinding.kctDecls _ ctds _ →
+    ctdecls ge_top ie_top ve_top ctds _ ⟨ce',te',de',ie',ve'⟩ →
+    /- ge' = ⟨ce',de',te'⟩ → -/
+    ge_top = _ → /- ge_top = ge_init ⊕ (⟨ce,te,de⟩ ⊕ ge') → -/
+    /- ie_top = ie ⊕ ie' ⊕ ie'' → -/
+    /- ve_top = ve ⊕ (ve' ⊕ ve'')-/
+    fe = ⟨ce',te',de',_,_⟩ →
+    se = ⟨_,_,_,_⟩ →
+    body M
+      ⟨ce,te,de,ie,ve⟩
+      (Source.ModuleBody.mk ctds _ _)
+      (Target.ModuleBody.mk _ _ _)
+      fe se
+
+/--
+Cp. Fig 11
+```text
+ME ⊢ mod ⇝ mod, ME
+```
+-/
+inductive module : Env.ME
+                 → Source.Module
+                 → Target.Module
+                 → Env.ME
+                 → Prop where
+  | MODULE :
+    Forall3 imports fes ses (λ impᵢ feᵢ seᵢ => Import me impᵢ feᵢ seᵢ) →
+    fe_imp = _ → /- justSingle(FE₁ ⊕ … ⊕ FEₙ)-/
+    /- SE_imp = SE₁ ⊕ … ⊕ SEₙ-/
+    body M fe_imp bod bod' fe se →
+    /- i ∈ [1,k] : FE_imp ⊕ [FE]M, SE_imp ⊕ SE ⊢export entᵢ : FE'ᵢ -/
+    /- FE_exp = FE'₁ ⊕ … ⊕ FE'ₖ-/
+    module me
+      (Source.Module.mk M ents imports bod)
+      (Target.Module.mk M _)
+      _
+
+
+
+
+
 
 
 /--
