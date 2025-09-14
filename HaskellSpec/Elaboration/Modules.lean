@@ -88,6 +88,7 @@ inductive ctdecl : Env.GE → Env.VE → Env.IE
       _
 
   | TYPE_DECL :
+    Kinding.ktype (Env.kindsOf _ _) t κ →
     /- kindsOf() ⊢ktype t : κ -/
     type _ /- TE ⊕ TE₁ ⊕ … ⊕ TEₖ -/ h t τ →
     /- i ∈ [1,k] : TEᵢ = { uᵢ : uᵢ^κᵢ} -/

@@ -392,4 +392,15 @@ Cp. section 2.7.9
 @[reducible]
 def ME : Type := Env Module_Name FE
 
+
+/-
+### The kindsOf function
+-/
+
+/--
+The `kindsOf` function is described in section 2.7.6
+-/
+def kindsOf(ce : CE)(te: TE) : KE :=
+  sorry
+
 end Env
