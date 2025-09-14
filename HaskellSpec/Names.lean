@@ -144,6 +144,7 @@ inductive OType_Name : Type where
 Type variables are written as `u` in the paper.
 -/
 inductive Type_Variable : Type where
+  deriving BEq
 
 /--
 ### Qualified Type Variable
