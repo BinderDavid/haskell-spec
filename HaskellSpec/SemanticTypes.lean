@@ -109,10 +109,33 @@ inductive ClassTypeScheme : Type where
   deriving BEq
 
 
+/-
+## Substitution of Types for Type Variables
+-/
 
-def type_subst (τ : SemTy.TypeS)
-               (args : List SemTy.TypeS)
-               (vars : List SemTy.Type_Variable)
-               : SemTy.TypeS := sorry
+/--
+A simultaneous substitution of types for type variables.
+E.g.: `[τ₁ / α₁, … , τₙ / αₙ]`
+-/
+@[reducible]
+def VarSubst : Type := List (SemTy.Type_Variable × SemTy.TypeS)
+
+/--
+A typeclass for types to which a type variable substitution can be applied.
+-/
+class Substitute (α : Type) where
+  substitute : VarSubst → α → α
+
+instance instSubstituteTypeS : Substitute TypeS where
+  substitute subst τ :=
+    let rec substitute_rec subst τ :=
+      match τ with
+      | TypeS.Variable α => Option.getD (List.lookup α subst) (SemTy.TypeS.Variable α)
+      | TypeS.TypeConstructor χ => SemTy.TypeS.TypeConstructor χ
+      | TypeS.App τ1 τ2 => SemTy.TypeS.App (substitute_rec subst τ1) (substitute_rec subst τ2);
+    substitute_rec subst τ
+
+instance instSubstituteContext : Substitute Context where
+  substitute subst := List.map (Prod.map id (Substitute.substitute subst))
 
 end SemTy
