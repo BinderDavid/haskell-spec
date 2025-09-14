@@ -6,14 +6,51 @@ import HaskellSpec.SemanticTypes
 -/
 namespace Prelude
 
+/-
+## Module Names
+-/
+
 def hs_prelude : Module_Name := Module_Name.Mk "Prelude"
 
 def hs_ratio : Module_Name := Module_Name.Mk "Ratio"
 
+/-
+## Haskell Types in the Prelude
+-/
+
+
+/--
+The type `Prelude!Char`
+-/
+def char : SemTy.TypeS :=
+  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Qualified hs_prelude (Type_Name.Mk "Char")) SemTy.Kind.Star)
+
+/--
+The type `Prelude!Bool`
+-/
+def bool : SemTy.TypeS :=
+  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Qualified hs_prelude (Type_Name.Mk "Bool")) SemTy.Kind.Star)
+
+/--
+The type `[] : * → *`
+-/
+def list : SemTy.TypeS :=
+  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star))
+
+/--
+The type `-> : * → * → *`
+-/
+def funt : SemTy.TypeS :=
+  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.Fun) (SemTy.Kind.Fun SemTy.Kind.Star (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star)))
+
+
+/-
+## Names of Type Classes
+-/
+
 def eq : SemTy.SClass_Name :=
   SemTy.SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
   "Eq")) SemTy.Kind.Star
-
 
 def ord : SemTy.SClass_Name :=
   SemTy.SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
@@ -39,6 +76,10 @@ def monad : SemTy.SClass_Name :=
   SemTy.SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
   "Monad")) (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star)
 
+/-
+## Names of Type Class Methods
+-/
+
 def enum_from : QVariable :=
   QVariable.Qualified hs_prelude (Variable.Mk "enumFrom")
 
@@ -57,35 +98,14 @@ def frominteger : QVariable :=
 def fromrational : QVariable :=
   QVariable.Qualified hs_prelude (Variable.Mk "fromRational")
 
-def ratio_percent : QVariable :=
-  QVariable.Qualified hs_ratio (Variable.Mk "(%)")
-
 def equals : QVariable :=
   QVariable.Qualified hs_prelude (Variable.Mk "(==)")
 
-/--
-The type `Prelude!Char`
+/-
+## Names of Constructors
 -/
-def char : SemTy.TypeS :=
-  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Qualified hs_prelude (Type_Name.Mk "Char")) SemTy.Kind.Star)
 
-/--
-The type `Prelude!Bool`
--/
-def bool : SemTy.TypeS :=
-  SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Qualified hs_prelude (Type_Name.Mk "Bool")) SemTy.Kind.Star)
-
-/--
-The type `[] : * → *`
--/
-def list : SemTy.TypeS :=
-SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star))
-
-/--
-The type `-> : * → * → *`
--/
-def funt : SemTy.TypeS :=
-SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.Fun) (SemTy.Kind.Fun SemTy.Kind.Star (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star)))
-
+def ratio_percent : QVariable :=
+  QVariable.Qualified hs_ratio (Variable.Mk "(%)")
 
 end Prelude
