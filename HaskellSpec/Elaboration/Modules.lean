@@ -12,34 +12,61 @@ import HaskellSpec.Elaboration.Kinding
 The rules are defined in fig. 11 of the paper.
 -/
 
-/--
-Cp. Fig 18
+/-- A typename `T` applied to a list of arguments:
 ```text
-TE, h ⊢ t : τ
+type_apply T [t₁,t₂,t₃] = T t₁ t₂ t₃
 ```
+TODO: Reverse order!
 -/
-inductive type : Env.TE → Int
-               → Source.TypeExpression
-               → SemTy.TypeS
-               → Prop where
-  | TVAR :
-    ⟨u, α⟩ ∈ te₂ →
-    type ⟨te₁,te₂⟩ h (Source.TypeExpression.var u) (SemTy.TypeS.Variable α)
+def type_apply (T : QType_Name)
+               (ts : List Source.TypeExpression)
+               : Source.TypeExpression :=
+  match ts with
+  | [] => Source.TypeExpression.typename T
+  | (t :: ts) => Source.TypeExpression.app (type_apply T ts) t
 
-  | TCON :
-    ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
-    type ⟨te₁,te₂⟩ h (Source.TypeExpression.typename T) (SemTy.TypeS.TypeConstructor χ)
+mutual
+  /--
+  Cp. Fig 18
+  ```text
+  TE, h ⊢ t : τ
+  ```
+  -/
+  inductive type : Env.TE → Int
+                 → Source.TypeExpression
+                 → SemTy.TypeS
+                 → Prop where
+    | TVAR :
+      ⟨u, α⟩ ∈ te₂ →
+      type ⟨te₁,te₂⟩ h (Source.TypeExpression.var u) (SemTy.TypeS.Variable α)
 
-  | TSYN :
-    ⟨T, Env.TE_Item.TypeSynonym χ g αs τ⟩ ∈ te₁ →
-    g < h →
-    type ⟨te₁,te₂⟩ h _ _
+    | TCON :
+      ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
+      type ⟨te₁,te₂⟩ h (Source.TypeExpression.typename T) (SemTy.TypeS.TypeConstructor χ)
 
-  | TAPP :
-    type te h t₁ τ₁ →
-    type te h t₂ τ₂ →
-    type te h (Source.TypeExpression.app t₁ t₂) (SemTy.TypeS.App τ₁ τ₂)
+    | TSYN :
+      ⟨T, Env.TE_Item.TypeSynonym χ g αs τ⟩ ∈ te₁ →
+      g < h →
+      types te h ts τs →
+      type ⟨te₁,te₂⟩ h (type_apply T ts) (SemTy.type_subst τ τs αs)
 
+    | TAPP :
+      type te h t₁ τ₁ →
+      type te h t₂ τ₂ →
+      type te h (Source.TypeExpression.app t₁ t₂) (SemTy.TypeS.App τ₁ τ₂)
+
+  inductive types : Env.TE → Int
+                  → List Source.TypeExpression
+                  → List SemTy.TypeS
+                  → Prop where
+    | NIL :
+      types te h [] []
+
+    | CONS :
+      types te h ts τs →
+      type  te h t τ →
+      types te h (t :: ts) (τ :: τs)
+end
 
 /--
 Cp. Fig 19
