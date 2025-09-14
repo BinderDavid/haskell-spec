@@ -246,22 +246,22 @@ mutual
       (x : QVariable) → (ve : Env.VE) →
       ⟨x, (Env.VE_Item.Ordinary x (SemTy.TypeScheme.Forall αs θ τ))⟩ ∈ ve →
       (τsForαs : SemTy.VarSubst) → (Env.dom τsForαs) = αs →
-      dict ie e (SemTy.applySubstContext τsForαs θ) →
+      dict ie e (SemTy.Substitute.substitute τsForαs θ) →
       ---------------------------------------------------------------------------------------
       exp ge ie ve (Source.Expression.var x)
         (Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (Env.rng τsForαs)) e)
-        (SemTy.applySubstTypeS τsForαs τ)
+        (SemTy.Substitute.substitute τsForαs τ)
 
     | VAR_2 :
       (x : QVariable) → (ve : Env.VE) →
       ⟨x, (Env.VE_Item.Class x (SemTy.ClassTypeScheme.Forall α Γ (SemTy.TypeScheme.Forall αs θ τ) ))⟩ ∈ ve →
       dict ie e1 [(Γ, τ)] →
       (τsForαs : SemTy.VarSubst) → (Env.dom τsForαs) = αs →
-      dict ie e2 (SemTy.applySubstContext τsForαs θ) →
+      dict ie e2 (SemTy.Substitute.substitute τsForαs θ) →
       --------------------------------------------------------------------------------------
       exp ge ie ve (Source.Expression.var x)
         (Target.Expression.app (Target.typ_app_ (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e1) (Env.rng τsForαs)) e2)
-        (SemTy.applySubstTypeS (List.cons (α, τ) τsForαs) τ)
+        (SemTy.Substitute.substitute (List.cons (α, τ) τsForαs) τ)
 
     | LITERAL :
       literal ie lit e τ →

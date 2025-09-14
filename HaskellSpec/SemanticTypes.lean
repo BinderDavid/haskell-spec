@@ -119,16 +119,28 @@ def type_subst (τ : SemTy.TypeS)
                : SemTy.TypeS := sorry
 
 
+/--
+A simultaneous substitution of types for type variables.
+E.g.: `[τ₁ / α₁, … , τₙ / αₙ]`
+-/
+def VarSubst : Type := List (SemTy.Type_Variable × SemTy.TypeS)
 
+/--
+A typeclass for types to which a type variable substitution can be applied.
+-/
+class Substitute (α : Type) where
+  substitute : VarSubst → α → α
 
-def VarSubst := List (SemTy.Type_Variable × SemTy.TypeS)
+instance instSubstituteTypeS : Substitute TypeS where
+  substitute subst τ :=
+    let rec substitute_rec subst τ :=
+      match τ with
+      | TypeS.Variable α => Option.getD (List.lookup α subst) (SemTy.TypeS.Variable α)
+      | TypeS.TypeConstructor χ => SemTy.TypeS.TypeConstructor χ
+      | TypeS.App τ1 τ2 => SemTy.TypeS.App (substitute_rec subst τ1) (substitute_rec subst τ2);
+    substitute_rec subst τ
 
-def applySubstTypeS (subst : VarSubst) : SemTy.TypeS → SemTy.TypeS
-  | SemTy.TypeS.Variable τ => Option.getD (List.lookup τ subst) (SemTy.TypeS.Variable τ)
-  | SemTy.TypeS.TypeConstructor χ => SemTy.TypeS.TypeConstructor χ
-  | SemTy.TypeS.App τ1 τ2 => SemTy.TypeS.App (applySubstTypeS subst τ1) (applySubstTypeS subst τ2)
-
-def applySubstContext (subst : VarSubst) : SemTy.Context → SemTy.Context :=
-  List.map (Prod.map id (applySubstTypeS subst))
+instance instSubstituteContext : Substitute Context where
+  substitute subst := List.map (Prod.map id (Substitute.substitute subst))
 
 end SemTy
