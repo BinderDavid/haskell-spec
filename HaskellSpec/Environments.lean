@@ -86,6 +86,10 @@ inductive TE_Item : Type where
   | DataType : SemTy.Type_Constructor →  TE_Item
   | TypeSynonym : SemTy.Type_Constructor → Int → List SemTy.Type_Variable → SemTy.TypeS → TE_Item
 
+instance instHasKindTE_Item : SemTy.HasKind TE_Item where
+  get x := match x with
+           | TE_Item.DataType c => SemTy.HasKind.get c
+           | TE_Item.TypeSynonym c _ _ _ => SemTy.HasKind.get c
 
 /-
 ### Type environment
@@ -275,6 +279,7 @@ inductive KE_Name : Type where
   | T : QType_Name -> KE_Name
   | u : Type_Variable -> KE_Name
   | C : QClassName -> KE_Name
+  deriving BEq
 
 /--
 ### Kind Environment
@@ -391,5 +396,32 @@ Cp. section 2.7.9
 -/
 @[reducible]
 def ME : Type := Env Module_Name FE
+
+
+/-
+### The kindsOf function
+-/
+
+def kindsOfCe (ce : CE) : KE :=
+  let f := λ ⟨C, ceentry⟩ => ⟨KE_Name.C C, SemTy.HasKind.get ceentry.name⟩
+  List.map f ce
+
+
+def kindsOfTe₁ (te : TE₁) : KE :=
+  let f := λ ⟨q, te_item ⟩ => ⟨KE_Name.T q, SemTy.HasKind.get te_item⟩
+  List.map f te
+
+def kindsOfTe₂ (te : TE₂) : KE :=
+  let f := λ ⟨u, ty_var⟩ => ⟨KE_Name.u u, SemTy.HasKind.get ty_var⟩
+  List.map f te
+
+/--
+The `kindsOf` function is described in section 2.7.6
+-/
+def kindsOf(ce : CE)(te: TE) : KE :=
+  /- List.append is safe bc the domains of the outputs of the three environments are distinct -/
+  List.append (List.append (kindsOfCe ce) (kindsOfTe₁ te.te₁)) (kindsOfTe₂ te.te₂)
+
+
 
 end Env

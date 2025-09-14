@@ -22,7 +22,8 @@ deriving instance BEq for Kind
 
 export Kind (Star Fun)
 
-
+class HasKind (α : Type) where
+  get : α → Kind
 
 /--
 ```text
@@ -34,6 +35,8 @@ structure SClass_Name : Type where
   kind : Kind
   deriving BEq
 
+instance instHasKindSClass_Name : HasKind SClass_Name where
+  get n := n.kind
 
 /--
 ```text
@@ -44,6 +47,10 @@ inductive Type_Constructor : Type where
   | Mk : OType_Name → Kind → Type_Constructor
   deriving BEq
 
+instance instHasKindType_Constructor : HasKind Type_Constructor where
+  get x := match x with
+           | Type_Constructor.Mk _ kind => kind
+
 /--
 ```text
 α ∈ Type variable → uᵏ
@@ -53,6 +60,9 @@ inductive Type_Variable : Type where
   | Mk : Type_Variable → Kind → Type_Variable
 
 deriving instance BEq for Type_Variable
+instance instHasKindType_Variable : HasKind Type_Variable where
+  get x := match x with
+           | Type_Variable.Mk _ kind => kind
 
 /--
 ```text
