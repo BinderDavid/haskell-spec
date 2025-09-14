@@ -35,63 +35,6 @@ structure SClass_Name : Type where
   deriving BEq
 
 
-def hs_prelude : Module_Name := Module_Name.Mk "Prelude"
-
-def hs_ratio : Module_Name := Module_Name.Mk "Ratio"
-
-def prelude_eq : SClass_Name :=
-  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
-  "Eq")) Kind.Star
-
-
-def prelude_ord : SClass_Name :=
-  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
-  "Ord")) Kind.Star
-
-def prelude_num : SClass_Name :=
-  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
-  "Num")) Kind.Star
-
-def prelude_integral : SClass_Name :=
-  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
-  "Integral")) Kind.Star
-
-def prelude_fractional : SClass_Name :=
-  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
-  "Fractional")) Kind.Star
-
-def prelude_enum : SClass_Name :=
-  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
-  "Enum")) Kind.Star
-
-def prelude_monad : SClass_Name :=
-  SClass_Name.mk (OClass_Name.Qualified hs_prelude (Class_Name.mk
-  "Monad")) (Kind.Fun Kind.Star Kind.Star)
-
-def prelude_enum_from : QVariable :=
-  QVariable.Qualified hs_prelude (Variable.Mk "enumFrom")
-
-def prelude_enum_from_then : QVariable :=
-  QVariable.Qualified hs_prelude (Variable.Mk "enumFromThen")
-
-def prelude_enum_from_to : QVariable :=
-  QVariable.Qualified hs_prelude (Variable.Mk "enumFromTo")
-
-def prelude_enum_from_then_to : QVariable :=
-  QVariable.Qualified hs_prelude (Variable.Mk "enumFromThenTo")
-
-def prelude_frominteger : QVariable :=
-  QVariable.Qualified hs_prelude (Variable.Mk "fromInteger")
-
-def prelude_fromrational : QVariable :=
-  QVariable.Qualified hs_prelude (Variable.Mk "fromRational")
-
-def ratio_percent : QVariable :=
-  QVariable.Qualified hs_ratio (Variable.Mk "(%)")
-
-def prelude_equals : QVariable :=
-  QVariable.Qualified hs_prelude (Variable.Mk "(==)")
-
 /--
 ```text
 χ ∈ Type constructor → Tᵏ
@@ -133,29 +76,6 @@ def mk_list (α: TypeS): TypeS :=
     (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) SemTy.Kind.Star))
   α
 
-/--
-The type `Prelude!Char`
--/
-def prelude_char : TypeS :=
-  TypeS.TypeConstructor (Type_Constructor.Mk (OType_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Char")) Kind.Star)
-
-/--
-The type `Prelude!Bool`
--/
-def prelude_bool : TypeS :=
-  TypeS.TypeConstructor (Type_Constructor.Mk (OType_Name.Qualified (Module_Name.Mk "Prelude") (Type_Name.Mk "Bool")) Kind.Star)
-
-/--
-The type `[] : * → *`
--/
-def prelude_list : TypeS :=
-TypeS.TypeConstructor (Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) (Kind.Fun Kind.Star Kind.Star))
-
-/--
-The type `-> : * → * → *`
--/
-def prelude_fun : TypeS :=
-TypeS.TypeConstructor (Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.Fun) (Kind.Fun Kind.Star (Kind.Fun Kind.Star Kind.Star)))
 
 /--
 ```text

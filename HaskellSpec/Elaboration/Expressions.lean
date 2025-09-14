@@ -8,20 +8,21 @@ import HaskellSpec.SemanticTypes
 import HaskellSpec.Elaboration.Modules
 import HaskellSpec.Elaboration.Bindings
 import HaskellSpec.NonEmpty
+import HaskellSpec.Prelude
 
 def fromRationalAfterRatio (n d : Int) : Target.Expression :=
   Target.Expression.app
-   (Target.Expression.var SemTy.prelude_fromrational)
+   (Target.Expression.var Prelude.fromrational)
    (Target.Expression.app
      (Target.Expression.app
-       (Target.Expression.var SemTy.ratio_percent)
+       (Target.Expression.var Prelude.ratio_percent)
        (Target.Expression.lit (Target.Literal.integer n))
      )
      (Target.Expression.lit (Target.Literal.integer d)))
 
 def fromInteger (i : Int) : Target.Expression :=
   Target.Expression.app
-    (Target.Expression.var SemTy.prelude_frominteger)
+    (Target.Expression.var Prelude.frominteger)
     (Target.Expression.lit (Target.Literal.integer i))
 
 /--
@@ -39,23 +40,23 @@ inductive literal : Env.IE
     literal ie
             (Source.Literal.char c)
             (Target.Expression.lit (Target.Literal.char c))
-            SemTy.prelude_char
+            Prelude.char
 
   | LIT_STRING :
     literal ie
             (Source.Literal.string s)
             (Target.Expression.lit (Target.Literal.string s))
-            (SemTy.TypeS.App SemTy.prelude_list SemTy.prelude_char)
+            (SemTy.TypeS.App Prelude.list Prelude.char)
 
   | LIT_INTEGER :
-    dict ie (fromInteger i) [⟨SemTy.prelude_num, τ⟩] →
+    dict ie (fromInteger i) [⟨Prelude.num, τ⟩] →
     literal ie
             (Source.Literal.integer i)
             (fromInteger i)
             τ
 
   | LIT_FLOAT :
-    dict ie (fromRationalAfterRatio n d) [⟨SemTy.prelude_fractional, τ⟩] →
+    dict ie (fromRationalAfterRatio n d) [⟨Prelude.fractional, τ⟩] →
     literal ie
             (Source.Literal.float n d)
             (fromRationalAfterRatio n d)
@@ -73,7 +74,7 @@ def apply_equals : SemTy.TypeS → Target.Expression → Target.Expression → T
   Target.Expression.app
     (Target.Expression.app
       (Target.Expression.typ_app
-        (Target.Expression.var SemTy.prelude_equals)
+        (Target.Expression.var Prelude.equals)
         (NonEmpty.mk τ []))
     ed)
     e
@@ -85,7 +86,7 @@ def apply_enumFromThenTo : SemTy.TypeS → Target.Expression → Target.Expressi
     (Target.Expression.app
       (Target.Expression.app
         (Target.Expression.app
-          (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then_to) (NonEmpty.mk τ []))
+          (Target.Expression.typ_app (Target.Expression.var Prelude.enum_from_then_to) (NonEmpty.mk τ []))
         e)
       e1')
     e2')
@@ -97,7 +98,7 @@ def apply_enumFromTo : SemTy.TypeS → Target.Expression → Target.Expression �
   Target.Expression.app
     (Target.Expression.app
       (Target.Expression.app
-        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_to) (NonEmpty.mk τ []))
+        (Target.Expression.typ_app (Target.Expression.var Prelude.enum_from_to) (NonEmpty.mk τ []))
       e)
     e1')
   e2'
@@ -108,7 +109,7 @@ def apply_enumFromThen : SemTy.TypeS → Target.Expression → Target.Expression
   Target.Expression.app
     (Target.Expression.app
       (Target.Expression.app
-        (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from_then) (NonEmpty.mk τ []))
+        (Target.Expression.typ_app (Target.Expression.var Prelude.enum_from_then) (NonEmpty.mk τ []))
       e)
     e1')
   e2'
@@ -118,7 +119,7 @@ def apply_enumFrom : SemTy.TypeS → Target.Expression → Target.Expression →
   λ τ e e1' =>
   Target.Expression.app
     (Target.Expression.app
-      (Target.Expression.typ_app (Target.Expression.var SemTy.prelude_enum_from) (NonEmpty.mk τ []))
+      (Target.Expression.typ_app (Target.Expression.var Prelude.enum_from) (NonEmpty.mk τ []))
     e)
   e1'
 
@@ -158,7 +159,7 @@ inductive pat : Env.GE → Env.IE
       (Source.Pattern.lit (Source.Literal.char c))
       (Target.Pattern.char c)
       []
-      SemTy.prelude_char
+      Prelude.char
 
   | PSTRING :
     pat
@@ -167,11 +168,11 @@ inductive pat : Env.GE → Env.IE
       (Source.Pattern.lit (Source.Literal.string s))
       (Target.Pattern.string s)
       []
-      (SemTy.TypeS.App SemTy.prelude_list SemTy.prelude_char)
+      (SemTy.TypeS.App Prelude.list Prelude.char)
 
   | PINTEGER :
     literal ie (Source.Literal.integer i) e τ →
-    dict ie ed [⟨SemTy.prelude_eq, τ⟩] →
+    dict ie ed [⟨Prelude.eq, τ⟩] →
     pat
       ge
       ie
@@ -182,7 +183,7 @@ inductive pat : Env.GE → Env.IE
 
   | PFLOAT :
     literal ie (Source.Literal.float n d) e τ →
-    dict ie ed [⟨SemTy.prelude_eq, τ⟩]→
+    dict ie ed [⟨Prelude.eq, τ⟩]→
     pat
       ge
       ie
@@ -218,7 +219,7 @@ mutual
                   → Env.VE
                   → Prop where
     | QGEN :
-      exp ge ie ve e e' (SemTy.TypeS.App SemTy.prelude_list τ) →
+      exp ge ie ve e e' (SemTy.TypeS.App Prelude.list τ) →
       pat ge ie p p' ve_p τ →
       quals ge ie (Env.oplusarrow ve ve_p) qs qs' ve_quals →
       quals ge ie ve
@@ -234,7 +235,7 @@ mutual
         (Env.oplusarrow ve ve_binds)
 
     | QFILTER :
-      exp ge ie ve e e' SemTy.prelude_bool →
+      exp ge ie ve e e' Prelude.bool →
       quals ge ie ve qs qs' ve_quals →
       quals ge ie ve
         (Source.Qualifiers.guard e qs)
@@ -291,7 +292,7 @@ mutual
           _
 
     | APP :
-      exp ge ie ve e₁ e₁' (SemTy.TypeS.App (SemTy.TypeS.App SemTy.prelude_fun τ') τ) →
+      exp ge ie ve e₁ e₁' (SemTy.TypeS.App (SemTy.TypeS.App Prelude.funt τ') τ) →
       exp ge ie ve e₂ e₂' τ' →
       ------------------------------------
       exp ge
@@ -341,37 +342,37 @@ mutual
       exp ge ie ve e1 e1' τ →
       exp ge ie ve e2 e2' τ →
       exp ge ie ve e3 e3' τ →
-      dict ie e [⟨SemTy.prelude_enum, τ⟩] →
+      dict ie e [⟨Prelude.enum, τ⟩] →
       exp ge ie ve
         (Source.Expression.listRange e1 (some e2) (some e3))
         (apply_enumFromThenTo τ e e1' e2' e3')
-        (SemTy.TypeS.App SemTy.prelude_list τ)
+        (SemTy.TypeS.App Prelude.list τ)
 
     | ENUM_FROM_TO :
       exp ge ie ve e1 e1' τ →
       exp ge ie ve e2 e2' τ →
-      dict ie e [⟨SemTy.prelude_enum, τ⟩] →
+      dict ie e [⟨Prelude.enum, τ⟩] →
       exp ge ie ve
         (Source.Expression.listRange e1 none (some e2))
         (apply_enumFromTo τ e e1' e2')
-        (SemTy.TypeS.App SemTy.prelude_list τ)
+        (SemTy.TypeS.App Prelude.list τ)
 
     | ENUM_FROM_THEN :
       exp ge ie ve e1 e1' τ →
       exp ge ie ve e2 e2' τ →
-      dict ie e [⟨SemTy.prelude_enum, τ⟩] →
+      dict ie e [⟨Prelude.enum, τ⟩] →
       exp ge ie ve
         (Source.Expression.listRange e1 (some e2) none)
         (apply_enumFromThen τ e e1' e2')
-        (SemTy.TypeS.App SemTy.prelude_list τ)
+        (SemTy.TypeS.App Prelude.list τ)
 
     | ENUM_FROM :
       exp ge ie ve e1 e1' τ →
-      dict ie e [⟨SemTy.prelude_enum, τ⟩] →
+      dict ie e [⟨Prelude.enum, τ⟩] →
       exp ge ie ve
         (Source.Expression.listRange e1 none none)
         (apply_enumFrom τ e e1')
-        (SemTy.TypeS.App SemTy.prelude_list τ)
+        (SemTy.TypeS.App Prelude.list τ)
 
   /--
   Cp. Fig 41
@@ -388,7 +389,7 @@ mutual
       exp ge ie ve e e₁ (SemTy.TypeS.App τ τ₁) →
       pat ge ie p p' veₚ τ₁ →
       stmts ge ie _ s e₂ (SemTy.TypeS.App τ τ₂) →
-      dict ie ed [⟨SemTy.prelude_monad, τ⟩] →
+      dict ie ed [⟨Prelude.monad, τ⟩] →
       stmts ge ie ve (Source.Statements.mbind p e s) _ (SemTy.TypeS.App τ τ₂)
 
     | SLET :
@@ -400,12 +401,12 @@ mutual
     | STHEN :
       exp ge ie ve e e₁ (SemTy.TypeS.App τ τ₁) →
       stmts ge ie ve s e₂ (SemTy.TypeS.App τ τ₂) →
-      dict ie ed [⟨SemTy.prelude_monad, τ⟩] →
+      dict ie ed [⟨Prelude.monad, τ⟩] →
       stmts ge ie ve (Source.Statements.seq e s) _ (SemTy.TypeS.App τ τ₂)
 
     | SRET :
       exp ge ie ve e e' (SemTy.TypeS.App τ τ₁) →
-      dict ie _ [⟨SemTy.prelude_monad, τ⟩] →
+      dict ie _ [⟨Prelude.monad, τ⟩] →
       stmts ge ie ve (Source.Statements.last e) e' (SemTy.TypeS.App τ τ₁)
 
   /--
@@ -420,7 +421,7 @@ mutual
                 → SemTy.TypeS
                 → Prop where
     | GDE :
-      exp ge ie ve e1 e1' SemTy.prelude_bool →
+      exp ge ie ve e1 e1' Prelude.bool →
       exp ge ie ve e2 e2' τ →
       gde ge ie ve (Source.GuardedExp.mk e1 e2) (Target.GuardedExp.mk e1' e2') τ
 
