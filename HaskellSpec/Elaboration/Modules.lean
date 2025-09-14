@@ -361,4 +361,9 @@ inductive dict : Env.IE
     dict _ _ _
 
   | DICT_SUPER :
-    dict _ _ _
+    List.Mem (Env.IE_Entry.ExtractsADictionaryForTheSuperclass x α Γ Γ') ie ->
+    dict ie e (List.singleton (Prod.mk Γ' τ)) ->
+    dict
+      ie
+      (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e)
+      (List.singleton (Prod.mk Γ τ))
