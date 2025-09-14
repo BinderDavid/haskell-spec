@@ -187,4 +187,12 @@ ceiling : ∀ α. RealFrac α ⇒c ∀ β. Integral β ⇒ α → β
 inductive ClassTypeScheme : Type where
   | Forall : Type_Variable → SClass_Name → TypeScheme → ClassTypeScheme
   deriving BEq
+
+
+
+def type_subst (τ : SemTy.TypeS)
+               (args : List SemTy.TypeS)
+               (vars : List SemTy.Type_Variable)
+               : SemTy.TypeS := sorry
+
 end SemTy
