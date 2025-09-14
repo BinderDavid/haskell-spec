@@ -325,7 +325,10 @@ inductive dict : Env.IE
     dict _ _ _
 
   | DICT_VAR :
-    dict _ _ _
+    List.Mem (Env.IE_Entry.BoundInDictionaryAbstraction v class_name α τs) ie ->
+    dict ie
+     (Target.Expression.var (QVariable.Unqualified v))
+     (List.singleton (Prod.mk class_name (τs.foldl SemTy.TypeS.App (SemTy.TypeS.Variable α))))
 
   | DICT_INST :
     dict _ _ _
