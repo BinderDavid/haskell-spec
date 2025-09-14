@@ -163,7 +163,7 @@ x is a dictionary from an instance declaration
 x : ∀α_1 … α_k . θ ⇒ Γ (χ α_1 … α_k)
 ```
 -/
-  | DictioanryFromInstanceDeclaration : QVariable
+  | DictionaryFromInstanceDeclaration : QVariable
     -> List SemTy.Type_Variable
     -> SemTy.Context
     -> SemTy.SClass_Name

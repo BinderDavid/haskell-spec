@@ -340,6 +340,21 @@ inductive method : Env.GE → Env.IE → Env.VE
   | METHOD :
     method _ _ _ _ _ _
 
+
+-- These are helpers we need for type variable substitution in various rules
+-- below.
+--  BEGIN
+def SemTyVarSubst := Env.Env SemTy.Type_Variable SemTy.TypeS
+
+def applySubstTypeS (subst : SemTyVarSubst) : SemTy.TypeS → SemTy.TypeS
+  | SemTy.TypeS.Variable τ => Option.getD (List.lookup τ subst) (SemTy.TypeS.Variable τ)
+  | SemTy.TypeS.TypeConstructor χ => SemTy.TypeS.TypeConstructor χ
+  | SemTy.TypeS.App τ1 τ2 => SemTy.TypeS.App (applySubstTypeS subst τ1) (applySubstTypeS subst τ2)
+
+def applySubstContext (subst : SemTyVarSubst) : SemTy.Context → SemTy.Context :=
+  List.map (Prod.map id (applySubstTypeS subst))
+-- END
+
 /--
 Cp. Fig 28
 ```text
@@ -360,7 +375,18 @@ inductive dict : Env.IE
      (List.singleton (Prod.mk class_name (τs.foldl SemTy.TypeS.App (SemTy.TypeS.Variable α))))
 
   | DICT_INST :
-    dict _ _ _
+    (Env.IE_Entry.DictionaryFromInstanceDeclaration x αs θ Γ χ _) ∈ ie ->
+    (τsForαs : SemTyVarSubst) → (Env.dom τsForαs) = αs →
+    dict ie e (applySubstContext τsForαs θ) →
+    τs = Env.rng τsForαs →
+    dict
+      ie
+      (Target.Expression.app
+        (match τs with
+          | [] => Target.Expression.var x
+          | (t :: ts)  => Target.Expression.typ_app (Target.Expression.var x) (NonEmpty.mk t ts))
+        e)
+      [⟨Γ, τs.foldl SemTy.TypeS.App (SemTy.TypeS.TypeConstructor χ)⟩]
 
   | DICT_SUPER :
     List.Mem (Env.IE_Entry.ExtractsADictionaryForTheSuperclass x α Γ Γ') ie ->
