@@ -192,20 +192,6 @@ inductive pat : Env.GE → Env.IE
       []
       τ
 
--- These are helpers we need for type variable substitution in VAR_1
--- below.
---  BEGIN
-def SemTyVarSubst := Env.Env SemTy.Type_Variable SemTy.TypeS
-
-def applySubstTypeS (subst : SemTyVarSubst) : SemTy.TypeS → SemTy.TypeS
-  | SemTy.TypeS.Variable τ => Option.getD (List.lookup τ subst) (SemTy.TypeS.Variable τ)
-  | SemTy.TypeS.TypeConstructor χ => SemTy.TypeS.TypeConstructor χ
-  | SemTy.TypeS.App τ1 τ2 => SemTy.TypeS.App (applySubstTypeS subst τ1) (applySubstTypeS subst τ2)
-
-def applySubstContext (subst : SemTyVarSubst) : SemTy.Context → SemTy.Context :=
-  List.map (Prod.map id (applySubstTypeS subst))
--- END
-
 mutual
   /--
   Cp. Fig 40
@@ -259,23 +245,23 @@ mutual
     | VAR_1 :
       (x : QVariable) → (ve : Env.VE) →
       ⟨x, (Env.VE_Item.Ordinary x (SemTy.TypeScheme.Forall αs θ τ))⟩ ∈ ve →
-      (τsForαs : SemTyVarSubst) → (Env.dom τsForαs) = αs →
-      dict ie e (applySubstContext τsForαs θ) →
+      (τsForαs : SemTy.VarSubst) → (Env.dom τsForαs) = αs →
+      dict ie e (SemTy.applySubstContext τsForαs θ) →
       ---------------------------------------------------------------------------------------
       exp ge ie ve (Source.Expression.var x)
         (Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (Env.rng τsForαs)) e)
-        (applySubstTypeS τsForαs τ)
+        (SemTy.applySubstTypeS τsForαs τ)
 
     | VAR_2 :
       (x : QVariable) → (ve : Env.VE) →
       ⟨x, (Env.VE_Item.Class x (SemTy.ClassTypeScheme.Forall α Γ (SemTy.TypeScheme.Forall αs θ τ) ))⟩ ∈ ve →
       dict ie e1 [(Γ, τ)] →
-      (τsForαs : SemTyVarSubst) → (Env.dom τsForαs) = αs →
-      dict ie e2 (applySubstContext τsForαs θ) →
+      (τsForαs : SemTy.VarSubst) → (Env.dom τsForαs) = αs →
+      dict ie e2 (SemTy.applySubstContext τsForαs θ) →
       --------------------------------------------------------------------------------------
       exp ge ie ve (Source.Expression.var x)
         (Target.Expression.app (Target.typ_app_ (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e1) (Env.rng τsForαs)) e2)
-        (applySubstTypeS (List.cons (α, τ) τsForαs) τ)
+        (SemTy.applySubstTypeS (List.cons (α, τ) τsForαs) τ)
 
     | LITERAL :
       literal ie lit e τ →

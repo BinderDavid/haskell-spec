@@ -109,10 +109,26 @@ inductive ClassTypeScheme : Type where
   deriving BEq
 
 
+/-
+## Substitution of Types for Type Variables
+-/
 
 def type_subst (τ : SemTy.TypeS)
                (args : List SemTy.TypeS)
                (vars : List SemTy.Type_Variable)
                : SemTy.TypeS := sorry
+
+
+
+
+def VarSubst := List (SemTy.Type_Variable × SemTy.TypeS)
+
+def applySubstTypeS (subst : VarSubst) : SemTy.TypeS → SemTy.TypeS
+  | SemTy.TypeS.Variable τ => Option.getD (List.lookup τ subst) (SemTy.TypeS.Variable τ)
+  | SemTy.TypeS.TypeConstructor χ => SemTy.TypeS.TypeConstructor χ
+  | SemTy.TypeS.App τ1 τ2 => SemTy.TypeS.App (applySubstTypeS subst τ1) (applySubstTypeS subst τ2)
+
+def applySubstContext (subst : VarSubst) : SemTy.Context → SemTy.Context :=
+  List.map (Prod.map id (applySubstTypeS subst))
 
 end SemTy
