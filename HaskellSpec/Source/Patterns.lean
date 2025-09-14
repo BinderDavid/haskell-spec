@@ -12,9 +12,9 @@ namespace Source
                     | ~p
                     | _
                     | literal
-                    | v+integer
   fp ∈ FieldPattern → x = p
 ```
+NOTE: n+k patterns have been removed from the formalization.
 --/
 inductive Pattern : Type where
   | var : QVariable → Pattern
@@ -24,6 +24,5 @@ inductive Pattern : Type where
   | lazy : Pattern → Pattern
   | wildcard : Pattern
   | lit : Literal → Pattern
-  | n_plus_k : Variable → Int → Pattern
 
 end Source
