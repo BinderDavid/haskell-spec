@@ -48,7 +48,9 @@ mutual
       ⟨T, Env.TE_Item.TypeSynonym χ g αs τ⟩ ∈ te₁ →
       g < h →
       types te h ts τs →
-      type ⟨te₁,te₂⟩ h (type_apply T ts) (SemTy.type_subst τ τs αs)
+      Env.rng subst = τs →
+      Env.dom subst = αs →
+      type ⟨te₁,te₂⟩ h (type_apply T ts) (SemTy.Substitute.substitute subst τ)
 
     | TAPP :
       type te h t₁ τ₁ →

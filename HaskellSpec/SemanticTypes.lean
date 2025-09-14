@@ -113,16 +113,11 @@ inductive ClassTypeScheme : Type where
 ## Substitution of Types for Type Variables
 -/
 
-def type_subst (τ : SemTy.TypeS)
-               (args : List SemTy.TypeS)
-               (vars : List SemTy.Type_Variable)
-               : SemTy.TypeS := sorry
-
-
 /--
 A simultaneous substitution of types for type variables.
 E.g.: `[τ₁ / α₁, … , τₙ / αₙ]`
 -/
+@[reducible]
 def VarSubst : Type := List (SemTy.Type_Variable × SemTy.TypeS)
 
 /--
