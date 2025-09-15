@@ -27,7 +27,7 @@ def fromInteger (i : Int) : Target.Expression :=
 
 set_option quotPrecheck false in
 set_option hygiene false in
-notation  "<literal>" ie "⊢" l "⇝" e "፥" t  => literal ie l e t
+notation  "《literal》" ie "⊢" l "⇝" e "፥" t "▪"=> literal ie l e t
 
 /--
 Cp. Fig 37
@@ -41,22 +41,22 @@ inductive literal : Env.IE
                   → SemTy.TypeS
                   → Prop where
   | LIT_CHAR :
-    -------------------------------------------------------------------------------------------------
-    <literal> ie ⊢ Source.Literal.char c ⇝ Target.Expression.lit (Target.Literal.char c) ፥ Prelude.char
+    -------------------------------------------------------------------------------------------------------
+    《literal》 ie ⊢ Source.Literal.char c ⇝ Target.Expression.lit (Target.Literal.char c) ፥ Prelude.char ▪
 
   | LIT_STRING :
-    --------------------------------------------------------------------------------------------------------------------------------------
-    <literal> ie ⊢ (Source.Literal.string s) ⇝ (Target.Expression.lit (Target.Literal.string s)) ፥ SemTy.TypeS.App Prelude.list Prelude.char
+    --------------------------------------------------------------------------------------------------------------------------------------------
+    《literal》 ie ⊢ (Source.Literal.string s) ⇝ (Target.Expression.lit (Target.Literal.string s)) ፥ SemTy.TypeS.App Prelude.list Prelude.char ▪
 
   | LIT_INTEGER :
-    (<dict> ie ⊢ fromInteger i ፥ [⟨Prelude.num, τ⟩]) →
-    ---------------------------------------------------------
-    <literal> ie ⊢ Source.Literal.integer i ⇝ fromInteger i ፥ τ
+    《dict》 ie ⊢ fromInteger i ፥ [⟨Prelude.num, τ⟩] ▪ →
+    ---------------------------------------------------------------
+    《literal》 ie ⊢ Source.Literal.integer i ⇝ fromInteger i ፥ τ ▪
 
   | LIT_FLOAT :
-    (<dict> ie ⊢ fromRationalAfterRatio n d ፥ [⟨Prelude.fractional, τ⟩]) →
-    ----------------------------------------------------------------------
-    <literal> ie ⊢ Source.Literal.float n d ⇝ fromRationalAfterRatio n d ፥ τ
+    《dict》 ie ⊢ fromRationalAfterRatio n d ፥ [⟨Prelude.fractional, τ⟩] ▪ →
+    ----------------------------------------------------------------------------
+    《literal》 ie ⊢ Source.Literal.float n d ⇝ fromRationalAfterRatio n d ፥ τ ▪
 
 def unqual_var (var : QVariable) : Variable :=
   match var with
@@ -119,6 +119,11 @@ def apply_enumFrom : SemTy.TypeS → Target.Expression → Target.Expression →
     e)
   e1'
 
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《pat》" ge "," ie "⊢" s "⇝" t "፥" ve "," τ "▪" => pat ge ie s t ve τ
+
 /--
 Cp. Fig 43. 44.
 ```
@@ -133,64 +138,46 @@ inductive pat : Env.GE → Env.IE
               → Prop where
   | PVAR :
     σ = (SemTy.TypeScheme.Forall [] [] τ) →
-    pat
-      ge
-      ie
-      (Source.Pattern.var x)
-      (Target.Pattern.var (unqual_var x) σ)
-      [(x, Env.VE_Item.Ordinary x σ)]
-      τ
+    -----------------------------------------------------------------------------------------------------------------
+    《pat》ge,ie ⊢ Source.Pattern.var x ⇝ Target.Pattern.var (unqual_var x) σ ፥ [(x, Env.VE_Item.Ordinary x σ)] , τ ▪
 
   | PIRR :
-    pat ge ie p₁ p₂ ve τ →
-    pat ge ie (Source.Pattern.lazy p₁) (Target.Pattern.lazy p₂) ve τ
+    《pat》ge,ie ⊢ p₁ ⇝ p₂ ፥ ve, τ ▪ →
+    -----------------------------------------------------------------------
+    《pat》ge,ie ⊢ Source.Pattern.lazy p₁ ⇝ Target.Pattern.lazy p₂ ፥ ve, τ ▪
 
   | PWILD :
-    pat ge ie Source.Pattern.wildcard Target.Pattern.wildcard [] τ
+    --------------------------------------------------------------
+    《pat》ge,ie ⊢ Source.Pattern.wildcard ⇝ Target.Pattern.wildcard ፥ [], τ ▪
 
   | PCHAR :
-    pat
-      ge
-      ie
-      (Source.Pattern.lit (Source.Literal.char c))
-      (Target.Pattern.char c)
-      []
-      Prelude.char
+    -------------------------------------------------------------------------------------------------------
+    《pat》ge,ie ⊢ Source.Pattern.lit (Source.Literal.char c) ⇝ Target.Pattern.char c ፥ [],Prelude.char ▪
 
   | PSTRING :
-    pat
-      ge
-      ie
-      (Source.Pattern.lit (Source.Literal.string s))
-      (Target.Pattern.string s)
-      []
-      (SemTy.TypeS.App Prelude.list Prelude.char)
+    ---------------------------------------------------------------------------------------------------------------------------------------
+    《pat》ge,ie ⊢ Source.Pattern.lit (Source.Literal.string s) ⇝ Target.Pattern.string s ፥ [], SemTy.TypeS.App Prelude.list Prelude.char ▪
+
 
   | PINTEGER :
-    (<literal> ie ⊢ (Source.Literal.integer i) ⇝ e ፥ τ) →
-    (<dict> ie ⊢ ed ፥ [⟨Prelude.eq, τ⟩]) →
-    pat
-      ge
-      ie
-      (Source.Pattern.lit (Source.Literal.integer i))
-      (Target.Pattern.exp (apply_equals τ ed e))
-      []
-      τ
+    《literal》 ie ⊢ (Source.Literal.integer i) ⇝ e ፥ τ ▪  →
+    《dict》 ie ⊢ ed ፥ [⟨Prelude.eq, τ⟩] ▪ →
+    -----------------------------------------------------------------------------------------------------------------
+    《pat》ge,ie ⊢ Source.Pattern.lit (Source.Literal.integer i) ⇝ Target.Pattern.exp (apply_equals τ ed e) ፥ [], τ ▪
 
   | PFLOAT :
-    (<literal> ie ⊢ (Source.Literal.float n d) ⇝ e ፥ τ) →
-    (<dict> ie ⊢ ed ፥ [⟨Prelude.eq, τ⟩]) →
-    pat
-      ge
-      ie
-      (Source.Pattern.lit (Source.Literal.float n d))
-      (Target.Pattern.exp (apply_equals τ ed e))
-      []
-      τ
+    《literal》 ie ⊢ (Source.Literal.float n d) ⇝ e ፥ τ ▪ →
+    《dict》 ie ⊢ ed ፥ [⟨Prelude.eq, τ⟩] ▪ →
+    -----------------------------------------------------------------------------------------------------------------
+    《pat》ge,ie ⊢ Source.Pattern.lit (Source.Literal.float n d) ⇝ Target.Pattern.exp (apply_equals τ ed e) ፥ [], τ ▪
 
 set_option quotPrecheck false in
 set_option hygiene false in
-notation  "<exp>" ge "," ie "," ve "⊢" e "⇝" e' "፥" t  => exp ge ie ve e e' t
+notation  "《exp》" ge "," ie "," ve "⊢" e "⇝" e' "፥" t "▪" => exp ge ie ve e e' t
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《quals》" ge "," ie "," ve "⊢" q "⇝" q' "፥" ve' "▪" => quals ge ie ve q q' ve'
 
 mutual
   /--
@@ -205,49 +192,43 @@ mutual
                   → Env.VE
                   → Prop where
     | QGEN :
-      (<exp> ge , ie , ve ⊢ e ⇝ e' ፥ SemTy.TypeS.App Prelude.list τ) →
-      pat ge ie p p' ve_p τ →
-      quals ge ie (Env.oplusarrow ve ve_p) qs qs' ve_quals →
-      quals ge ie ve
-        (Source.Qualifiers.list_bind p e qs)
-        (Target.Qualifiers.list_bind p' e' qs')
-        (Env.oplusarrow ve_p ve_quals)
+      《exp》  ge,ie,ve                     ⊢ e  ⇝ e'  ፥ SemTy.TypeS.App Prelude.list τ ▪ →
+      《pat》  ge,ie                        ⊢ p  ⇝ p'  ፥ ve_p, τ ▪ →
+      《quals》ge,ie,Env.oplusarrow ve ve_p ⊢ qs ⇝ qs' ፥ ve_quals ▪ →
+      -------------------------------------------------------------------------------------------------------------------------------
+      《quals》ge,ie,ve ⊢ Source.Qualifiers.list_bind p e qs ⇝ Target.Qualifiers.list_bind p' e' qs' ፥ Env.oplusarrow ve_p ve_quals ▪
 
     | QLET :
       binds ge ie ve bs (Target.Binds.cons b' bs') ve_binds →
-      quals ge ie (Env.oplusarrow ve ve_binds) qs qs' ve_quals →
-      quals ge ie ve (Source.Qualifiers.lbind bs qs)
-        (Target.Qualifiers.lbind (Target.Binds.cons b' bs') qs')
-        (Env.oplusarrow ve ve_binds)
+      《quals》ge,ie,Env.oplusarrow ve ve_binds ⊢ qs ⇝ qs' ፥  ve_quals ▪ →
+      -----------------------------------------------------------------------------------------------------------------------------------------
+      《quals》ge,ie,ve ⊢ Source.Qualifiers.lbind bs qs ⇝ Target.Qualifiers.lbind (Target.Binds.cons b' bs') qs' ፥ Env.oplusarrow ve ve_binds ▪
 
     | QFILTER :
-      exp ge ie ve e e' Prelude.bool →
-      quals ge ie ve qs qs' ve_quals →
-      quals ge ie ve
-        (Source.Qualifiers.guard e qs)
-        (Target.Qualifiers.guard e' qs')
-        ve_quals
+     《exp》  ge,ie,ve ⊢ e  ⇝ e'  ፥ Prelude.bool ▪ →
+     《quals》ge,ie,ve ⊢ qs ⇝ qs' ፥ ve_quals ▪ →
+     -----------------------------------------------------------------------------------------------
+     《quals》 ge,ie,ve ⊢ Source.Qualifiers.guard e qs ⇝ Target.Qualifiers.guard e' qs' ፥ ve_quals ▪
 
     | QEMPTY :
-      quals ge ie ve Source.Qualifiers.empty Target.Qualifiers.empty []
-    /--
-    Cp. Fig 36. 38. 39. 42
-    ```text
-    GE, IE, VE ⊢ e ⇝ e : τ
-    ```
-    -/
+     ----------------------------------------------------------------------------
+     《quals》ge,ie,ve ⊢ Source.Qualifiers.empty ⇝ Target.Qualifiers.empty ፥ [] ▪
 
-
+  /--
+  Cp. Fig 36. 38. 39. 42
+  ```text
+  GE, IE, VE ⊢ e ⇝ e : τ
+  ```
+  -/
   inductive exp : Env.GE → Env.IE → Env.VE
                 → Source.Expression
                 → Target.Expression
                 → SemTy.TypeS
                 → Prop where
     | VAR_1 :
-      (x : QVariable) → (ve : Env.VE) →
       ⟨x, (Env.VE_Item.Ordinary x (SemTy.TypeScheme.Forall αs θ τ))⟩ ∈ ve →
       (τsForαs : SemTy.VarSubst) → (Env.dom τsForαs) = αs →
-      (<dict> ie ⊢ e ፥ SemTy.Substitute.substitute τsForαs θ) →
+      《dict》 ie ⊢ e ፥ SemTy.Substitute.substitute τsForαs θ ▪ →
       ---------------------------------------------------------------------------------------
       exp ge ie ve (Source.Expression.var x)
         (Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (Env.rng τsForαs)) e)
@@ -256,27 +237,25 @@ mutual
     | VAR_2 :
       (x : QVariable) → (ve : Env.VE) →
       ⟨x, (Env.VE_Item.Class x (SemTy.ClassTypeScheme.Forall α Γ (SemTy.TypeScheme.Forall αs θ τ) ))⟩ ∈ ve →
-      (<dict> ie ⊢ e1 ፥ [(Γ, τ)]) →
-      (τsForαs : SemTy.VarSubst) → (Env.dom τsForαs) = αs →
-      (<dict> ie ⊢ e2 ፥ SemTy.Substitute.substitute τsForαs θ) →
+      《dict》 ie ⊢ e1 ፥ [(Γ, τ)] ▪ →
+      (τsForαs : SemTy.VarSubst) →
+      (Env.dom τsForαs) = αs →
+      《dict》 ie ⊢ e2 ፥ SemTy.Substitute.substitute τsForαs θ ▪ →
       --------------------------------------------------------------------------------------
       exp ge ie ve (Source.Expression.var x)
         (Target.Expression.app (Target.typ_app_ (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e1) (Env.rng τsForαs)) e2)
         (SemTy.Substitute.substitute (List.cons (α, τ) τsForαs) τ)
 
     | LITERAL :
-      (<literal> ie ⊢ lit ⇝ e ፥ τ) →
-      exp ge ie ve (Source.Expression.lit lit) e τ
+      《literal》  ie ⊢ lit ⇝ e ፥ τ ▪ →
+      ------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.lit lit ⇝ e ፥ τ ▪
 
     | LAMBDA :
       Forall4NE ps ps' ves τs (λ p p' ve' τ' => pat ge ie p p' ve' τ') →
-      exp ge ie _ e e' τ →
-      exp ge
-          ie
-          ve
-          (Source.Expression.abs ps e)
-          (Target.Expression.abs ps' e')
-          _
+      《exp》ge,ie,_ ⊢ e ⇝ e' ፥ τ ▪ →
+      ---------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.abs ps e ⇝ Target.Expression.abs ps' e' ፥ _ ▪
 
     | APP :
       exp ge ie ve e₁ e₁' (SemTy.TypeS.App (SemTy.TypeS.App Prelude.funt τ') τ) →
@@ -305,8 +284,8 @@ mutual
         τ
 
     | LIST_COMP :
-      quals ge ie ve quals_source quals_target ve_quals ->
-      exp ge ie (Env.oplusarrow ve ve_quals) e_source e_target  τ ->
+      《quals》ge,ie,ve ⊢ quals_source ⇝ quals_target ፥ ve_quals ▪ →
+      exp ge ie (Env.oplusarrow ve ve_quals) e_source e_target  τ →
       exp ge ie ve
        (Source.Expression.listComp e_source quals_source)
        (Target.Expression.listComp e_target quals_target)
@@ -329,7 +308,7 @@ mutual
       exp ge ie ve e1 e1' τ →
       exp ge ie ve e2 e2' τ →
       exp ge ie ve e3 e3' τ →
-      (<dict> ie ⊢ e ፥ [⟨Prelude.enum, τ⟩]) →
+      《dict》 ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
       exp ge ie ve
         (Source.Expression.listRange e1 (some e2) (some e3))
         (apply_enumFromThenTo τ e e1' e2' e3')
@@ -338,7 +317,7 @@ mutual
     | ENUM_FROM_TO :
       exp ge ie ve e1 e1' τ →
       exp ge ie ve e2 e2' τ →
-      (<dict> ie ⊢ e ፥ [⟨Prelude.enum, τ⟩]) →
+      《dict》 ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
       exp ge ie ve
         (Source.Expression.listRange e1 none (some e2))
         (apply_enumFromTo τ e e1' e2')
@@ -347,7 +326,7 @@ mutual
     | ENUM_FROM_THEN :
       exp ge ie ve e1 e1' τ →
       exp ge ie ve e2 e2' τ →
-      (<dict> ie ⊢ e ፥ [⟨Prelude.enum, τ⟩]) →
+      《dict》 ie ⊢ e ፥ [⟨Prelude.enum, τ⟩]  ▪ →
       exp ge ie ve
         (Source.Expression.listRange e1 (some e2) none)
         (apply_enumFromThen τ e e1' e2')
@@ -355,7 +334,7 @@ mutual
 
     | ENUM_FROM :
       exp ge ie ve e1 e1' τ →
-      (<dict> ie ⊢ e ፥ [⟨Prelude.enum, τ⟩]) →
+      《dict》 ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
       exp ge ie ve
         (Source.Expression.listRange e1 none none)
         (apply_enumFrom τ e e1')
@@ -376,7 +355,7 @@ mutual
       exp ge ie ve e e₁ (SemTy.TypeS.App τ τ₁) →
       pat ge ie p p' veₚ τ₁ →
       stmts ge ie _ s e₂ (SemTy.TypeS.App τ τ₂) →
-      (<dict> ie ⊢ ed ፥ [⟨Prelude.monad, τ⟩]) →
+      《dict》 ie ⊢ ed ፥ [⟨Prelude.monad, τ⟩] ▪ →
       stmts ge ie ve (Source.Statements.mbind p e s) _ (SemTy.TypeS.App τ τ₂)
 
     | SLET :

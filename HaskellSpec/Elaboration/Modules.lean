@@ -343,7 +343,7 @@ inductive method : Env.GE → Env.IE → Env.VE
 
 set_option quotPrecheck false in
 set_option hygiene false in
-notation  "<dict>" ie "⊢" e "፥" τ  => dict ie e τ
+notation  "《dict》" ie "⊢" e "፥" τ "▪"  => dict ie e τ
 
 /--
 Cp. Fig 28
@@ -357,18 +357,18 @@ inductive dict : Env.IE
                → Prop where
   | DICT_TUPLE :
     ----------------
-    <dict> ie ⊢ _ ፥ _
+    《dict》 ie ⊢ _ ፥ _ ▪
 
   | DICT_VAR :
     Env.IE_Entry.BoundInDictionaryAbstraction v class_name α τs ∈ ie ->
     ----------------------------------------------------------------------
-    <dict> ie ⊢ (Target.Expression.var (QVariable.Unqualified v)) ፥ (List.singleton (Prod.mk class_name (τs.foldl SemTy.TypeS.App (SemTy.TypeS.Variable α))))
+    《dict》 ie ⊢ (Target.Expression.var (QVariable.Unqualified v)) ፥ (List.singleton (Prod.mk class_name (τs.foldl SemTy.TypeS.App (SemTy.TypeS.Variable α)))) ▪
 
   | DICT_INST :
-    <dict> ie ⊢ _ ፥ _
+    《dict》 ie ⊢ _ ፥ _ ▪
 
   | DICT_SUPER :
     Env.IE_Entry.ExtractsADictionaryForTheSuperclass x α Γ Γ' ∈ ie ->
-    (<dict> ie ⊢ e ፥ List.singleton (Prod.mk Γ' τ)) →
+    《dict》 ie ⊢ e ፥ List.singleton (Prod.mk Γ' τ) ▪ →
     -----------------------------------------------------------------------------------------------------------------------------------------
-    <dict> ie ⊢ (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e) ፥ (List.singleton (Prod.mk Γ τ))
+    《dict》 ie ⊢ (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e) ፥ (List.singleton (Prod.mk Γ τ)) ▪
