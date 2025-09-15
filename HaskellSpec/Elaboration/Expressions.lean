@@ -235,7 +235,6 @@ mutual
         (SemTy.Substitute.substitute τsForαs τ)
 
     | VAR_2 :
-      (x : QVariable) → (ve : Env.VE) →
       ⟨x, (Env.VE_Item.Class x (SemTy.ClassTypeScheme.Forall α Γ (SemTy.TypeScheme.Forall αs θ τ) ))⟩ ∈ ve →
       《dict》 ie ⊢ e1 ፥ [(Γ, τ)] ▪ →
       (τsForαs : SemTy.VarSubst) →
@@ -258,87 +257,72 @@ mutual
       《exp》ge,ie,ve ⊢ Source.Expression.abs ps e ⇝ Target.Expression.abs ps' e' ፥ _ ▪
 
     | APP :
-      exp ge ie ve e₁ e₁' (SemTy.TypeS.App (SemTy.TypeS.App Prelude.funt τ') τ) →
-      exp ge ie ve e₂ e₂' τ' →
+      《exp》ge,ie,ve ⊢ e₁ ⇝ e₁' ፥ SemTy.TypeS.App (SemTy.TypeS.App Prelude.funt τ') τ ▪ →
+      《exp》ge,ie,ve ⊢ e₂ ⇝ e₂' ፥ τ' ▪ →
       ------------------------------------
-      exp ge
-          ie
-          ve
-          (Source.Expression.app e₁ e₂)
-          (Target.Expression.app e₁' e₂')
-          τ
+      《exp》ge,ie,ve ⊢ Source.Expression.app e₁ e₂ ⇝ Target.Expression.app e₁' e₂' ፥ τ ▪
 
     | LET :
       binds ge ie ve source_binds (Target.Binds.cons ve_head ve_tail) ve_binds →
-      exp ge ie (Env.oplusarrow ve ve_binds) e e' τ →
-      exp ge ie ve (Source.Expression.let_bind source_binds e)
-        (Target.Expression.let_bind (Target.Binds.cons ve_head ve_tail) e')
-        τ
+      《exp》ge,ie,Env.oplusarrow ve ve_binds ⊢ e ⇝ e' ፥ τ ▪ →
+      -------------------------------------------------------------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.let_bind source_binds e ⇝ Target.Expression.let_bind (Target.Binds.cons ve_head ve_tail) e' ፥ τ ▪
 
     | CASE :
-      exp ge ie ve e e' τ' →
+      《exp》ge,ie,ve ⊢ e ⇝ e' ፥ τ' ▪ →
       /-Forall2NE ms ms' (λ m m' => matchR ge ie ve m m' (SemTy.TypeS.App (SemTy.TypeS.App SemTy.prelude_fun τ') τ)) → -/
-      exp ge ie ve
-        (Source.Expression.case e ms)
-        (Target.Expression.case e' ms')
-        τ
+      -----------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.case e ms ⇝ Target.Expression.case e' ms' ፥ τ ▪
 
     | LIST_COMP :
-      《quals》ge,ie,ve ⊢ quals_source ⇝ quals_target ፥ ve_quals ▪ →
-      exp ge ie (Env.oplusarrow ve ve_quals) e_source e_target  τ →
-      exp ge ie ve
-       (Source.Expression.listComp e_source quals_source)
-       (Target.Expression.listComp e_target quals_target)
-       (SemTy.mk_list τ)
+      《quals》ge,ie,ve                         ⊢ quals_source ⇝ quals_target ፥ ve_quals ▪ →
+      《exp》  ge,ie,Env.oplusarrow ve ve_quals ⊢ e_source     ⇝ e_target     ፥ τ ▪ →
+      -----------------------------------------------------------------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.listComp e_source quals_source ⇝ Target.Expression.listComp e_target quals_target ፥ SemTy.mk_list τ ▪
 
     | DO :
       stmts ge ie ve s e τ →
-      exp ge ie ve (Source.Expression.do_block s) e τ
+      --------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.do_block s ⇝ e ፥ τ ▪
 
     | CON :
-      exp ge ie ve (Source.Expression.constr _) _ _
+      ------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.constr _ ⇝ _ ፥ _ ▪
 
     | UPD :
-      exp ge ie ve (Source.Expression.recUpd _ _) _ _
+      ---------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.recUpd _ _ ⇝  _ ፥ _ ▪
 
     | LABCON :
-      exp ge ie ve (Source.Expression.recConstr _ _) _ _
+      -----------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.recConstr _ _ ⇝ _ ፥ _ ▪
 
     | ENUM_FROM_THEN_TO :
-      exp ge ie ve e1 e1' τ →
-      exp ge ie ve e2 e2' τ →
-      exp ge ie ve e3 e3' τ →
-      《dict》 ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
-      exp ge ie ve
-        (Source.Expression.listRange e1 (some e2) (some e3))
-        (apply_enumFromThenTo τ e e1' e2' e3')
-        (SemTy.TypeS.App Prelude.list τ)
+      《exp》ge,ie,ve ⊢ e₁ ⇝ e₁' ፥ τ ▪ →
+      《exp》ge,ie,ve ⊢ e₂ ⇝ e₂' ፥ τ ▪ →
+      《exp》ge,ie,ve ⊢ e₃ ⇝ e₃' ፥ τ ▪ →
+      《dict》     ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
+      -------------------------------------------------------------------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ (some e₂) (some e₃) ⇝ apply_enumFromThenTo τ e e₁' e₂' e₃' ፥ SemTy.TypeS.App Prelude.list τ ▪
 
     | ENUM_FROM_TO :
-      exp ge ie ve e1 e1' τ →
-      exp ge ie ve e2 e2' τ →
-      《dict》 ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
-      exp ge ie ve
-        (Source.Expression.listRange e1 none (some e2))
-        (apply_enumFromTo τ e e1' e2')
-        (SemTy.TypeS.App Prelude.list τ)
+      《exp》ge,ie,ve ⊢ e₁ ⇝ e₁' ፥ τ ▪ →
+      《exp》ge,ie,ve ⊢ e₂ ⇝ e₂' ፥ τ ▪ →
+      《dict》     ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
+      -------------------------------------------------------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ none (some e₂) ⇝ apply_enumFromTo τ e e₁' e₂' ፥ SemTy.TypeS.App Prelude.list τ ▪
 
     | ENUM_FROM_THEN :
-      exp ge ie ve e1 e1' τ →
-      exp ge ie ve e2 e2' τ →
-      《dict》 ie ⊢ e ፥ [⟨Prelude.enum, τ⟩]  ▪ →
-      exp ge ie ve
-        (Source.Expression.listRange e1 (some e2) none)
-        (apply_enumFromThen τ e e1' e2')
-        (SemTy.TypeS.App Prelude.list τ)
+      《exp》ge,ie,ve ⊢ e₁ ⇝ e₁' ፥ τ ▪ →
+      《exp》ge,ie,ve ⊢ e₂ ⇝ e₂' ፥ τ ▪ →
+      《dict》     ie ⊢ e ፥ [⟨Prelude.enum, τ⟩]  ▪ →
+      ---------------------------------------------------------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ (some e₂) none ⇝ apply_enumFromThen τ e e₁' e₂' ፥ SemTy.TypeS.App Prelude.list τ ▪
 
     | ENUM_FROM :
-      exp ge ie ve e1 e1' τ →
-      《dict》 ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
-      exp ge ie ve
-        (Source.Expression.listRange e1 none none)
-        (apply_enumFrom τ e e1')
-        (SemTy.TypeS.App Prelude.list τ)
+      《exp》ge,ie,ve ⊢ e₁ ⇝ e₁' ፥ τ ▪ →
+      《dict》     ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
+      《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ none none ⇝ apply_enumFrom τ e e₁' ፥ SemTy.TypeS.App Prelude.list τ ▪
 
   /--
   Cp. Fig 41
