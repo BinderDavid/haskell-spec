@@ -2,6 +2,9 @@ structure NonEmpty (α : Type) where
   head : α
   tail : List α
 
+instance instMembershipNonEmpty : Membership α (NonEmpty α) where
+  mem ys x := (x = ys.head) ∨ x ∈ ys.tail
+
 def singleton (a : α) : NonEmpty α := NonEmpty.mk a []
 
 def fromList : (List α) -> Option (NonEmpty α)
