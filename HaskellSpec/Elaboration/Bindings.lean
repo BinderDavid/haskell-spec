@@ -28,6 +28,10 @@ def concat_target_binds (n m: Target.Binds): Target.Binds :=
 def concat_source_binds (n m : Source.Binds): Source.Binds :=
   sorry
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《binds》" ge "," ie "," ve "⊢" bs "⇝" bs' "፥" ve' "▪" => binds ge ie ve bs bs' ve'
+
 /--
 Cp. Fig. 29
 ```text
@@ -40,14 +44,14 @@ inductive binds : Env.GE → Env.IE → Env.VE
                 → Env.VE
                 → Prop where
   | BINDS :
-      binds ge ie ve                a_source_binds binds' ve_bindg ->
-      binds ge ie (cross_arrow a b) b_source_binds binds'' ve_binds ->
-      binds ge ie ve (concat_source_binds a_source_binds b_source_binds)
-        (concat_target_binds binds' binds'')
-        (cross ve_bindg ve_binds)
+    《binds》ge,ie,ve              ⊢ a_source_binds ⇝ binds' ፥ ve_bindg ▪ →
+    《binds》ge,ie,cross_arrow a b ⊢ b_source_binds ⇝ binds'' ፥ ve_binds ▪ →
+    --------------------------------------------------------------------------------------------------------------------------------------
+    《binds》ge,ie,ve ⊢ concat_source_binds a_source_binds b_source_binds ⇝ concat_target_binds binds' binds'' ፥ cross ve_bindg ve_binds ▪
 
   | EMPTY_BINDS :
-    binds ge ie ve Source.Binds.empty Target.Binds.empty List.nil
+    ------------------------------------------------------------------
+    《binds》ge,ie,ve ⊢ Source.Binds.empty ⇝ Target.Binds.empty ፥ [] ▪
 
 /--
 Cp. Fig 30
@@ -61,18 +65,3 @@ inductive bindG : Env.GE → Env.IE → Env.VE
                 → Prop where
   | BINDG :
     bindG _ _ _ _ _
-
-/--
-Cp. Fig 34
-```text
-GE, IE, VE ⊢ bindG ⇝ binds : VE
-```
--/
-inductive monobinds : Env.GE → Env.IE → Env.VE
-                    → List Source.Binds
-                    → Target.Binds
-                    → Env.VE
-                    → Prop where
-  | MONOBINDS :
-    monobinds _ _ _ _ _ _
-

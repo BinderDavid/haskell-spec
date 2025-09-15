@@ -183,6 +183,22 @@ set_option quotPrecheck false in
 set_option hygiene false in
 notation  "《stmts》" ge "," ie "," ve "⊢" s "⇝" e "፥" τ "▪" => stmts ge ie ve s e τ
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《gde》" ge "," ie "," ve "⊢" gde' "⇝" gde'' "፥" τ "▪" => gde ge ie ve gde' gde'' τ
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《gdes》" ge "," ie "," ve "⊢" gdes' "⇝" gdes'' "፥" τ "▪" => gdes ge ie ve gdes' gdes'' τ
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《match》" ge "," ie "," ve "⊢" match' "⇝" match'' "፥" τ "▪" => matchR ge ie ve match' match'' τ
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《bind》" ge "," ie "," ve "⊢" bind' "⇝" bind'' "፥" ve' "▪" => bind ge ie ve bind' bind'' ve'
+
 mutual
   /--
   Cp. Fig 40
@@ -203,7 +219,7 @@ mutual
       《quals》ge,ie,ve ⊢ Source.Qualifiers.list_bind p e qs ⇝ Target.Qualifiers.list_bind p' e' qs' ፥ Env.oplusarrow ve_p ve_quals ▪
 
     | QLET :
-      binds ge ie ve bs (Target.Binds.cons b' bs') ve_binds →
+      《binds》ge,ie,ve ⊢ bs ⇝ Target.Binds.cons b' bs' ፥ ve_binds ▪ →
       《quals》ge,ie,Env.oplusarrow ve ve_binds ⊢ qs ⇝ qs' ፥  ve_quals ▪ →
       -----------------------------------------------------------------------------------------------------------------------------------------
       《quals》ge,ie,ve ⊢ Source.Qualifiers.lbind bs qs ⇝ Target.Qualifiers.lbind (Target.Binds.cons b' bs') qs' ፥ Env.oplusarrow ve ve_binds ▪
@@ -267,7 +283,7 @@ mutual
       《exp》ge,ie,ve ⊢ Source.Expression.app e₁ e₂ ⇝ Target.Expression.app e₁' e₂' ፥ τ ▪
 
     | LET :
-      binds ge ie ve source_binds (Target.Binds.cons ve_head ve_tail) ve_binds →
+      《binds》ge,ie,ve ⊢ source_binds ⇝ Target.Binds.cons ve_head ve_tail ፥ ve_binds ▪ →
       《exp》ge,ie,Env.oplusarrow ve ve_binds ⊢ e ⇝ e' ፥ τ ▪ →
       -------------------------------------------------------------------------------------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.let_bind source_binds e ⇝ Target.Expression.let_bind (Target.Binds.cons ve_head ve_tail) e' ፥ τ ▪
@@ -349,7 +365,7 @@ mutual
       《stmts》ge,ie,ve ⊢ Source.Statements.mbind p e s ⇝ _ ፥ SemTy.TypeS.App τ τ₂ ▪
 
     | SLET :
-      binds ge ie ve bs (Target.Binds.cons b' bs') ve_binds →
+      《binds》ge,ie,ve ⊢ bs ⇝ Target.Binds.cons b' bs' ፥ ve_binds ▪ →
       《stmts》ge,ie,Env.oplusarrow ve ve_binds ⊢ s ⇝ e ፥ τ ▪ →
       -------------------------------------------------------------------------
       《stmts》ge,ie,ve ⊢ Source.Statements.lbind bs s ⇝ Target.Expression.let_bind (Target.Binds.cons b' bs') e ፥ τ ▪
@@ -381,8 +397,8 @@ mutual
     | GDE :
       《exp》ge,ie,ve ⊢ e1 ⇝ e1' ፥ Prelude.bool ▪ →
       《exp》ge,ie,ve ⊢ e2 ⇝ e2' ፥ τ ▪ →
-      --------------------------------------------------------------------------
-      gde ge ie ve (Source.GuardedExp.mk e1 e2) (Target.GuardedExp.mk e1' e2') τ
+      ---------------------------------------------------------------------------------
+      《gde》ge,ie,ve ⊢ Source.GuardedExp.mk e1 e2 ⇝ Target.GuardedExp.mk e1' e2' ፥ τ ▪
 
   /--
   Cp. Fig 35
@@ -397,8 +413,9 @@ mutual
                  → Prop where
     | GDES :
       /- Forall2NE gs gs' (λ g g' => gde ge ie (Env.oplusarrow ve ve_binds) g g' τ) → -/
-      binds ge ie ve bs bs' ve_binds →
-      gdes ge ie ve (Source.GuardedExprs.mk gs bs) (Target.GuardedExprs.mk gs' bs') τ
+      《binds》ge,ie,ve ⊢ bs ⇝ bs' ፥ ve_binds ▪ →
+      -------------------------------------------------------------------------------
+      《gdes》ge,ie,ve ⊢ Source.GuardedExprs.mk gs bs ⇝ Target.GuardedExprs.mk gs' bs' ፥ τ ▪
 
   /--
   Cp. Fig 35
@@ -414,9 +431,10 @@ mutual
                    → SemTy.TypeS
                    → Prop where
     | MATCH :
-      Forall3NE pats pats' ves (λ p p' ve' => pat ge ie p p' ve' τ) →
-      gdes ge ie _ gs gs' τ →
-      matchR ge ie ve (Source.Match.mk pats gs) (Target.Match.mk pats' gs') _
+      Forall3NE pats pats' ves (λ p p' ve' => 《pat》ge,ie ⊢ p ⇝ p' ፥ ve',τ ▪) →
+      《gdes》ge,ie,_  ⊢ gs ⇝ gs' ፥ τ ▪ →
+      -----------------------------------------------------------------------------
+      《match》ge,ie,ve ⊢ Source.Match.mk pats gs ⇝ Target.Match.mk pats' gs' ፥ _ ▪
 
   /--
   Cp. Fig 34
@@ -439,8 +457,28 @@ mutual
         (List.singleton (Prod.mk x (Env.VE_Item.Ordinary x (SemTy.TypeScheme.Forall [] [] τ))))
 
     | PATBIND :
-      《pat》ge,ie ⊢ p_source ⇝ p_target ፥ veₚ,  τ ▪ ->
-      gdes ge ie ve gdes_source gedes_target τ ->
+      《pat》ge,ie ⊢ p_source ⇝ p_target ፥ veₚ,  τ ▪ →
+      《gdes》ge,ie,ve ⊢ gdes_source ⇝ gedes_target ፥ τ ▪ →
       bind ge ie ve (Source.Binding.bind_pat p_source gdes_source) (Target.Binding.bind_pat p_target gdes_target) veₚ
 
 end
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《monobinds》" ge "," ie "," ve "⊢" bs "⇝" bs' "፥" ve' "▪" => monobinds ge ie ve bs bs' ve'
+
+/--
+Cp. Fig 34
+```text
+GE, IE, VE ⊢ bindG ⇝ binds : VE
+```
+-/
+inductive monobinds : Env.GE → Env.IE → Env.VE
+                    → List Source.Binds
+                    → Target.Binds
+                    → Env.VE
+                    → Prop where
+  | MONOBINDS :
+    Forall3 bs bs' ves (λ b b' veᵢ => 《bind》ge,ie,ve ⊢ b ⇝ b' ፥ veᵢ ▪ ) →
+    ------------------------------------
+    《monobinds》ge,ie,ve ⊢ _ ⇝ _ ፥ _ ▪

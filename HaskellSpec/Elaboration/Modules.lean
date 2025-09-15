@@ -25,6 +25,10 @@ def type_apply (T : QType_Name)
   | [] => Source.TypeExpression.typename T
   | (t :: ts) => Source.TypeExpression.app (type_apply T ts) t
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《type》" te "," h "⊢" t "፥"  τ "▪" => type te h t τ
+
 mutual
   /--
   Cp. Fig 18
@@ -38,11 +42,13 @@ mutual
                  → Prop where
     | TVAR :
       ⟨u, α⟩ ∈ te₂ →
-      type ⟨te₁,te₂⟩ h (Source.TypeExpression.var u) (SemTy.TypeS.Variable α)
+      ---------------------------------------------------------------------------
+      《type》⟨te₁,te₂⟩, h ⊢ Source.TypeExpression.var u ፥ SemTy.TypeS.Variable α ▪
 
     | TCON :
       ⟨T, Env.TE_Item.DataType χ⟩ ∈ te₁ →
-      type ⟨te₁,te₂⟩ h (Source.TypeExpression.typename T) (SemTy.TypeS.TypeConstructor χ)
+      --------------------------------------------------------------------------------------
+      《type》⟨te₁,te₂⟩,h ⊢ Source.TypeExpression.typename T ፥ SemTy.TypeS.TypeConstructor χ ▪
 
     | TSYN :
       ⟨T, Env.TE_Item.TypeSynonym χ g αs τ⟩ ∈ te₁ →
@@ -50,23 +56,27 @@ mutual
       types te h ts τs →
       Env.rng subst = τs →
       Env.dom subst = αs →
-      type ⟨te₁,te₂⟩ h (type_apply T ts) (SemTy.Substitute.substitute subst τ)
+      ---------------------------------------------------------------------------
+      《type》⟨te₁,te₂⟩,h ⊢ type_apply T ts ፥ SemTy.Substitute.substitute subst τ ▪
 
     | TAPP :
-      type te h t₁ τ₁ →
-      type te h t₂ τ₂ →
-      type te h (Source.TypeExpression.app t₁ t₂) (SemTy.TypeS.App τ₁ τ₂)
+      《type》te,h ⊢ t₁ ፥ τ₁ ▪ →
+      《type》te,h ⊢ t₂ ፥ τ₂ ▪ →
+      ----------------------------------------------------------------------
+      《type》te,h ⊢ Source.TypeExpression.app t₁ t₂ ፥ SemTy.TypeS.App τ₁ τ₂ ▪
 
   inductive types : Env.TE → Int
                   → List Source.TypeExpression
                   → List SemTy.TypeS
                   → Prop where
     | NIL :
+      ----------------
       types te h [] []
 
     | CONS :
       types te h ts τs →
-      type  te h t τ →
+      《type》te,h ⊢ t ፥ τ ▪ →
+      ------------------------------
       types te h (t :: ts) (τ :: τs)
 end
 
@@ -82,6 +92,7 @@ inductive ctdecl : Env.GE → Env.VE → Env.IE
                  → Env.FE
                  → Prop where
   | DATA_DECL :
+    -------------------------------------------------
     ctdecl ge ie ve
       (Source.ClassOrType.ct_data cx S us conDecls)
       (Target.ClassOrType.ct_data _ _ _ _)
@@ -90,10 +101,11 @@ inductive ctdecl : Env.GE → Env.VE → Env.IE
   | TYPE_DECL :
     Kinding.ktype (Env.kindsOf _ _) t κ →
     /- kindsOf() ⊢ktype t : κ -/
-    type _ /- TE ⊕ TE₁ ⊕ … ⊕ TEₖ -/ h t τ →
+    《type》_ /- TE ⊕ TE₁ ⊕ … ⊕ TEₖ -/ , h ⊢ t ፥ τ ▪ →
     /- i ∈ [1,k] : TEᵢ = { uᵢ : uᵢ^κᵢ} -/
 
     te' = [⟨_, _⟩]/- {S : ⟨ S^… , h, Λu₁^… , uₙ^κ τ⟩ }-/ →
+    -----------------------------------------------------
     ctdecl ⟨ce,te,de⟩ ie ve
       (Source.ClassOrType.ct_type S us t)
       _
@@ -125,6 +137,7 @@ inductive ctdecls : Env.GE → Env.IE → Env.VE
       fe'
 
   | EMPTY_CTDECL :
+    ------------------------------
     ctdecls ge ie ve
       Source.ClassesAndTypes.empty
       Target.ClassesAndTypes.empty
@@ -152,6 +165,7 @@ inductive body : Module_Name
     /- ve_top = ve ⊕ (ve' ⊕ ve'')-/
     fe = ⟨ce',te',de',_,_⟩ →
     se = ⟨_,_,_,_⟩ →
+    -------------------------------------------------------------
     body M
       ⟨ce,te,de,ie,ve⟩
       (Source.ModuleBody.mk ctds _ _)
@@ -223,6 +237,7 @@ inductive lcon : Env.IE
                → SemTy.TypeS
                → Prop where
   | LCON :
+    ----------
     lcon _ _ _
 
 /--
@@ -236,6 +251,7 @@ inductive ctDecl : Env.GE → Env.IE → Env.VE
                  → Target.ClassOrType
                  → Prop where
   | CLASS_DECL :
+    ----------------
     ctDecl _ _ _ _ _
 
 /--
@@ -249,7 +265,10 @@ inductive sig : Env.GE
               → Env.VE
               → Prop where
   | SIG :
-    sig _ _ _
+    ke = Env.kindsOf ce te →
+    《type》_,_ ⊢ _ ፥ _ ▪ →
+    -------------------------------------------------
+    sig ⟨ce,te,de⟩ (Source.Signature.mk v _ _) [⟨v,_⟩]
 
 /--
 Cp. Fig 24
@@ -261,10 +280,15 @@ inductive sigs : Env.GE
                → List Source.Signature
                → Env.VE
                → Prop where
-  | Nil : sigs ge [] []
-  | Cons : sig ge s ve
-         → sigs ge ss ves
-         → sigs ge (s :: ss) (List.append ve ves)
+  | SIGS_NIL :
+    -------------
+    sigs ge [] []
+
+  | SIGS_CONS :
+    sig ge s ve →
+    sigs ge ss ves →
+    --------------------------------------
+    sigs ge (s :: ss) (List.append ve ves)
 
 /--
 Cp. Fig 25
@@ -278,9 +302,10 @@ inductive classR : Env.CE → Env.TE → Int
                  → SemTy.TypeS
                  → Prop where
   | CLASS :
-    (_, Env.CEEntry.mk Γ h' x C ie) ∈ ce ->
-    h' < h ->
-    type te h'' (List.foldl Source.TypeExpression.app (Source.TypeExpression.var u) ts) τ ->
+    (_, Env.CEEntry.mk Γ h' x C ie) ∈ ce →
+    h' < h →
+    《type》te, h'' ⊢ List.foldl Source.TypeExpression.app (Source.TypeExpression.var u) ts ፥ τ ▪ →
+    ------------------------------------------------------------------------------------------------
     classR ce te h (Source.ClassAssertion.mk C u ts) Γ τ
 
 /--
@@ -295,6 +320,7 @@ inductive context : Env.CE → Env.TE → Int
                   → Prop where
   | CONTEXT :
     Forall3 class_assertions Γs τs (λ classᵢ Γᵢ τᵢ => classR ce te h classᵢ Γᵢ τᵢ) →
+    ---------------------------------------------------------------------------------
     context ce te h class_assertions _
 
 /--
@@ -309,6 +335,7 @@ inductive instDecl : Env.GE → Env.IE → Env.VE
                    → Env.IE
                    → Prop where
   | INST_DECL :
+    --------------------
     instDecl _ _ _ _ _ _
 
 
@@ -325,6 +352,7 @@ inductive instDecls : Env.GE → Env.IE → Env.VE
                     → Prop where
   | INST_DECLS :
     Forall3 inst_decls binds ies (λ instDeclᵢ bindᵢ ieᵢ => instDecl ge ie ve instDeclᵢ bindᵢ ieᵢ) →
+    ------------------------------------------------------------------------------------------------
     instDecls ge ie ve inst_decls (Target.InstanceDecls.instDecls binds) (ies.foldl List.append [])
 
 
@@ -340,6 +368,7 @@ inductive method : Env.GE → Env.IE → Env.VE
                  → Env.VE
                  → Prop where
   | METHOD :
+    -------------------
     method _ _ _ _ _ _
 
 set_option quotPrecheck false in
@@ -361,15 +390,15 @@ inductive dict : Env.IE
     《dict》 ie ⊢ _ ፥ _ ▪
 
   | DICT_VAR :
-    Env.IE_Entry.BoundInDictionaryAbstraction v class_name α τs ∈ ie ->
-    ----------------------------------------------------------------------
-    《dict》 ie ⊢ (Target.Expression.var (QVariable.Unqualified v)) ፥ (List.singleton (Prod.mk class_name (τs.foldl SemTy.TypeS.App (SemTy.TypeS.Variable α)))) ▪
+    Env.IE_Entry.BoundInDictionaryAbstraction v class_name α τs ∈ ie →
+    ------------------------------------------------------------------------------------------------------------------------------------
+    《dict》 ie ⊢ (Target.Expression.var (QVariable.Unqualified v)) ፥ [⟨class_name, τs.foldl SemTy.TypeS.App (SemTy.TypeS.Variable α)⟩] ▪
 
   | DICT_INST :
     《dict》 ie ⊢ _ ፥ _ ▪
 
   | DICT_SUPER :
-    Env.IE_Entry.ExtractsADictionaryForTheSuperclass x α Γ Γ' ∈ ie ->
-    《dict》 ie ⊢ e ፥ List.singleton (Prod.mk Γ' τ) ▪ →
-    -----------------------------------------------------------------------------------------------------------------------------------------
-    《dict》 ie ⊢ (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e) ፥ (List.singleton (Prod.mk Γ τ)) ▪
+    Env.IE_Entry.ExtractsADictionaryForTheSuperclass x α Γ Γ' ∈ ie →
+    《dict》 ie ⊢ e ፥ [⟨Γ', τ⟩] ▪ →
+    -----------------------------------------------------------------------------------------------------------------------
+    《dict》 ie ⊢ Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e ፥ [⟨Γ, τ⟩] ▪
