@@ -179,6 +179,10 @@ set_option quotPrecheck false in
 set_option hygiene false in
 notation  "《quals》" ge "," ie "," ve "⊢" q "⇝" q' "፥" ve' "▪" => quals ge ie ve q q' ve'
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《stmts》" ge "," ie "," ve "⊢" s "⇝" e "፥" τ "▪" => stmts ge ie ve s e τ
+
 mutual
   /--
   Cp. Fig 40
@@ -281,7 +285,7 @@ mutual
       《exp》ge,ie,ve ⊢ Source.Expression.listComp e_source quals_source ⇝ Target.Expression.listComp e_target quals_target ፥ SemTy.mk_list τ ▪
 
     | DO :
-      stmts ge ie ve s e τ →
+      《stmts》ge,ie,ve ⊢ s ⇝ e ፥ τ ▪ →
       --------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.do_block s ⇝ e ፥ τ ▪
 
@@ -336,28 +340,31 @@ mutual
                   → SemTy.TypeS
                   → Prop where
     | SBIND :
-      exp ge ie ve e e₁ (SemTy.TypeS.App τ τ₁) →
-      pat ge ie p p' veₚ τ₁ →
-      stmts ge ie _ s e₂ (SemTy.TypeS.App τ τ₂) →
-      《dict》 ie ⊢ ed ፥ [⟨Prelude.monad, τ⟩] ▪ →
-      stmts ge ie ve (Source.Statements.mbind p e s) _ (SemTy.TypeS.App τ τ₂)
+      《exp》 ge,ie,ve ⊢ e ⇝ e₁ ፥ SemTy.TypeS.App τ τ₁ ▪ →
+      《pat》    ge,ie ⊢ p ⇝ p' ፥ veₚ,  τ₁ ▪ →
+      《stmts》ge,ie,_ ⊢ s ⇝ e₂ ፥ SemTy.TypeS.App τ τ₂ ▪ →
+      《dict》      ie ⊢ ed ፥ [⟨Prelude.monad, τ⟩] ▪ →
+      -----------------------------------------------------------------------------
+      《stmts》ge,ie,ve ⊢ Source.Statements.mbind p e s ⇝ _ ፥ SemTy.TypeS.App τ τ₂ ▪
 
     | SLET :
       binds ge ie ve bs (Target.Binds.cons b' bs') ve_binds →
-      stmts ge ie (Env.oplusarrow ve ve_binds) s e τ →
-      stmts ge ie ve (Source.Statements.lbind bs s)
-        (Target.Expression.let_bind (Target.Binds.cons b' bs') e) τ
+      《stmts》ge,ie,Env.oplusarrow ve ve_binds ⊢ s ⇝ e ፥ τ ▪ →
+      -------------------------------------------------------------------------
+      《stmts》ge,ie,ve ⊢ Source.Statements.lbind bs s ⇝ Target.Expression.let_bind (Target.Binds.cons b' bs') e ፥ τ ▪
 
     | STHEN :
-      exp ge ie ve e e₁ (SemTy.TypeS.App τ τ₁) →
-      stmts ge ie ve s e₂ (SemTy.TypeS.App τ τ₂) →
-      dict ie ed [⟨Prelude.monad, τ⟩] →
-      stmts ge ie ve (Source.Statements.seq e s) _ (SemTy.TypeS.App τ τ₂)
+      《exp》  ge,ie,ve ⊢ e ⇝ e₁ ፥ SemTy.TypeS.App τ τ₁ ▪ →
+      《stmts》ge,ie,ve ⊢ s ⇝ e₂ ፥ SemTy.TypeS.App τ τ₂ ▪ →
+      《dict》       ie ⊢ ed ፥ [⟨Prelude.monad, τ⟩] ▪ →
+      --------------------------------------------------------------------------
+      《stmts》ge,ie,ve ⊢ Source.Statements.seq e s ⇝ _ ፥ SemTy.TypeS.App τ τ₂ ▪
 
     | SRET :
-      exp ge ie ve e e' (SemTy.TypeS.App τ τ₁) →
-      dict ie _ [⟨Prelude.monad, τ⟩] →
-      stmts ge ie ve (Source.Statements.last e) e' (SemTy.TypeS.App τ τ₁)
+      《exp》ge,ie,ve ⊢ e ⇝ e' ፥ SemTy.TypeS.App τ τ₁ ▪ →
+      《dict》     ie ⊢ _ ፥ [⟨Prelude.monad, τ⟩] ▪ →
+      -------------------------------------------------------------------
+      《stmts》ge,ie,ve ⊢ Source.Statements.last e ⇝ e' ፥ SemTy.TypeS.App τ τ₁ ▪
 
   /--
   Cp. Fig 35
