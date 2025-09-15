@@ -30,6 +30,10 @@ inductive KindOrdering : SemTy.Kind
 def KindEnvOrdering (ke1 ke2 : Env.KE) : Prop := sorry
 
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《ktype》" ke "⊢" t "፥" κ "▪"=> ktype ke t κ
+
 /--
 Fig. 10 (Kind inference, type expressions)
 ```text
@@ -42,19 +46,23 @@ inductive ktype : Env.KE
                 → Prop where
   | KIND_TVAR :
     (Env.KE_Name.u u, κ) ∈ ke →
-    ----------------------------------------
-    ktype ke (Source.TypeExpression.var u) κ
+    ----------------------------------------------
+    《ktype》ke ⊢ Source.TypeExpression.var u ፥ κ ▪
 
   | KIND_TCON :
     (Env.KE_Name.T T, κ) ∈ ke →
     ----------------------------------------------
-    ktype ke (Source.TypeExpression.typename T) κ
+    《ktype》ke ⊢ Source.TypeExpression.typename T ፥ κ ▪
 
   | KIND_APP :
-    ktype ke t₁ (SemTy.Fun κ₁ κ₂) →
-    ktype ke t₂ κ₁ →
+    《ktype》ke ⊢ t₁ ፥ SemTy.Fun κ₁ κ₂ ▪ →
+    《ktype》ke ⊢ t₂ ፥ κ₁ ▪ →
     ---------------------------------------------
-    ktype ke (Source.TypeExpression.app t₁ t₂) κ₂
+    《ktype》ke ⊢ Source.TypeExpression.app t₁ t₂ ፥ κ₂ ▪
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《kctx》" ke "⊢" ctx "▪"=> kctx ke ctx
 
 /--
 ```text
@@ -64,20 +72,24 @@ i ∈ [1, n] : KE ⊢^ktype tᵢ : κᵢ
 KE ⊢^kctx C₁ t₁, ... Cₙ tₙ
 ```
 -/
-inductive kctx : KE
+inductive kctx : Env.KE
                → Source.Context
                → Prop where
   | KIND_CTX_NIL :
     ------------------------------
-    kctx ke []
+    《kctx》ke ⊢ [] ▪
 
   | KIND_CTX_CONS :
     (Env.KE_Name.C CA.name, κ) ∈ ke →
-    ktype ke (Source.classAssertionType CA) κ →
-    kctx ke CAS →
+    《ktype》ke ⊢ Source.classAssertionType CA ፥ κ ▪ →
+    《kctx》 ke ⊢ CAS ▪ →
     ---------------------------------------------------------
-    kctx ke (CA :: CAS)
+    《kctx》 ke ⊢ CA :: CAS ▪
 
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《ksig》" ke "⊢" sig "▪"=> ksig ke sig
 
 /--
 Cp. fig 9
@@ -89,10 +101,14 @@ inductive ksig : Env.KE
                → Source.Signature
                → Prop where
   | KIND_SIG :
-    kctx _ /- (Env.oplus ke ke') -/ cx →
-    ktype _ /- (Env.oplus ke ke') -/ t SemTy.Kind.Star →
+    《kctx》  _ /- (Env.oplus ke ke') -/ ⊢ cx ▪ →
+    《ktype》 _ /- (Env.oplus ke ke') -/ ⊢ t ፥ SemTy.Kind.Star ▪ →
     -----------------------------------------------------
-    ksig ke (Source.Signature.mk v cx t)
+    《ksig》 ke ⊢ Source.Signature.mk v cx t ▪
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《ksigs》" ke "⊢" sigs "▪"=> ksigs ke sigs
 
 /--
 Cp. fig 9
@@ -104,14 +120,18 @@ inductive ksigs : Env.KE
                 → List Source.Signature
                 → Prop where
   | KIND_SIGS_NIL :
-    ---------------
-    ksigs ke []
+    ------------------
+    《ksigs》ke ⊢ [] ▪
 
   | KIND_SIGS_CONS :
-    ksig ke sig →
-    ksigs ke sigs →
-    ----------------------
-    ksigs ke (sig :: sigs)
+    《ksig》  ke ⊢ sig ▪ →
+    《ksigs》 ke ⊢ sigs ▪ →
+    ----------------------------
+    《ksigs》 ke ⊢ sig :: sigs ▪
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《kconDecl》" ke "⊢" condecl "▪"=> kconDecl ke condecl
 
 /--
 Cp. fig 9
@@ -123,14 +143,18 @@ inductive kconDecl : Env.KE
                    → Source.ConstructorDecl
                    → Prop where
   | KIND_POSCON :
-    (∀ τ, τ ∈ tys → ktype ke τ SemTy.Kind.Star) →
-    -------------------------------------------------
-    kconDecl ke (Source.ConstructorDecl.poscon c tys)
+    (∀ τ, τ ∈ tys → 《ktype》 ke ⊢ τ ፥ SemTy.Kind.Star ▪) →
+    -------------------------------------------------------
+    《kconDecl》 ke ⊢ Source.ConstructorDecl.poscon c tys ▪
 
   | KIND_LABCON :
-    (∀ l τ, (l,τ) ∈ lbls → ktype ke τ SemTy.Kind.Star) →
-    ----------------------------------------------------
-    kconDecl ke (Source.ConstructorDecl.labcon c lbls)
+    (∀ l τ, (l,τ) ∈ lbls → 《ktype》ke ⊢ τ ፥ SemTy.Kind.Star ▪) →
+    --------------------------------------------------------
+    《kconDecl》 ke ⊢ Source.ConstructorDecl.labcon c lbls ▪
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《kctDecl》" ke "⊢" kctdecl "፥" ke' "▪"=> kctDecl ke kctdecl ke'
 
 /--
 Cp. fig 8
@@ -143,23 +167,26 @@ inductive kctDecl : Env.KE
                   → Env.KE
                   → Prop where
   | KIND_DATA :
-    kctx _ _ →
-    kconDecl _ _ →
-    --------------------------------------------------
-    kctDecl ke (Source.ClassOrType.ct_data _ _ _ _) _
+    《kctx》 _ ⊢ _ ▪ →
+    《kconDecl》 _ ⊢ _ ▪ →
+    -----------------------------------------------------------
+    《kctDecl》 ke ⊢ (Source.ClassOrType.ct_data _ _ _ _) ፥ _ ▪
 
   | KIND_TYPE :
-    ktype _ _ _ →
-    ------------------------------------------------
-    kctDecl ke (Source.ClassOrType.ct_type _ _ _) _
+    《ktype》 _ ⊢ _ ፥ _ ▪ →
+    ------------------------------------------------------
+    《kctDecl》ke ⊢ Source.ClassOrType.ct_type _ _ _ ፥ _ ▪
 
   | KIND_CLASS :
-    kctx _ _ →
-    ksigs _ _ →
-    ----------------------------------------------------
-    kctDecl ke (Source.ClassOrType.ct_class _ _ _ _ _) _
+    《kctx》_ ⊢ _ ▪ →
+    《ksigs》_ ⊢ _ ▪ →
+    -----------------------------------------------------------
+    《kctDecl》ke ⊢ Source.ClassOrType.ct_class _ _ _ _ _ ፥ _ ▪
 
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《kgroup》" ke "⊢" classortypes "፥" ke' "▪"=> kgroup ke classortypes ke'
 /--
 Cp. fig 8
 ```text
@@ -171,9 +198,14 @@ inductive kgroup : Env.KE
                  → Env.KE
                  → Prop where
   | KGROUP :
-    kctDecl _ _ _ →
-    ---------------
-    kgroup _ _ _
+    《kctDecl》 _ ⊢ _ ፥ _ ▪ →
+    -------------------------
+    《kgroup》_ ⊢ _ ፥ _ ▪
+
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《kctDecls》" ke "⊢" classandtypes "፥" ke' "▪"=> kctDecls ke classandtypes ke'
 
 /--
 Cp. fig 8
@@ -186,13 +218,13 @@ inductive kctDecls : Env.KE
                    → Env.KE
                    → Prop where
   | KCTDECLS :
-    kgroup _ _ _ →
-    kctDecls _ _ _ →
+    《kgroup》 _ ⊢ _ ፥ _ ▪ →
+    《kctDecls》 _ ⊢ _ ፥ _ ▪ →
     -----------------------------------------------------
-    kctDecls ke (Source.ClassesAndTypes.decls grp rest) _
+    《kctDecls》ke ⊢ Source.ClassesAndTypes.decls grp rest ፥ _ ▪
 
   | KCTEMPTY :
     -------------------------------------------
-    kctDecls ke Source.ClassesAndTypes.empty []
+    《kctDecls》 ke ⊢ Source.ClassesAndTypes.empty ፥ [] ▪
 
 end Kinding
