@@ -297,21 +297,6 @@ inductive context : Env.CE → Env.TE → Int
     Forall3 class_assertions Γs τs (λ classᵢ Γᵢ τᵢ => classR ce te h classᵢ Γᵢ τᵢ) →
     context ce te h class_assertions _
 
-
-/--
-Cp. Fig 26
-```text
-GE, IE, VE ⊢ instDecls ⇝ binds : IE
-```
--/
-inductive instDecls : Env.GE → Env.IE → Env.VE
-                    → Source.InstanceDecls
-                    → Target.InstanceDecls
-                    → Env.IE
-                    → Prop where
-  | INST_DECLS :
-    instDecls _ _ _ _ _ _
-
 /--
 Cp. Fig 26
 ```text
@@ -325,6 +310,22 @@ inductive instDecl : Env.GE → Env.IE → Env.VE
                    → Prop where
   | INST_DECL :
     instDecl _ _ _ _ _ _
+
+
+/--
+Cp. Fig 26
+```text
+GE, IE, VE ⊢ instDecls ⇝ binds : IE
+```
+-/
+inductive instDecls : Env.GE → Env.IE → Env.VE
+                    → Source.InstanceDecls
+                    → Target.InstanceDecls
+                    → Env.IE
+                    → Prop where
+  | INST_DECLS :
+    Forall3 inst_decls binds ies (λ instDeclᵢ bindᵢ ieᵢ => instDecl ge ie ve instDeclᵢ bindᵢ ieᵢ) →
+    instDecls ge ie ve inst_decls (Target.InstanceDecls.instDecls binds) (ies.foldl List.append [])
 
 
 /--
