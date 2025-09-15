@@ -378,8 +378,9 @@ mutual
                 → SemTy.TypeS
                 → Prop where
     | GDE :
-      exp ge ie ve e1 e1' Prelude.bool →
-      exp ge ie ve e2 e2' τ →
+      《exp》ge,ie,ve ⊢ e1 ⇝ e1' ፥ Prelude.bool ▪ →
+      《exp》ge,ie,ve ⊢ e2 ⇝ e2' ፥ τ ▪ →
+      --------------------------------------------------------------------------
       gde ge ie ve (Source.GuardedExp.mk e1 e2) (Target.GuardedExp.mk e1' e2') τ
 
   /--
@@ -437,7 +438,7 @@ mutual
         (List.singleton (Prod.mk x (Env.VE_Item.Ordinary x (SemTy.TypeScheme.Forall [] [] τ))))
 
     | PATBIND :
-      pat ge ie p_source p_target veₚ τ ->
+      《pat》ge,ie ⊢ p_source ⇝ p_target ፥ veₚ,  τ ▪ ->
       gdes ge ie ve gdes_source gedes_target τ ->
       bind ge ie ve (Source.Binding.bind_pat p_source gdes_source) (Target.Binding.bind_pat p_target gdes_target) veₚ
 

@@ -30,6 +30,10 @@ inductive KindOrdering : SemTy.Kind
 def KindEnvOrdering (ke1 ke2 : Env.KE) : Prop := sorry
 
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《ktype》" ke "⊢" t "፥" κ "▪"=> ktype ke t κ
+
 /--
 Fig. 10 (Kind inference, type expressions)
 ```text
@@ -42,19 +46,19 @@ inductive ktype : Env.KE
                 → Prop where
   | KIND_TVAR :
     (Env.KE_Name.u u, κ) ∈ ke →
-    ----------------------------------------
-    ktype ke (Source.TypeExpression.var u) κ
+    ----------------------------------------------
+    《ktype》ke ⊢ Source.TypeExpression.var u ፥ κ ▪
 
   | KIND_TCON :
     (Env.KE_Name.T T, κ) ∈ ke →
     ----------------------------------------------
-    ktype ke (Source.TypeExpression.typename T) κ
+    《ktype》ke ⊢ Source.TypeExpression.typename T ፥ κ ▪
 
   | KIND_APP :
-    ktype ke t₁ (SemTy.Fun κ₁ κ₂) →
-    ktype ke t₂ κ₁ →
+    《ktype》ke ⊢ t₁ ፥ SemTy.Fun κ₁ κ₂ ▪ →
+    《ktype》ke ⊢ t₂ ፥ κ₁ ▪ →
     ---------------------------------------------
-    ktype ke (Source.TypeExpression.app t₁ t₂) κ₂
+    《ktype》ke ⊢ Source.TypeExpression.app t₁ t₂ ፥ κ₂ ▪
 
 /--
 ```text
@@ -64,7 +68,7 @@ i ∈ [1, n] : KE ⊢^ktype tᵢ : κᵢ
 KE ⊢^kctx C₁ t₁, ... Cₙ tₙ
 ```
 -/
-inductive kctx : KE
+inductive kctx : Env.KE
                → Source.Context
                → Prop where
   | KIND_CTX_NIL :
@@ -73,7 +77,7 @@ inductive kctx : KE
 
   | KIND_CTX_CONS :
     (Env.KE_Name.C CA.name, κ) ∈ ke →
-    ktype ke (Source.classAssertionType CA) κ →
+    《ktype》ke ⊢ Source.classAssertionType CA ፥ κ ▪ →
     kctx ke CAS →
     ---------------------------------------------------------
     kctx ke (CA :: CAS)
@@ -90,7 +94,7 @@ inductive ksig : Env.KE
                → Prop where
   | KIND_SIG :
     kctx _ /- (Env.oplus ke ke') -/ cx →
-    ktype _ /- (Env.oplus ke ke') -/ t SemTy.Kind.Star →
+    《ktype》 _ /- (Env.oplus ke ke') -/ ⊢ t ፥ SemTy.Kind.Star ▪ →
     -----------------------------------------------------
     ksig ke (Source.Signature.mk v cx t)
 
@@ -149,7 +153,7 @@ inductive kctDecl : Env.KE
     kctDecl ke (Source.ClassOrType.ct_data _ _ _ _) _
 
   | KIND_TYPE :
-    ktype _ _ _ →
+    《ktype》 _ ⊢ _ ፥ _ ▪ →
     ------------------------------------------------
     kctDecl ke (Source.ClassOrType.ct_type _ _ _) _
 
