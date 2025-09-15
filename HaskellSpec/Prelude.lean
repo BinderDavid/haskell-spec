@@ -37,12 +37,17 @@ The type `[] : * → *`
 def list : SemTy.TypeS :=
   SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.List) (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star))
 
+def mk_list (α: SemTy.TypeS): SemTy.TypeS :=
+ SemTy.TypeS.App list α
+
 /--
 The type `-> : * → * → *`
 -/
 def funt : SemTy.TypeS :=
   SemTy.TypeS.TypeConstructor (SemTy.Type_Constructor.Mk (OType_Name.Special Special_Type_Constructor.Fun) (SemTy.Kind.Fun SemTy.Kind.Star (SemTy.Kind.Fun SemTy.Kind.Star SemTy.Kind.Star)))
 
+def mk_funt (α β : SemTy.TypeS) : SemTy.TypeS :=
+  SemTy.TypeS.App (SemTy.TypeS.App funt α) β
 
 /-
 ## Names of Type Classes
