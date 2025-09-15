@@ -12,6 +12,10 @@ The rules are defined in fig. 8, 9, 10 of the paper.
 
 namespace Kinding
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《kindord》" κ₁ "≼" κ₂ "▪" => KindOrdering κ₁ κ₂
+
 /--
 Defined in section 3.1.1
 -/
@@ -20,22 +24,28 @@ inductive KindOrdering : SemTy.Kind
                        → Prop where
   | STAR_LT :
     -------------------------------
-    KindOrdering SemTy.Kind.Star κ
+    《kindord》SemTy.Kind.Star ≼ κ ▪
 
   | FUN_CONG :
-    KindOrdering κ₁ κ₁' →
-    KindOrdering κ₂ κ₂' →
+    《kindord》κ₁ ≼ κ₁' ▪ →
+    《kindord》κ₂ ≼ κ₂' ▪ →
     ------------------------------------------------------------
-    KindOrdering (SemTy.Kind.Fun κ₁ κ₂) (SemTy.Kind.Fun κ₁' κ₂')
+    《kindord》SemTy.Kind.Fun κ₁ κ₂ ≼ SemTy.Kind.Fun κ₁' κ₂' ▪
 
-def KindEnvOrdering (ke1 ke2 : Env.KE) : Prop := sorry
+
+def KindEnvOrdering (ke₁ ke₂ : Env.KE) : Prop :=
+  ∀ x ∈ ke₁, ∃ x' ∈ ke₂, x.fst = x'.fst ∧ 《kindord》 x.snd ≼ x'.snd ▪
+
+notation  "《kindenvord》" ke₁ "≼" ke₂ "▪" => KindEnvOrdering ke₁ ke₂
 
 /--
 If `MinKindEnv f ke_min` holds, then `ke_min` is the smallest kind environment satisfying `f`.
 This is used to implement kind defaulting.
 -/
 def MinKindEnv (f : Env.KE → Prop) (ke : Env.KE) : Prop :=
-  f ke ∧ (∀ ke', f ke → KindEnvOrdering ke ke')
+  f ke
+  ∧
+  (∀ ke', f ke → 《kindenvord》 ke ≼ ke' ▪)
 
 
 set_option quotPrecheck false in
@@ -228,7 +238,7 @@ inductive kctDecls : Env.KE
                    → Prop where
   | KCTDECLS :
     MinKindEnv (λ ke' => 《kgroup》 _ /-Env.oplus ke ke' -/ ⊢ grp ፥ ke' ▪) ke_decls →
-    《kctDecls》 _ /-Env.oplus ke ke_decls -/ ⊢ rest ፥ _ /- ke_groups -/▪ →
+    《kctDecls》 _ /-Env.oplus ke ke_decls -/ ⊢ rest ፥ ke_groups ▪ →
     -----------------------------------------------------
     《kctDecls》ke ⊢ Source.ClassesAndTypes.decls grp rest ፥ _ /- ke_decls ⊕ ke_groups -/▪
 
