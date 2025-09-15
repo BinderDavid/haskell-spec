@@ -20,6 +20,7 @@ inductive ConstructorDecl : Type where
 conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
 ```
 -/
+@[reducible]
 def ConstructorDecls : Type := NonEmpty ConstructorDecl
 
 /--
