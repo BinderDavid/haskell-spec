@@ -29,6 +29,10 @@ set_option quotPrecheck false in
 set_option hygiene false in
 notation  "《type》" te "," h "⊢" t "፥"  τ "▪" => type te h t τ
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《types》" te "," h "⊢" ts "፥"  τs "▪" => types te h ts τs
+
 mutual
   /--
   Cp. Fig 18
@@ -53,7 +57,7 @@ mutual
     | TSYN :
       ⟨T, Env.TE_Item.TypeSynonym χ g αs τ⟩ ∈ te₁ →
       g < h →
-      types te h ts τs →
+      《types》te, h ⊢ ts ፥ τs ▪ →
       Env.rng subst = τs →
       Env.dom subst = αs →
       ---------------------------------------------------------------------------
@@ -70,33 +74,34 @@ mutual
                   → List SemTy.TypeS
                   → Prop where
     | NIL :
-      ----------------
-      types te h [] []
+      -------------------------
+      《types》te,h ⊢ [] ፥ [] ▪
 
     | CONS :
-      types te h ts τs →
-      《type》te,h ⊢ t ፥ τ ▪ →
-      ------------------------------
-      types te h (t :: ts) (τ :: τs)
+      《types》te,h ⊢ ts ፥ τs ▪ →
+      《type》 te,h ⊢ t  ፥ τ ▪ →
+      -----------------------------------
+      《types》te,h ⊢ t :: ts ፥ τ :: τs ▪
 end
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《ctdecl》" ge "," ie "," ve "⊢" cot "⇝"  cot' "፥" ve' "▪" => ctdecl ge ie ve cot cot' ve'
+
 /--
-Cp. Fig 19
+Cp. Fig 19 & Fig 23
 ```text
 GE, IE, VE ⊢ ctDecl ⇝ typeDecls; binds : ⟨ CE, TE, KE, IE, VE⟩
 ```
 -/
-inductive ctdecl : Env.GE → Env.VE → Env.IE
+inductive ctdecl : Env.GE → Env.IE → Env.VE
                  → Source.ClassOrType
                  → Target.ClassOrType
                  → Env.FE
                  → Prop where
   | DATA_DECL :
-    -------------------------------------------------
-    ctdecl ge ie ve
-      (Source.ClassOrType.ct_data cx S us conDecls)
-      (Target.ClassOrType.ct_data _ _ _ _)
-      _
+    -----------------------------------------------------------------------------------------------------------
+    《ctdecl》ge,ie,ve ⊢ Source.ClassOrType.ct_data cx S us conDecls ⇝ Target.ClassOrType.ct_data _ _ _ _ ፥ _ ▪
 
   | TYPE_DECL :
     Kinding.ktype (Env.kindsOf _ _) t κ →
@@ -106,10 +111,16 @@ inductive ctdecl : Env.GE → Env.VE → Env.IE
 
     te' = [⟨_, _⟩]/- {S : ⟨ S^… , h, Λu₁^… , uₙ^κ τ⟩ }-/ →
     -----------------------------------------------------
-    ctdecl ⟨ce,te,de⟩ ie ve
-      (Source.ClassOrType.ct_type S us t)
-      _
-      ⟨[], ⟨[], te'⟩, ⟨[],[]⟩, [], []⟩
+    《ctdecl》⟨ce,te,de⟩,ie,ve ⊢ Source.ClassOrType.ct_type S us t ⇝ _ ፥ ⟨[], ⟨[], te'⟩, ⟨[],[]⟩, [], []⟩ ▪
+
+  | CLASS_DECL :
+    --------------------------------------------------------------------
+    《ctdecl》ge,ie,ve ⊢ Source.ClassOrType.ct_class _ _ _ _ _ ⇝ _ ፥ _ ▪
+
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《ctdecls》" ge "," ie "," ve "⊢" cot "⇝"  cot' "፥" fe "▪" => ctdecls ge ie ve cot cot' fe
 
 /--
 Cp. Fig 17
@@ -124,25 +135,21 @@ inductive ctdecls : Env.GE → Env.IE → Env.VE
                   → Prop where
   | CTDECL :
     Forall3NE ctDecls typeDecls fes
-      (λ ctDeclᵢ typeDeclsᵢ feᵢ =>
-        ctdecl ge ve ie ctDeclᵢ typeDeclsᵢ feᵢ
-      ) →
-    ctdecls ge ie ve ctDecls₀ typeDecls₀ fe₀ →
+      (λ ctDeclᵢ typeDeclsᵢ feᵢ =>《ctdecl》ge,ie,ve ⊢ ctDeclᵢ ⇝ typeDeclsᵢ ፥ feᵢ ▪) →
+    《ctdecls》ge,ie,ve ⊢ ctDecls₀ ⇝ typeDecls₀ ፥ fe₀ ▪ →
     typeDecls' = Target.ClassesAndTypes.decls typeDecls typeDecls₀ →
     fe' = Env.FE_union fe (foldl Env.FE_union fes) →
-    -----------------------------------------------------
-    ctdecls ge ie ve
-      (Source.ClassesAndTypes.decls ctDecls ctDecls₀)
-      typeDecls'
-      fe'
+    ----------------------------------------------------------------------------------------
+    《ctdecls》ge,ie,ve ⊢ Source.ClassesAndTypes.decls ctDecls ctDecls₀ ⇝ typeDecls' ፥ fe' ▪
 
   | EMPTY_CTDECL :
-    ------------------------------
-    ctdecls ge ie ve
-      Source.ClassesAndTypes.empty
-      Target.ClassesAndTypes.empty
-      ⟨[],⟨[],[]⟩,⟨[],[]⟩,[],[]⟩
+    --------------------------------------------------------------------------------------------------------------
+    《ctdecls》ge,ie,ve ⊢ Source.ClassesAndTypes.empty ⇝ Target.ClassesAndTypes.empty ፥ ⟨[],⟨[],[]⟩,⟨[],[]⟩,[],[]⟩ ▪
 
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《body》" M "," fe "⊢" sm "⇝"  tm "፥" fe' "," se "▪" => body M fe sm tm fe' se
 
 /--
 Cp. Fig 15
@@ -158,19 +165,19 @@ inductive body : Module_Name
                → Prop where
   | BODY :
     Kinding.kctDecls _ ctds _ →
-    ctdecls ge_top ie_top ve_top ctds _ ⟨ce',te',de',ie',ve'⟩ →
+    《ctdecls》ge_top,ie_top,ve_top ⊢ ctds ⇝ _ ፥ ⟨ce',te',de',ie',ve'⟩ ▪ →
     /- ge' = ⟨ce',de',te'⟩ → -/
     ge_top = _ → /- ge_top = ge_init ⊕ (⟨ce,te,de⟩ ⊕ ge') → -/
     /- ie_top = ie ⊕ ie' ⊕ ie'' → -/
     /- ve_top = ve ⊕ (ve' ⊕ ve'')-/
     fe = ⟨ce',te',de',_,_⟩ →
     se = ⟨_,_,_,_⟩ →
-    -------------------------------------------------------------
-    body M
-      ⟨ce,te,de,ie,ve⟩
-      (Source.ModuleBody.mk ctds _ _)
-      (Target.ModuleBody.mk _ _ _)
-      fe se
+    -------------------------------------------------------------------------------------------------
+    《body》M,⟨ce,te,de,ie,ve⟩ ⊢ Source.ModuleBody.mk ctds _ _ ⇝ Target.ModuleBody.mk _ _ _ ፥ fe, se ▪
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《module》" me "⊢" sm "⇝"  tm "፥" me' "▪" => module me sm tm me'
 
 /--
 Cp. Fig 11
@@ -187,13 +194,15 @@ inductive module : Env.ME
     Forall3 imports fes ses (λ impᵢ feᵢ seᵢ => Import me impᵢ feᵢ seᵢ) →
     fe_imp = _ → /- justSingle(FE₁ ⊕ … ⊕ FEₙ)-/
     /- SE_imp = SE₁ ⊕ … ⊕ SEₙ-/
-    body M fe_imp bod bod' fe se →
+    《body》M,fe_imp ⊢ bod ⇝ bod' ፥ fe,se ▪ →
     /- i ∈ [1,k] : FE_imp ⊕ [FE]M, SE_imp ⊕ SE ⊢export entᵢ : FE'ᵢ -/
     /- FE_exp = FE'₁ ⊕ … ⊕ FE'ₖ-/
-    module me
-      (Source.Module.mk M ents imports bod)
-      (Target.Module.mk M _)
-      _
+    -------------------------------------------------------------------------------
+    《module》me ⊢ Source.Module.mk M ents imports bod ⇝ Target.Module.mk M _ ፥ _ ▪
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《condecl》" te "," θ "," τ "⊢" cd "⇝" cd' "፥" de "," ve "," le "," θ' "▪" => condecl te θ τ cd cd' de ve le θ'
 
 /--
 Cp. Fig 20
@@ -210,20 +219,16 @@ inductive condecl : Env.TE
                   → SemTy.Context
                   → Prop where
   | POSCON :
-    Forall2 ts ts' (λ tᵢ tᵢ' => type te _ tᵢ tᵢ') →
+    Forall2 ts ts' (λ tᵢ tᵢ' => 《type》te,_ ⊢ tᵢ ፥ tᵢ' ▪) →
     /- σ = ∀ α₁ … αₙ. θ' ⇒ τ₁ → … → τₙ → χ α₁ … αₖ -/
     /- DE = { J : ⟨J, χ, σ ⟩ }-/
     /- θ' = θ|τ₁…τₖ -/
-    condecl te θ τ
-      (Source.ConstructorDecl.poscon J ts)
-      (Target.ConstructorDecl.poscon J ts'')
-      de ve le θ'
+    -------------------------------------------------------------------------------------------------------------
+    《condecl》te,θ,τ ⊢ Source.ConstructorDecl.poscon J ts ⇝ Target.ConstructorDecl.poscon J ts'' ፥ de,ve,le,θ' ▪
 
   | LABCON :
-    condecl te θ τ
-      (Source.ConstructorDecl.labcon J _)
-      (Target.ConstructorDecl.labcon J _)
-      de ve le θ'
+    ---------------------------------------------------------------------------------------------------------
+    《condecl》te,θ,τ ⊢ Source.ConstructorDecl.labcon J _ ⇝ Target.ConstructorDecl.labcon J _ ፥ de,ve,le,θ' ▪
 
 /--
 Cp. Fig 22
@@ -240,19 +245,9 @@ inductive lcon : Env.IE
     ----------
     lcon _ _ _
 
-/--
-Cp. Fig 23
-```text
-GE, IE, VE ⊢ ctDecl ⇝ typeDecls; binds : FE
-```
--/
-inductive ctDecl : Env.GE → Env.IE → Env.VE
-                 → Source.ClassOrType
-                 → Target.ClassOrType
-                 → Prop where
-  | CLASS_DECL :
-    ----------------
-    ctDecl _ _ _ _ _
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《sig》" ge "⊢" sign "፥" ve "▪" => sig ge sign ve
 
 /--
 Cp. Fig 24
@@ -267,8 +262,13 @@ inductive sig : Env.GE
   | SIG :
     ke = Env.kindsOf ce te →
     《type》_,_ ⊢ _ ፥ _ ▪ →
-    -------------------------------------------------
-    sig ⟨ce,te,de⟩ (Source.Signature.mk v _ _) [⟨v,_⟩]
+    ---------------------------------------------------------
+    《sig》⟨ce,te,de⟩ ⊢ (Source.Signature.mk v _ _) ፥ [⟨v,_⟩] ▪
+
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《sigs》" ge "⊢" sign "፥" ve "▪" => sigs ge sign ve
 
 /--
 Cp. Fig 24
@@ -281,14 +281,18 @@ inductive sigs : Env.GE
                → Env.VE
                → Prop where
   | SIGS_NIL :
-    -------------
-    sigs ge [] []
+    ----------------------
+    《sigs》ge ⊢ [] ፥ [] ▪
 
   | SIGS_CONS :
-    sig ge s ve →
-    sigs ge ss ves →
-    --------------------------------------
-    sigs ge (s :: ss) (List.append ve ves)
+    《sig》 ge ⊢ s  ፥ ve ▪ →
+    《sigs》ge ⊢ ss ፥ ves ▪ →
+    -------------------------------------------
+    《sigs》ge ⊢ s :: ss ፥ List.append ve ves ▪
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《class》" ce "," te "," h "⊢" cls "፥" Γ "," τ "▪" => classR ce te h cls Γ τ
 
 /--
 Cp. Fig 25
@@ -306,7 +310,11 @@ inductive classR : Env.CE → Env.TE → Int
     h' < h →
     《type》te, h'' ⊢ List.foldl Source.TypeExpression.app (Source.TypeExpression.var u) ts ፥ τ ▪ →
     ------------------------------------------------------------------------------------------------
-    classR ce te h (Source.ClassAssertion.mk C u ts) Γ τ
+    《class》ce,te,h ⊢ Source.ClassAssertion.mk C u ts ፥ Γ , τ ▪
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《context》" ce "," te "," h "⊢" cx "፥" θ "▪" => context ce te h cx θ
 
 /--
 Cp. Fig 25
@@ -319,9 +327,13 @@ inductive context : Env.CE → Env.TE → Int
                   → SemTy.Context
                   → Prop where
   | CONTEXT :
-    Forall3 class_assertions Γs τs (λ classᵢ Γᵢ τᵢ => classR ce te h classᵢ Γᵢ τᵢ) →
-    ---------------------------------------------------------------------------------
-    context ce te h class_assertions _
+    Forall3 class_assertions Γs τs (λ classᵢ Γᵢ τᵢ => 《class》ce,te,h ⊢ classᵢ ፥ Γᵢ ,τᵢ ▪) →
+    -----------------------------------------------------------------------------------------
+    《context》ce,te,h ⊢ class_assertions ፥ _ ▪
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《instdecl》" ge "," ie "," ve "⊢" idecl "⇝" idecl' "፥" ie' "▪" => instDecl ge ie ve idecl idecl' ie'
 
 /--
 Cp. Fig 26
@@ -335,9 +347,12 @@ inductive instDecl : Env.GE → Env.IE → Env.VE
                    → Env.IE
                    → Prop where
   | INST_DECL :
-    --------------------
-    instDecl _ _ _ _ _ _
+    ----------------------------------
+    《instdecl》ge,ie,ve ⊢ _ ⇝ _ ፥ _ ▪
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《instdecls》" ge "," ie "," ve "⊢" idecls "⇝" idecls' "፥" ie' "▪" => instDecls ge ie ve idecls idecls' ie'
 
 /--
 Cp. Fig 26
@@ -351,10 +366,14 @@ inductive instDecls : Env.GE → Env.IE → Env.VE
                     → Env.IE
                     → Prop where
   | INST_DECLS :
-    Forall3 inst_decls binds ies (λ instDeclᵢ bindᵢ ieᵢ => instDecl ge ie ve instDeclᵢ bindᵢ ieᵢ) →
-    ------------------------------------------------------------------------------------------------
-    instDecls ge ie ve inst_decls (Target.InstanceDecls.instDecls binds) (ies.foldl List.append [])
+    Forall3 inst_decls binds ies (λ instDeclᵢ bindᵢ ieᵢ => 《instdecl》ge,ie,ve ⊢ instDeclᵢ ⇝ bindᵢ ፥ ieᵢ ▪) →
+    ----------------------------------------------------------------------------------------------------------
+    《instdecls》ge,ie,ve ⊢ inst_decls ⇝ (Target.InstanceDecls.instDecls binds) ፥ (ies.foldl List.append []) ▪
 
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《method》" ge "," ie "," ve "⊢" sb "⇝" fb "፥" ve' "▪" => method ge ie ve sb fb ve'
 
 /--
 Cp. Fig 27
@@ -368,8 +387,8 @@ inductive method : Env.GE → Env.IE → Env.VE
                  → Env.VE
                  → Prop where
   | METHOD :
-    -------------------
-    method _ _ _ _ _ _
+    ---------------------------------
+    《method》ge, ie,ve ⊢ _ ⇝ _ ፥ _ ▪
 
 set_option quotPrecheck false in
 set_option hygiene false in
@@ -386,7 +405,7 @@ inductive dict : Env.IE
                → SemTy.Context
                → Prop where
   | DICT_TUPLE :
-    ----------------
+    ---------------------
     《dict》 ie ⊢ _ ፥ _ ▪
 
   | DICT_VAR :
