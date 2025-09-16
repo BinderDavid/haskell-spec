@@ -393,5 +393,6 @@ inductive method : Env.GE → Env.IE → Env.VE
                  → Env.VE
                  → Prop where
   | METHOD :
-    ---------------------------------
-    《method》ge, ie,ve ⊢ _ ⇝ _ ፥ _ ▪
+    《bind》ge,_,ve ⊢ bnd ⇝ bnd' ፥ [⟨x,_⟩] ▪ →
+    ----------------------------------------------------------------------
+    《method》ge, ie,ve ⊢ bnd ⇝ Target.FieldBinding.fb_bind _ _ ፥ [⟨x,_⟩] ▪
