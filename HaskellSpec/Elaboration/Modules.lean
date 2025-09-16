@@ -5,6 +5,7 @@ import HaskellSpec.Environments
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Elaboration.ImportExport
 import HaskellSpec.Elaboration.Kinding
+import HaskellSpec.Elaboration.Expressions
 
 /-!
 # Modules
@@ -347,8 +348,13 @@ inductive instDecl : Env.GE → Env.IE → Env.VE
                    → Env.IE
                    → Prop where
   | INST_DECL :
-    ----------------------------------
-    《instdecl》ge,ie,ve ⊢ _ ⇝ _ ፥ _ ▪
+    ⟨T, χ⟩ ∈ te₁ →
+    /- i ∈ [1,k] : αᵢ = uᵢ^kᵢ-/
+    ⟨_, Env.CEEntry.mk Γ h x_def α ie_sup⟩ ∈ ce →
+    《context》ce,_,_ ⊢ cx ፥ θ ▪ →
+    /- i ∈ [1,m] : 《method》ge;_,ve ⊢ bindᵢ ⇝ fbindᵢ ፥ ve_i -/
+    -----------------------------------------------------------------
+    《instdecl》⟨ce,⟨te₁,te₂⟩,de⟩,ie,ve ⊢ Source.InstanceDecl.mk cx C _ bs ⇝ _ ፥ _ ▪
 
 set_option quotPrecheck false in
 set_option hygiene false in
@@ -366,9 +372,9 @@ inductive instDecls : Env.GE → Env.IE → Env.VE
                     → Env.IE
                     → Prop where
   | INST_DECLS :
-    Forall3 inst_decls binds ies (λ instDeclᵢ bindᵢ ieᵢ => 《instdecl》ge,ie,ve ⊢ instDeclᵢ ⇝ bindᵢ ፥ ieᵢ ▪) →
+    Forall3 inst_decls bs ies (λ instDeclᵢ bindᵢ ieᵢ => 《instdecl》ge,ie,ve ⊢ instDeclᵢ ⇝ bindᵢ ፥ ieᵢ ▪) →
     ----------------------------------------------------------------------------------------------------------
-    《instdecls》ge,ie,ve ⊢ inst_decls ⇝ (Target.InstanceDecls.instDecls binds) ፥ (ies.foldl List.append []) ▪
+    《instdecls》ge,ie,ve ⊢ inst_decls ⇝ (Target.InstanceDecls.instDecls bs) ፥ (ies.foldl List.append []) ▪
 
 
 set_option quotPrecheck false in
@@ -389,35 +395,3 @@ inductive method : Env.GE → Env.IE → Env.VE
   | METHOD :
     ---------------------------------
     《method》ge, ie,ve ⊢ _ ⇝ _ ፥ _ ▪
-
-set_option quotPrecheck false in
-set_option hygiene false in
-notation  "《dict》" ie "⊢" e "፥" τ "▪"  => dict ie e τ
-
-/--
-Cp. Fig 28
-```text
-IE ⊢ e : (Γ₁ τ₁,…,Γₙ τₙ)
-```
--/
-inductive dict : Env.IE
-               → Target.Expression
-               → SemTy.Context
-               → Prop where
-  | DICT_TUPLE :
-    ---------------------
-    《dict》 ie ⊢ _ ፥ _ ▪
-
-  | DICT_VAR :
-    Env.IE_Entry.BoundInDictionaryAbstraction v class_name α τs ∈ ie →
-    ------------------------------------------------------------------------------------------------------------------------------------
-    《dict》 ie ⊢ (Target.Expression.var (QVariable.Unqualified v)) ፥ [⟨class_name, τs.foldl SemTy.TypeS.App (SemTy.TypeS.Variable α)⟩] ▪
-
-  | DICT_INST :
-    《dict》 ie ⊢ _ ፥ _ ▪
-
-  | DICT_SUPER :
-    Env.IE_Entry.ExtractsADictionaryForTheSuperclass x α Γ Γ' ∈ ie →
-    《dict》 ie ⊢ e ፥ [⟨Γ', τ⟩] ▪ →
-    -----------------------------------------------------------------------------------------------------------------------
-    《dict》 ie ⊢ Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e ፥ [⟨Γ, τ⟩] ▪
