@@ -5,8 +5,8 @@ import HaskellSpec.Source.Patterns
 import HaskellSpec.Source.Literals
 import HaskellSpec.Target.Lang
 import HaskellSpec.SemanticTypes
-import HaskellSpec.Elaboration.Modules
 import HaskellSpec.Elaboration.Bindings
+import HaskellSpec.Elaboration.Dictionary
 import HaskellSpec.NonEmpty
 import HaskellSpec.Prelude
 
