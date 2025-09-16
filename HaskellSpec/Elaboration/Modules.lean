@@ -231,20 +231,29 @@ inductive condecl : Env.TE
     ---------------------------------------------------------------------------------------------------------
     《condecl》te,θ,τ ⊢ Source.ConstructorDecl.labcon J _ ⇝ Target.ConstructorDecl.labcon J _ ፥ de,ve,le,θ' ▪
 
+
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《lcon》" ie "," φ "⊢" τ_old "," ue "," τ_new "▪" => lcon ie φ τ_old ue τ_new
+
 /--
 Cp. Fig 22
 ```text
 IE, φ ⊢ τ_old, UE, τ_new
 ```
-TODO: UE and φ are still not formalized
 -/
 inductive lcon : Env.IE
+               → Env.LabelInfo
                → SemTy.TypeS
+               → Env.UE
                → SemTy.TypeS
                → Prop where
   | LCON :
-    ----------
-    lcon _ _ _
+    《dict》ie ⊢ _ ፥ _ ▪ →
+    《dict》ie ⊢ _ ፥ _ ▪ →
+    ------------------------------------------------------
+    《lcon》ie , Env.LabelInfo.mk αs θ ue τ ⊢ _ , ue , _ ▪
 
 set_option quotPrecheck false in
 set_option hygiene false in
