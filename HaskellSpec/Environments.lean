@@ -3,13 +3,17 @@ import HaskellSpec.SemanticTypes
 
 namespace Env
 
+/-
+# Environments
+
+Environments are represented as association lists, i.e. lists of tuples of key and value.
+The various operations on environments are described in section 2.7 of the paper.
+-/
+
 @[reducible]
 def Env (name info : Type) : Type :=
   List (name × info)
 
-/-
-Operations on Environments from section 2.7
--/
 
 /-- Domain of an environment -/
 def dom (env : Env name info) : List name :=
@@ -100,8 +104,10 @@ the type variable information records in-scope type variables.
 
 Cp. section 2.7.2
 -/
+
 abbrev TE₁ : Type := Env QType_Name TE_Item
 abbrev TE₂ : Type := Env Type_Variable SemTy.Type_Variable
+
 structure TE : Type where
   te₁ : TE₁
   te₂ : TE₂
@@ -127,12 +133,9 @@ def TE_empty : TE :=
     te₂ := []
   }
 
-/--
-### Label Environment
-
-Cp. section 2.7.3
+/-
+## Instance Environment
 -/
-inductive LE : Type where
 
 /--
 Section 2.7.4
@@ -185,11 +188,6 @@ x : ∀α . Γ'α ⇒ Γα
     -> SemTy.SClass_Name
     -> IE_Entry
 
-/--
-### Instance Environment
-
-Cp. section 2.7.4
--/
 @[reducible]
 def IE := List IE_Entry
 
@@ -214,6 +212,29 @@ Cp. Fig 16
 -/
 def CE_init : CE := []
 
+/-
+## Data Constructor Environment
+-/
+
+/-
+### Update Environment
+-/
+
+abbrev UE : Type := Env  QVariable SemTy.TypeS
+
+/-
+### Label Environment
+
+Cp. section 2.7.3
+-/
+
+structure LabelInfo : Type where
+  tyvars : List SemTy.Type_Variable
+  context : SemTy.Context
+  update_env : UE
+  ty : SemTy.TypeS
+
+abbrev LE : Type := Env QConstructor LabelInfo
 
 abbrev DE₁ : Type := Env QConstructor (QConstructor × SemTy.Type_Constructor × SemTy.TypeScheme)
 abbrev DE₂ : Type := Env QVariable (QVariable × SemTy.Type_Constructor × LE)
