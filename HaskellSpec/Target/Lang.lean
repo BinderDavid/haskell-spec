@@ -83,8 +83,8 @@ mutual
   ```
   -/
   inductive Binds : Type where
-    | cons : Binding → Binds → Binds -- using this directly corresponds to the `rec` case
-    | empty : Binds
+    | recursive : List Binding → Binds
+    | non_recursive : List Binding → Binds
 
   /--
   ```text
