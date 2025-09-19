@@ -49,7 +49,7 @@ notation  "《binds》" ge "," ie "," ve "⊢" bs "⇝" bs' "፥" ve' "▪" => b
 Cp. Fig. 29
 ```text
 GE, IE, VE ⊢ binds ⇝ binds : VE
-```
+```xs
 -/
 inductive binds : Env.GE → Env.IE → Env.VE
                 → Source.Binds
@@ -57,11 +57,11 @@ inductive binds : Env.GE → Env.IE → Env.VE
                 → Env.VE
                 → Prop where
   | BINDS :
-    《bindG》ge,ie,ve              ⊢ sgs ; bnds ⇝ binds' ፥ ve_bindg ▪ →
-    《binds》ge,ie, Env.oplusarrow ve ve_bindg ⊢ b_source_binds ⇝ binds'' ፥ ve_binds ▪ →
-    --------------------------------------------------------------------------------------------------------------------------------------
+    《bindG》ge,ie, ve                         ⊢ sgs ; bnds ⇝ binds' ፥ ve_bindg ▪ →
+    《binds》ge,ie, Env.oplusarrow ve ve_bindg ⊢ bnds' ⇝ binds'' ፥ ve_binds ▪ →
+    ----------------------------xs----------------------------------------------------------------------------------------------------------
     《binds》ge,ie,ve ⊢ Source.Binds.cons sgs bnds bnds' ⇝ concat_target_binds binds' binds'' ፥ cross ve_bindg ve_binds ▪
 
   | EMPTY_BINDS :
     ------------------------------------------------------------------
-    《binds》ge,ie,ve ⊢ Source.Binds.empty ⇝ Target.Binds.empty ፥ [] ▪
+    《binds》ge,ie,ve ⊢ Source.Binds.empty ⇝ Target.Binds.non_recursive [] ፥ [] ▪
