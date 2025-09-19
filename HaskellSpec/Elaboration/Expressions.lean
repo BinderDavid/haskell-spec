@@ -219,10 +219,10 @@ mutual
       《quals》ge,ie,ve ⊢ Source.Qualifiers.list_bind p e qs ⇝ Target.Qualifiers.list_bind p' e' qs' ፥ Env.oplusarrow ve_p ve_quals ▪
 
     | QLET :
-      《binds》ge,ie,ve ⊢ bs ⇝ Target.Binds.cons b' bs' ፥ ve_binds ▪ →
+      《binds》ge,ie,ve ⊢ bs ⇝ bs' ፥ ve_binds ▪ →
       《quals》ge,ie,Env.oplusarrow ve ve_binds ⊢ qs ⇝ qs' ፥  ve_quals ▪ →
-      -----------------------------------------------------------------------------------------------------------------------------------------
-      《quals》ge,ie,ve ⊢ Source.Qualifiers.lbind bs qs ⇝ Target.Qualifiers.lbind (Target.Binds.cons b' bs') qs' ፥ Env.oplusarrow ve ve_binds ▪
+      -----------------------------------------------------------------------------------------------------------------
+      《quals》ge,ie,ve ⊢ Source.Qualifiers.lbind bs qs ⇝ Target.Qualifiers.lbind bs' qs' ፥ Env.oplusarrow ve ve_binds ▪
 
     | QFILTER :
      《exp》  ge,ie,ve ⊢ e  ⇝ e'  ፥ Prelude.bool ▪ →
@@ -279,14 +279,14 @@ mutual
     | APP :
       《exp》ge,ie,ve ⊢ e₁ ⇝ e₁' ፥ Prelude.mk_funt τ' τ ▪ →
       《exp》ge,ie,ve ⊢ e₂ ⇝ e₂' ፥ τ' ▪ →
-      ------------------------------------
+      ----------------------------------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.app e₁ e₂ ⇝ Target.Expression.app e₁' e₂' ፥ τ ▪
 
     | LET :
-      《binds》ge,ie,ve ⊢ source_binds ⇝ Target.Binds.cons ve_head ve_tail ፥ ve_binds ▪ →
+      《binds》ge,ie,ve ⊢ source_binds ⇝ bs ፥ ve_binds ▪ →
       《exp》ge,ie,Env.oplusarrow ve ve_binds ⊢ e ⇝ e' ፥ τ ▪ →
-      -------------------------------------------------------------------------------------------------------------------------------------
-      《exp》ge,ie,ve ⊢ Source.Expression.let_bind source_binds e ⇝ Target.Expression.let_bind (Target.Binds.cons ve_head ve_tail) e' ፥ τ ▪
+      ---------------------------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.let_bind source_binds e ⇝ Target.Expression.let_bind bs e' ፥ τ ▪
 
     | CASE :
       《exp》ge,ie,ve ⊢ e ⇝ e' ፥ τ' ▪ →
@@ -365,10 +365,10 @@ mutual
       《stmts》ge,ie,ve ⊢ Source.Statements.mbind p e s ⇝ _ ፥ SemTy.TypeS.App τ τ₂ ▪
 
     | SLET :
-      《binds》ge,ie,ve ⊢ bs ⇝ Target.Binds.cons b' bs' ፥ ve_binds ▪ →
+      《binds》ge,ie,ve ⊢ bs ⇝ bs' ፥ ve_binds ▪ →
       《stmts》ge,ie,Env.oplusarrow ve ve_binds ⊢ s ⇝ e ፥ τ ▪ →
-      -------------------------------------------------------------------------
-      《stmts》ge,ie,ve ⊢ Source.Statements.lbind bs s ⇝ Target.Expression.let_bind (Target.Binds.cons b' bs') e ፥ τ ▪
+      ----------------------------------------------------------------------------------------
+      《stmts》ge,ie,ve ⊢ Source.Statements.lbind bs s ⇝ Target.Expression.let_bind bs' e ፥ τ ▪
 
     | STHEN :
       《exp》  ge,ie,ve ⊢ e ⇝ e₁ ፥ SemTy.TypeS.App τ τ₁ ▪ →

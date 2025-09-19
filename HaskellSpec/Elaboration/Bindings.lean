@@ -11,12 +11,6 @@ The intersection of the domains of the two environments must be empty
 def cross (a b: Env.VE): Env.VE :=
   a ++ b
 
-/-
-A circle with a cross inside, with a right arrow on top
-
-Asymmetric version of ⊕ where entries in E2 shadow E if names collide
--/
-def cross_arrow (_: Env.VE) (_: Env.VE): Env.VE := sorry
 
 
 def concat_target_binds (n m: Target.Binds): Target.Binds :=
@@ -25,8 +19,27 @@ def concat_target_binds (n m: Target.Binds): Target.Binds :=
   -- this.
   sorry
 
-def concat_source_binds (n m : Source.Binds): Source.Binds :=
-  sorry
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《bindG》" ge "," ie "," ve "⊢" sgs ";" bs "⇝" bs' "፥" ve' "▪" => bindG ge ie ve sgs bs bs' ve'
+
+/--
+Cp. Fig 30
+```text
+GE, IE, VE ⊢ sigs;bindG ⇝ binds : VE
+```
+-/
+inductive bindG : Env.GE → Env.IE → Env.VE
+                → List Source.Signature
+                → List Source.Binds
+                → Target.Binds
+                → Env.VE
+                → Prop where
+  | BINDG :
+    -------------------------------
+    《bindG》_,_,_ ⊢ _ ; _ ⇝ _ ፥ _ ▪
+
 
 set_option quotPrecheck false in
 set_option hygiene false in
@@ -36,7 +49,7 @@ notation  "《binds》" ge "," ie "," ve "⊢" bs "⇝" bs' "፥" ve' "▪" => b
 Cp. Fig. 29
 ```text
 GE, IE, VE ⊢ binds ⇝ binds : VE
-```
+```xs
 -/
 inductive binds : Env.GE → Env.IE → Env.VE
                 → Source.Binds
@@ -44,24 +57,11 @@ inductive binds : Env.GE → Env.IE → Env.VE
                 → Env.VE
                 → Prop where
   | BINDS :
-    《binds》ge,ie,ve              ⊢ a_source_binds ⇝ binds' ፥ ve_bindg ▪ →
-    《binds》ge,ie,cross_arrow a b ⊢ b_source_binds ⇝ binds'' ፥ ve_binds ▪ →
-    --------------------------------------------------------------------------------------------------------------------------------------
-    《binds》ge,ie,ve ⊢ concat_source_binds a_source_binds b_source_binds ⇝ concat_target_binds binds' binds'' ፥ cross ve_bindg ve_binds ▪
+    《bindG》ge,ie, ve                         ⊢ sgs ; bnds ⇝ binds' ፥ ve_bindg ▪ →
+    《binds》ge,ie, Env.oplusarrow ve ve_bindg ⊢ bnds' ⇝ binds'' ፥ ve_binds ▪ →
+    ----------------------------xs----------------------------------------------------------------------------------------------------------
+    《binds》ge,ie,ve ⊢ Source.Binds.cons sgs bnds bnds' ⇝ concat_target_binds binds' binds'' ፥ cross ve_bindg ve_binds ▪
 
   | EMPTY_BINDS :
     ------------------------------------------------------------------
-    《binds》ge,ie,ve ⊢ Source.Binds.empty ⇝ Target.Binds.empty ፥ [] ▪
-
-/--
-Cp. Fig 30
-```text
-GE, IE, VE ⊢ sigs;bindG ⇝ binds : VE
-```
--/
-inductive bindG : Env.GE → Env.IE → Env.VE
-                → Target.Binds
-                → Env.VE
-                → Prop where
-  | BINDG :
-    bindG _ _ _ _ _
+    《binds》ge,ie,ve ⊢ Source.Binds.empty ⇝ Target.Binds.non_recursive [] ፥ [] ▪
