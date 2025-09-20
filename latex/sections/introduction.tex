@@ -1,1 +1,22 @@
-This describes the differences w.r.t \cite{Faxen2002staticsemantics}.
+This article describes a Lean mechanization of the typing system described in \cite{Faxen2002staticsemantics}.
+In particular, we discuss the differences between the version of the typing rules described in that paper, and the rules formalized in the mechanization.
+These differences are mainly due to the different underlying technologies: pen and paper on the one hand and a modern interactive proof assistant on the other hand.
+These differences go both ways:
+Some things which are easy to specify by hand are difficult to implement in the proof assistant, and some things which are easy to specify in a proof assistant, using higher-order combinators, for example, are cumbersome to write down in a paper.
+
+\subsection{Notations for Judgment Forms}
+
+\citet{Faxen2002staticsemantics} uses the following notation for typing judgements.
+\begin{equation*}
+    \textit{environments} \vdash^{\textit{judgement name}} \textit{source phrase} \leadsto \textit{target phrase} : \textit{derived information}
+\end{equation*}
+A judgement of this form uses information taken from an environment and elaborates a source phrase of the surface language to a target phrase of the System-F based intermediate language.
+Additional derived information can be derived types or kinds, as well as new environments when checking toplevel declarations or bindings, for example.
+
+In the Lean mechanization we write judgements as follows:
+\begin{equation*}
+    \jdgmtname{judgement name} \textit{environments} \vdash \textit{source phrase} \leadsto \textit{target phrase} \specialcolon \textit{derived information}\ \sqcdot
+\end{equation*}
+This difference is due to the technical constraints of proof assistants, in particular the extensible parsers for user defined notations:
+The starting delimiter $\jdgmtname{judgement name}$ and ending delimiter $\sqcdot$ of the judgement form make parsing much simpler and allow it to omit many unnecessary parentheses.
+Instead of the colon we use a special colon $\specialcolon$ to clearly distinguish it from the symbol that the specification language Lean uses for type ascriptions.
