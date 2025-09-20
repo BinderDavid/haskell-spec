@@ -20,3 +20,9 @@ In the Lean mechanization we write judgements as follows:
 This difference is due to the technical constraints of proof assistants, in particular the extensible parsers for user defined notations:
 The starting delimiter $\jdgmtname{judgement name}$ and ending delimiter $\sqcdot$ of the judgement form make parsing much simpler and allow it to omit many unnecessary parentheses.
 Instead of the colon we use a special colon $\specialcolon$ to clearly distinguish it from the symbol that the specification language Lean uses for type ascriptions.
+
+\subsection{Dependency Order}
+Proof assistants enforce a strict dependency order on inductive definitions: We cannot refer to a judgement before we have defined it.
+This also entails that we have to make groups of mutually recursive definitions explicit, and such groups of mutually recursive definitions are subject to additional constraints.
+This is usually omitted when we formalize something on paper, but here we have to make it completely explicit.
+
