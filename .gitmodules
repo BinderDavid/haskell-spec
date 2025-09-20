@@ -1,0 +1,3 @@
+[submodule "latex/bibliography"]
+	path = latex/bibliography
+	url = git@github.com:BinderDavid/bibliography.git

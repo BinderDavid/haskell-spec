@@ -1,0 +1,111 @@
+\documentclass[acmsmall, screen, review, anonymous]{acmart}
+\settopmatter{printfolios=true,printccs=true,printacmref=true}
+
+%%
+%% Bibliography and Citation Style
+%%
+\bibliographystyle{ACM-Reference-Format}
+\citestyle{acmauthoryear}
+
+\usepackage{amsmath}
+\usepackage[nameinlink,noabbrev,capitalise]{cleveref}
+\usepackage{mathtools}
+\usepackage{thmtools}
+\usepackage{bussproofs}
+\usepackage{listings}
+\usepackage{csquotes}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage[mathscr]{euscript}
+\usepackage{cmll}
+
+%%
+%% Todo notes
+%%
+\setlength{\marginparwidth}{2cm} % This is needed, otherwise the package "todonotes" will generate a warning.
+\usepackage[]{todonotes}
+\newcommand{\david}[2][]{\todo[inline,color=red!40,author=David,#1]{#2}}
+
+%%
+%% Macros
+%%
+\input{macros/macros}
+
+\begin{document}
+%%
+%% Title information
+%%
+\title{Haskell Spec}
+
+%%
+%% Keywords
+%%
+\keywords{Haskell}
+
+%%
+%% CCS Classification
+%%
+
+\begin{CCSXML}
+  <ccs2012>
+     <concept>
+         <concept_id>10003752.10003753.10003754.10003733</concept_id>
+         <concept_desc>Theory of computation~Lambda calculus</concept_desc>
+         <concept_significance>500</concept_significance>
+         </concept>
+     <concept>
+         <concept_id>10011007.10011006.10011041</concept_id>
+         <concept_desc>Software and its engineering~Compilers</concept_desc>
+         <concept_significance>500</concept_significance>
+         </concept>
+     <concept>
+         <concept_id>10011007.10011006.10011008.10011024.10011027</concept_id>
+         <concept_desc>Software and its engineering~Control structures</concept_desc>
+         <concept_significance>300</concept_significance>
+         </concept>
+   </ccs2012>
+\end{CCSXML}
+
+\ccsdesc[500]{Theory of computation~Lambda calculus}
+\ccsdesc[500]{Software and its engineering~Compilers}
+\ccsdesc[300]{Software and its engineering~Control structures}
+
+%%
+%% Author: David Binder
+%%
+\author{David Binder}
+\orcid{0000-0003-1272-0972}
+\affiliation{
+  \department{Department of Computer Science}
+  \institution{University of Tübingen}
+  \city{Tübingen}
+  \country{Germany}
+}
+\email{D.Binder@kent.ac.uk}
+
+
+
+%%
+%% Abstract
+%%
+\begin{abstract}
+  todo
+\end{abstract}
+
+\maketitle
+
+
+%%
+%% Section: Introduction
+%%
+\section{Introduction}
+\label{sec:introduction}
+\input{sections/introduction.tex}
+
+%%
+%% Bibliography
+%%
+\bibliography{bibliography/bibliography.bib, bibliography/ownpublications.bib}
+
+
+\end{document}
