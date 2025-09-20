@@ -78,28 +78,34 @@ inductive ktype : Env.KE
     ---------------------------------------------
     《ktype》ke ⊢ Source.TypeExpression.app t₁ t₂ ፥ κ₂ ▪
 
+
+inductive kclassassertion : Env.KE
+                          → Source.ClassAssertion
+                          → Prop where
+  | KIND_CLASS_ASSERTION :
+    (Env.KE_Name.C ca.name, κ) ∈ ke →
+    《ktype》ke ⊢ Source.classAssertionType ca ፥ κ ▪ →
+    --------------------------------------------------
+    kclassassertion ke ca
+
 set_option quotPrecheck false in
 set_option hygiene false in
 notation  "《kctx》" ke "⊢" ctx "▪"=> kctx ke ctx
 
 /--
 ```text
-{C₁ : κ₁, ..., Cₙ : κₙ} ⊆ KE
-i ∈ [1, n] : KE ⊢^ktype tᵢ : κᵢ
------------------------------- KIND CTX
-KE ⊢^kctx C₁ t₁, ... Cₙ tₙ
+KE ⊢ cx
 ```
 -/
 inductive kctx : Env.KE
                → Source.Context
                → Prop where
   | KIND_CTX_NIL :
-    ------------------------------
+    -----------------
     《kctx》ke ⊢ [] ▪
 
   | KIND_CTX_CONS :
-    (Env.KE_Name.C ca.name, κ) ∈ ke →
-    《ktype》ke ⊢ Source.classAssertionType ca ፥ κ ▪ →
+    kclassassertion ke ca →
     《kctx》 ke ⊢ cas ▪ →
     ---------------------------------------------------------
     《kctx》 ke ⊢ ca :: cas ▪

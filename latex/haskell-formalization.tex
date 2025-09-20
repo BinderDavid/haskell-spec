@@ -1,4 +1,4 @@
-\documentclass[acmsmall, screen, review, anonymous]{acmart}
+\documentclass[acmsmall, screen, review]{acmart}
 \settopmatter{printfolios=true,printccs=true,printacmref=true}
 
 %%
@@ -15,6 +15,7 @@
 \usepackage{listings}
 \usepackage{csquotes}
 \usepackage{tikz}
+\usepackage{MnSymbol}
 \usepackage{graphicx}
 \usepackage[mathscr]{euscript}
 \usepackage{cmll}
@@ -35,7 +36,7 @@
 %%
 %% Title information
 %%
-\title{Haskell Spec}
+\title{A Mechanized Specification of the Haskell 2010 Type System in the Lean Proof Assistant}
 
 %%
 %% Keywords
@@ -76,10 +77,10 @@
 \author{David Binder}
 \orcid{0000-0003-1272-0972}
 \affiliation{
-  \department{Department of Computer Science}
-  \institution{University of Tübingen}
-  \city{Tübingen}
-  \country{Germany}
+  \department{School of Computing}
+  \institution{University of Kent}
+  \city{Canterbury}
+  \country{United Kingdom}
 }
 \email{D.Binder@kent.ac.uk}
 
@@ -89,7 +90,12 @@
 %% Abstract
 %%
 \begin{abstract}
-  todo
+  The Haskell language report defines what the Haskell language \emph{is}; it does so, however, using natural language which can often be ambiguous.
+  This ambiguity can lead to divergent behaviour among different compilers, so what we really require is a mathematically precise
+  specification of the language.
+  Over 20 years ago Karl Filip Faxen presented a comprehensive set of formal typing rules for the entire Haskell 98 surface language.
+  Specifying the rules for a complete language, and not only some core subset of it, is necessarily verbose and error-prone.
+  To ensure that we do not accidentally introduce bugs into the specification, we present a \emph{mechanized} version of Faxen's rules, adapted to the Haskell 2010 language standard, in the proof assistant Lean.
 \end{abstract}
 
 \maketitle
@@ -101,6 +107,13 @@
 \section{Introduction}
 \label{sec:introduction}
 \input{sections/introduction.tex}
+
+%%
+%% Section: Kinding
+%%
+\section{Kinding}
+\label{sec:kinding}
+\input{sections/kinding.tex}
 
 %%
 %% Bibliography
