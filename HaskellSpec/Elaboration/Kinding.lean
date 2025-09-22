@@ -229,17 +229,21 @@ inductive kctDecl : Env.KE
                   → Env.KE
                   → Prop where
   | KIND_DATA :
-    《oplus》ke ⊞ _ ≡ ke'' ▪ →
+     κ = SemTy.kind_fun_list κs →
+     List.length κs = List.length us →
+    《oplus》ke ⊞ List.zip (List.map (λ u => Env.KE_Name.u u) us) κs ≡ ke'' ▪ →
     (∀ ca ∈ cx, 《kclassassertion》 ke'' ⊢ ca ▪)→
     (∀ conDecl ∈  cons,《kconDecl》 ke'' ⊢ conDecl ▪) →
     -----------------------------------------------------------
     《kctDecl》 ke ⊢ (Source.ClassOrType.ct_data cx S us cons) ፥ [⟨Env.KE_Name.T (QType_Name.Unqualified S),κ⟩] ▪
 
   | KIND_TYPE :
-    《oplus》ke ⊞ _ ≡ ke'' ▪ →
+     List.length κs = List.length us →
+    《oplus》ke ⊞ List.zip (List.map (λ u => Env.KE_Name.u u) us) κs ≡ ke'' ▪ →
     《ktype》 ke'' ⊢ t ፥ κ ▪ →
+    κ_res = SemTy.kind_fun_list (κs ++ [κ]) →
     ------------------------------------------------------
-    《kctDecl》ke ⊢ Source.ClassOrType.ct_type S us t ፥ [⟨Env.KE_Name.T (QType_Name.Unqualified S),_⟩] ▪
+    《kctDecl》ke ⊢ Source.ClassOrType.ct_type S us t ፥ [⟨Env.KE_Name.T (QType_Name.Unqualified S),κ_res⟩] ▪
 
   | KIND_CLASS :
     《oplus》ke ⊞ [⟨Env.KE_Name.u u,κ⟩] ≡ ke' ▪ →
@@ -264,8 +268,9 @@ inductive kgroup : Env.KE
                  → Prop where
   | KGROUP :
     Forall2NE class_or_types kes (λ ctDecl keᵢ => 《kctDecl》 ke ⊢ ctDecl ፥ keᵢ ▪) →
+    《oplus*》⊞{ toList kes }≡ ke_res ▪ →
     -----------------------------------
-    《kgroup》ke ⊢ class_or_types ፥ _ ▪
+    《kgroup》ke ⊢ class_or_types ፥ ke_res ▪
 
 
 set_option quotPrecheck false in

@@ -39,17 +39,30 @@ def intersect [BEq t] (l l' : List t) : (List t) :=
 -- asserts that the environments have no overlapping domains
 inductive oplus : Env k v -> Env k v -> Env k v -> Prop where
 
-  | SU_nil :
+  | Nil :
     ------------
     oplus [] E E
 
-  | SU_cons :
+  | Cons :
     k ∉ dom E₂ →
     oplus E₁ E₂ E₃ →
     -------------------------------------
     oplus ((k, v) :: E₁) E₂ ((k, v) :: E₃)
 
 notation  "《oplus》" e₁ "⊞" e₂ "≡" e₃ "▪"=> oplus e₁ e₂ e₃
+
+inductive oplus_many : List (Env k v) → Env k v → Prop where
+  | Nil :
+    ----------------
+    oplus_many [] []
+
+  | Cons :
+    oplus_many es e' →
+    oplus e e' e'' →
+    ------------------------
+    oplus_many (e :: es) e''
+
+notation  "《oplus*》⊞{" es "}≡" e "▪"=> oplus_many es e
 
 def oplusbar [BEq name] (env env' : Env name info) (_ : (restrict env (dom env') = restrict env' (dom env))) : (Env name info) :=
   List.append env env'
