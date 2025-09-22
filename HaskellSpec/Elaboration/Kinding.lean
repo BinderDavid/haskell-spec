@@ -117,10 +117,10 @@ def KindEnvOrdering (ke₁ ke₂ : Env.KE) : Prop :=
 notation  "《kindenvord》" ke₁ "≼" ke₂ "▪" => KindEnvOrdering ke₁ ke₂
 
 /--
-If `MinKindEnv f ke_min` holds, then `ke_min` is the smallest kind environment satisfying `f`.
+If `MinKindEnv ke_min f` holds, then `ke_min` is the smallest kind environment satisfying `f`.
 This is used to implement kind defaulting.
 -/
-def MinKindEnv (f : Env.KE → Prop) (ke : Env.KE) : Prop :=
+def MinKindEnv (ke : Env.KE) (f : Env.KE → Prop) : Prop :=
   f ke
   ∧
   (∀ ke', f ke → 《kindenvord》 ke ≼ ke' ▪)
@@ -137,8 +137,8 @@ KE ⊢ t : κ
 ```
 -/
 inductive ktype : Env.KE
-                → TypeExpression
-                → Kind
+                → Source.TypeExpression
+                → SemTy.Kind
                 → Prop where
   | KIND_TVAR :
     (Env.KE_Name.u u, κ) ∈ ke →
@@ -184,9 +184,10 @@ inductive ksig : Env.KE
                → Source.Signature
                → Prop where
   | KIND_SIG :
-     /- ke' = {u₁ : κ₁,…, uₙ : κₙ } → -/
-     (∀ ca ∈ cx, 《kclassassertion》  _ /- (Env.oplus ke ke') -/ ⊢ ca ▪ ) →
-    《ktype》 _ /- (Env.oplus ke ke') -/ ⊢ t ፥ SemTy.Kind.Star ▪ →
+     (∀ e ∈ ke', ∃ u, e.fst = Env.KE_Name.u u) →
+    《oplus》ke ⊞ ke' ≡ ke'' ▪ →
+     (∀ ca ∈ cx, 《kclassassertion》ke'' ⊢ ca ▪ ) →
+    《ktype》 ke'' ⊢ t ፥ SemTy.Kind.Star ▪ →
     -----------------------------------------------------
     《ksig》 ke ⊢ Source.Signature.mk v cx t ▪
 
@@ -228,21 +229,24 @@ inductive kctDecl : Env.KE
                   → Env.KE
                   → Prop where
   | KIND_DATA :
-    (∀ ca ∈ cx, 《kclassassertion》 _ ⊢ ca ▪ )→
-    (∀ conDecl ∈  cons,《kconDecl》 _ ⊢ conDecl ▪) →
+    《oplus》ke ⊞ _ ≡ ke'' ▪ →
+    (∀ ca ∈ cx, 《kclassassertion》 ke'' ⊢ ca ▪)→
+    (∀ conDecl ∈  cons,《kconDecl》 ke'' ⊢ conDecl ▪) →
     -----------------------------------------------------------
-    《kctDecl》 ke ⊢ (Source.ClassOrType.ct_data cx S us cons) ፥ [⟨Env.KE_Name.T _,κ⟩] ▪
+    《kctDecl》 ke ⊢ (Source.ClassOrType.ct_data cx S us cons) ፥ [⟨Env.KE_Name.T (QType_Name.Unqualified S),κ⟩] ▪
 
   | KIND_TYPE :
-    《ktype》 _ ⊢ t ፥ κ ▪ →
+    《oplus》ke ⊞ _ ≡ ke'' ▪ →
+    《ktype》 ke'' ⊢ t ፥ κ ▪ →
     ------------------------------------------------------
-    《kctDecl》ke ⊢ Source.ClassOrType.ct_type S us t ፥ [⟨Env.KE_Name.T _,_⟩] ▪
+    《kctDecl》ke ⊢ Source.ClassOrType.ct_type S us t ፥ [⟨Env.KE_Name.T (QType_Name.Unqualified S),_⟩] ▪
 
   | KIND_CLASS :
-    (∀ ca ∈ cx, 《kclassassertion》_ ⊢ ca ▪ )→
-    (∀ sig ∈ sigs, 《ksig》_ ⊢ sig ▪ ) →
+    《oplus》ke ⊞ [⟨Env.KE_Name.u u,κ⟩] ≡ ke' ▪ →
+    (∀ ca ∈ cx, 《kclassassertion》ke' ⊢ ca ▪ )→
+    (∀ sig ∈ sigs, 《ksig》ke' ⊢ sig ▪ ) →
     -----------------------------------------------------------
-    《kctDecl》ke ⊢ Source.ClassOrType.ct_class cx B u sigs b ፥ [⟨Env.KE_Name.C _,κ⟩] ▪
+    《kctDecl》ke ⊢ Source.ClassOrType.ct_class cx B u sigs b ፥ [⟨Env.KE_Name.C (QClassName.Unqualified B),κ⟩] ▪
 
 
 set_option quotPrecheck false in
@@ -279,10 +283,13 @@ inductive kctDecls : Env.KE
                    → Env.KE
                    → Prop where
   | KCTDECLS :
-    MinKindEnv (λ ke' => 《kgroup》 _ /-Env.oplus ke ke' -/ ⊢ grp ፥ ke' ▪) ke_decls →
-    《kctDecls》 _ /-Env.oplus ke ke_decls -/ ⊢ rest ፥ ke_groups ▪ →
+    MinKindEnv ke_decls (λ ke' => ∃ ke'', 《oplus》ke ⊞ ke' ≡ ke'' ▪ ∧
+                                           《kgroup》 ke'' ⊢ grp ፥ ke' ▪) →
+    《oplus》ke ⊞ ke_decls ≡ ke_res ▪ →
+    《kctDecls》 ke_res ⊢ rest ፥ ke_groups ▪ →
+    《oplus》ke_decls ⊞ ke_groups ≡ ke_final ▪ →
     -----------------------------------------------------
-    《kctDecls》ke ⊢ Source.ClassesAndTypes.decls grp rest ፥ _ /- ke_decls ⊕ ke_groups -/▪
+    《kctDecls》ke ⊢ Source.ClassesAndTypes.decls grp rest ፥ ke_final ▪
 
   | KCTEMPTY :
     -------------------------------------------
