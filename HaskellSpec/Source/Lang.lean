@@ -37,7 +37,7 @@ cx ∈ Context → (class₁,...,classₖ)
                 k ≥ 0
 ```
 -/
-def Context : Type := List ClassAssertion
+abbrev Context : Type := List ClassAssertion
 
 /--
 ```text

@@ -79,6 +79,10 @@ inductive ktype : Env.KE
     《ktype》ke ⊢ Source.TypeExpression.app t₁ t₂ ፥ κ₂ ▪
 
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《kclassassertion》" ke "⊢" ca "▪"=> kclassassertion ke ca
+
 inductive kclassassertion : Env.KE
                           → Source.ClassAssertion
                           → Prop where
@@ -87,29 +91,6 @@ inductive kclassassertion : Env.KE
     《ktype》ke ⊢ Source.classAssertionType ca ፥ κ ▪ →
     --------------------------------------------------
     kclassassertion ke ca
-
-set_option quotPrecheck false in
-set_option hygiene false in
-notation  "《kctx》" ke "⊢" ctx "▪"=> kctx ke ctx
-
-/--
-```text
-KE ⊢ cx
-```
--/
-inductive kctx : Env.KE
-               → Source.Context
-               → Prop where
-  | KIND_CTX_NIL :
-    -----------------
-    《kctx》ke ⊢ [] ▪
-
-  | KIND_CTX_CONS :
-    kclassassertion ke ca →
-    《kctx》 ke ⊢ cas ▪ →
-    ---------------------------------------------------------
-    《kctx》 ke ⊢ ca :: cas ▪
-
 
 set_option quotPrecheck false in
 set_option hygiene false in
@@ -126,33 +107,10 @@ inductive ksig : Env.KE
                → Prop where
   | KIND_SIG :
      /- ke' = {u₁ : κ₁,…, uₙ : κₙ } → -/
-    《kctx》  _ /- (Env.oplus ke ke') -/ ⊢ cx ▪ →
+     (∀ ca ∈ cx, 《kclassassertion》  _ /- (Env.oplus ke ke') -/ ⊢ ca ▪ ) →
     《ktype》 _ /- (Env.oplus ke ke') -/ ⊢ t ፥ SemTy.Kind.Star ▪ →
     -----------------------------------------------------
     《ksig》 ke ⊢ Source.Signature.mk v cx t ▪
-
-set_option quotPrecheck false in
-set_option hygiene false in
-notation  "《ksigs》" ke "⊢" sigs "▪"=> ksigs ke sigs
-
-/--
-Cp. fig 9
-```text
-KE ⊢ sigs
-```
--/
-inductive ksigs : Env.KE
-                → List Source.Signature
-                → Prop where
-  | KIND_SIGS_NIL :
-    ------------------
-    《ksigs》ke ⊢ [] ▪
-
-  | KIND_SIGS_CONS :
-    《ksig》  ke ⊢ sig ▪ →
-    《ksigs》 ke ⊢ sigs ▪ →
-    ----------------------------
-    《ksigs》 ke ⊢ sig :: sigs ▪
 
 set_option quotPrecheck false in
 set_option hygiene false in
@@ -192,7 +150,7 @@ inductive kctDecl : Env.KE
                   → Env.KE
                   → Prop where
   | KIND_DATA :
-    《kctx》 _ ⊢ cx ▪ →
+    (∀ ca ∈ cx, 《kclassassertion》 _ ⊢ ca ▪ )→
     (∀ conDecl ∈  cons,《kconDecl》 _ ⊢ conDecl ▪) →
     -----------------------------------------------------------
     《kctDecl》 ke ⊢ (Source.ClassOrType.ct_data cx S us cons) ፥ [⟨Env.KE_Name.T _,κ⟩] ▪
@@ -203,8 +161,8 @@ inductive kctDecl : Env.KE
     《kctDecl》ke ⊢ Source.ClassOrType.ct_type S us t ፥ [⟨Env.KE_Name.T _,_⟩] ▪
 
   | KIND_CLASS :
-    《kctx》_ ⊢ cx ▪ →
-    《ksigs》_ ⊢ sigs ▪ →
+    (∀ ca ∈ cx, 《kclassassertion》_ ⊢ ca ▪ )→
+    (∀ sig ∈ sigs, 《ksig》_ ⊢ sig ▪ ) →
     -----------------------------------------------------------
     《kctDecl》ke ⊢ Source.ClassOrType.ct_class cx B u sigs b ፥ [⟨Env.KE_Name.C _,κ⟩] ▪
 
