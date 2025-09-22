@@ -32,6 +32,84 @@ inductive KindOrdering : SemTy.Kind
     ------------------------------------------------------------
     《kindord》SemTy.Kind.Fun κ₁ κ₂ ≼ SemTy.Kind.Fun κ₁' κ₂' ▪
 
+theorem kind_ord_reflexive : ∀ κ, 《kindord》 κ ≼ κ ▪ := by
+  intros κ
+  induction κ with
+  | Star => apply KindOrdering.STAR_LT
+  | Fun κ₁ κ₂ IH₁ IH₂ => apply KindOrdering.FUN_CONG <;> assumption
+
+theorem kind_ord_transitive : ∀ κ₁ κ₂ κ₃,
+  《kindord》κ₁ ≼ κ₂ ▪ →
+  《kindord》κ₂ ≼ κ₃ ▪ →
+  《kindord》κ₁ ≼ κ₃ ▪ := by
+  intros κ₁ κ₂ ; revert κ₁
+  induction κ₂ with
+  | Star =>
+    intros κ₁ κ₃ H₁ H₂
+    cases H₁ with
+    | STAR_LT => apply KindOrdering.STAR_LT
+  | Fun κ₂₁ κ₂₂ IH₁ IH₂ =>
+    intros κ₁ κ₃ H₁ H₂
+    cases H₁ with
+    | STAR_LT => apply KindOrdering.STAR_LT
+    | FUN_CONG HX₁ HX₂ =>
+      cases H₂ with
+      | FUN_CONG HX₃ HX₄ =>
+        apply KindOrdering.FUN_CONG
+        . apply IH₁ <;> assumption
+        . apply IH₂ <;> assumption
+
+theorem kind_ord_asymm : ∀ κ₁ κ₂,
+  《kindord》κ₁ ≼ κ₂ ▪ →
+  《kindord》κ₂ ≼ κ₁ ▪ →
+  κ₁ = κ₂ := by
+  intros κ₁
+  induction κ₁ with
+  | Star =>
+    intros κ₂ H₁ H₂
+    cases H₂ with
+    | STAR_LT => rfl
+  | Fun κ₁₁ κ₁₂ IH₁ IH₂ =>
+    intros κ₂ H₁ H₂
+    cases H₁ with
+    | FUN_CONG HX₁ HX₂ =>
+      cases H₂ with
+      | FUN_CONG HX₃ HX₄ =>
+        specialize IH₁ _ HX₁ HX₃
+        specialize IH₂ _ HX₂ HX₄
+        rw [IH₁, IH₂]
+
+def decide_kind_ord (κ₁ κ₂ : SemTy.Kind) : Decidable 《kindord》κ₁ ≼ κ₂ ▪ :=
+  match κ₁ with
+  | SemTy.Kind.Star => by
+    apply Decidable.isTrue
+    apply KindOrdering.STAR_LT
+  | SemTy.Fun κ₁₁ κ₁₂ =>
+    match κ₂ with
+    | SemTy.Kind.Star => by
+      apply Decidable.isFalse
+      intros HX
+      cases HX
+    | SemTy.Fun κ₂₁ κ₂₂ =>
+      match decide_kind_ord κ₁₁ κ₂₁ with
+      | Decidable.isFalse H => by
+        apply Decidable.isFalse
+        intros HX
+        cases HX with
+        | FUN_CONG => apply H ; assumption
+      | Decidable.isTrue H₁ =>
+        match decide_kind_ord κ₁₂ κ₂₂ with
+        | Decidable.isFalse H => by
+          apply Decidable.isFalse
+          intros HX
+          cases HX with
+          | FUN_CONG => apply H ; assumption
+        | Decidable.isTrue H₂ => by
+          apply Decidable.isTrue
+          apply KindOrdering.FUN_CONG <;> assumption
+
+instance decidable_kind_ord {κ₁ κ₂ : SemTy.Kind }: Decidable 《kindord》κ₁ ≼ κ₂ ▪ :=
+  decide_kind_ord κ₁ κ₂
 
 def KindEnvOrdering (ke₁ ke₂ : Env.KE) : Prop :=
   ∀ x ∈ ke₁, ∃ x' ∈ ke₂, x.fst = x'.fst ∧ 《kindord》 x.snd ≼ x'.snd ▪
