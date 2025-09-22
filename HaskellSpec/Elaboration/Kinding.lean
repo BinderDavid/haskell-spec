@@ -32,6 +32,84 @@ inductive KindOrdering : SemTy.Kind
     ------------------------------------------------------------
     《kindord》SemTy.Kind.Fun κ₁ κ₂ ≼ SemTy.Kind.Fun κ₁' κ₂' ▪
 
+theorem kind_ord_reflexive : ∀ κ, 《kindord》 κ ≼ κ ▪ := by
+  intros κ
+  induction κ with
+  | Star => apply KindOrdering.STAR_LT
+  | Fun κ₁ κ₂ IH₁ IH₂ => apply KindOrdering.FUN_CONG <;> assumption
+
+theorem kind_ord_transitive : ∀ κ₁ κ₂ κ₃,
+  《kindord》κ₁ ≼ κ₂ ▪ →
+  《kindord》κ₂ ≼ κ₃ ▪ →
+  《kindord》κ₁ ≼ κ₃ ▪ := by
+  intros κ₁ κ₂ ; revert κ₁
+  induction κ₂ with
+  | Star =>
+    intros κ₁ κ₃ H₁ H₂
+    cases H₁ with
+    | STAR_LT => apply KindOrdering.STAR_LT
+  | Fun κ₂₁ κ₂₂ IH₁ IH₂ =>
+    intros κ₁ κ₃ H₁ H₂
+    cases H₁ with
+    | STAR_LT => apply KindOrdering.STAR_LT
+    | FUN_CONG HX₁ HX₂ =>
+      cases H₂ with
+      | FUN_CONG HX₃ HX₄ =>
+        apply KindOrdering.FUN_CONG
+        . apply IH₁ <;> assumption
+        . apply IH₂ <;> assumption
+
+theorem kind_ord_asymm : ∀ κ₁ κ₂,
+  《kindord》κ₁ ≼ κ₂ ▪ →
+  《kindord》κ₂ ≼ κ₁ ▪ →
+  κ₁ = κ₂ := by
+  intros κ₁
+  induction κ₁ with
+  | Star =>
+    intros κ₂ H₁ H₂
+    cases H₂ with
+    | STAR_LT => rfl
+  | Fun κ₁₁ κ₁₂ IH₁ IH₂ =>
+    intros κ₂ H₁ H₂
+    cases H₁ with
+    | FUN_CONG HX₁ HX₂ =>
+      cases H₂ with
+      | FUN_CONG HX₃ HX₄ =>
+        specialize IH₁ _ HX₁ HX₃
+        specialize IH₂ _ HX₂ HX₄
+        rw [IH₁, IH₂]
+
+def decide_kind_ord (κ₁ κ₂ : SemTy.Kind) : Decidable 《kindord》κ₁ ≼ κ₂ ▪ :=
+  match κ₁ with
+  | SemTy.Kind.Star => by
+    apply Decidable.isTrue
+    apply KindOrdering.STAR_LT
+  | SemTy.Fun κ₁₁ κ₁₂ =>
+    match κ₂ with
+    | SemTy.Kind.Star => by
+      apply Decidable.isFalse
+      intros HX
+      cases HX
+    | SemTy.Fun κ₂₁ κ₂₂ =>
+      match decide_kind_ord κ₁₁ κ₂₁ with
+      | Decidable.isFalse H => by
+        apply Decidable.isFalse
+        intros HX
+        cases HX with
+        | FUN_CONG => apply H ; assumption
+      | Decidable.isTrue H₁ =>
+        match decide_kind_ord κ₁₂ κ₂₂ with
+        | Decidable.isFalse H => by
+          apply Decidable.isFalse
+          intros HX
+          cases HX with
+          | FUN_CONG => apply H ; assumption
+        | Decidable.isTrue H₂ => by
+          apply Decidable.isTrue
+          apply KindOrdering.FUN_CONG <;> assumption
+
+instance decidable_kind_ord {κ₁ κ₂ : SemTy.Kind }: Decidable 《kindord》κ₁ ≼ κ₂ ▪ :=
+  decide_kind_ord κ₁ κ₂
 
 def KindEnvOrdering (ke₁ ke₂ : Env.KE) : Prop :=
   ∀ x ∈ ke₁, ∃ x' ∈ ke₂, x.fst = x'.fst ∧ 《kindord》 x.snd ≼ x'.snd ▪
@@ -39,10 +117,10 @@ def KindEnvOrdering (ke₁ ke₂ : Env.KE) : Prop :=
 notation  "《kindenvord》" ke₁ "≼" ke₂ "▪" => KindEnvOrdering ke₁ ke₂
 
 /--
-If `MinKindEnv f ke_min` holds, then `ke_min` is the smallest kind environment satisfying `f`.
+If `MinKindEnv ke_min f` holds, then `ke_min` is the smallest kind environment satisfying `f`.
 This is used to implement kind defaulting.
 -/
-def MinKindEnv (f : Env.KE → Prop) (ke : Env.KE) : Prop :=
+def MinKindEnv (ke : Env.KE) (f : Env.KE → Prop) : Prop :=
   f ke
   ∧
   (∀ ke', f ke → 《kindenvord》 ke ≼ ke' ▪)
@@ -59,8 +137,8 @@ KE ⊢ t : κ
 ```
 -/
 inductive ktype : Env.KE
-                → TypeExpression
-                → Kind
+                → Source.TypeExpression
+                → SemTy.Kind
                 → Prop where
   | KIND_TVAR :
     (Env.KE_Name.u u, κ) ∈ ke →
@@ -78,32 +156,19 @@ inductive ktype : Env.KE
     ---------------------------------------------
     《ktype》ke ⊢ Source.TypeExpression.app t₁ t₂ ፥ κ₂ ▪
 
+
 set_option quotPrecheck false in
 set_option hygiene false in
-notation  "《kctx》" ke "⊢" ctx "▪"=> kctx ke ctx
+notation  "《kclassassertion》" ke "⊢" ca "▪"=> kclassassertion ke ca
 
-/--
-```text
-{C₁ : κ₁, ..., Cₙ : κₙ} ⊆ KE
-i ∈ [1, n] : KE ⊢^ktype tᵢ : κᵢ
------------------------------- KIND CTX
-KE ⊢^kctx C₁ t₁, ... Cₙ tₙ
-```
--/
-inductive kctx : Env.KE
-               → Source.Context
-               → Prop where
-  | KIND_CTX_NIL :
-    ------------------------------
-    《kctx》ke ⊢ [] ▪
-
-  | KIND_CTX_CONS :
+inductive kclassassertion : Env.KE
+                          → Source.ClassAssertion
+                          → Prop where
+  | KIND_CLASS_ASSERTION :
     (Env.KE_Name.C ca.name, κ) ∈ ke →
     《ktype》ke ⊢ Source.classAssertionType ca ፥ κ ▪ →
-    《kctx》 ke ⊢ cas ▪ →
-    ---------------------------------------------------------
-    《kctx》 ke ⊢ ca :: cas ▪
-
+    --------------------------------------------------
+    kclassassertion ke ca
 
 set_option quotPrecheck false in
 set_option hygiene false in
@@ -119,34 +184,12 @@ inductive ksig : Env.KE
                → Source.Signature
                → Prop where
   | KIND_SIG :
-     /- ke' = {u₁ : κ₁,…, uₙ : κₙ } → -/
-    《kctx》  _ /- (Env.oplus ke ke') -/ ⊢ cx ▪ →
-    《ktype》 _ /- (Env.oplus ke ke') -/ ⊢ t ፥ SemTy.Kind.Star ▪ →
+     (∀ e ∈ ke', ∃ u, e.fst = Env.KE_Name.u u) →
+    《oplus》ke ⊞ ke' ≡ ke'' ▪ →
+     (∀ ca ∈ cx, 《kclassassertion》ke'' ⊢ ca ▪ ) →
+    《ktype》 ke'' ⊢ t ፥ SemTy.Kind.Star ▪ →
     -----------------------------------------------------
     《ksig》 ke ⊢ Source.Signature.mk v cx t ▪
-
-set_option quotPrecheck false in
-set_option hygiene false in
-notation  "《ksigs》" ke "⊢" sigs "▪"=> ksigs ke sigs
-
-/--
-Cp. fig 9
-```text
-KE ⊢ sigs
-```
--/
-inductive ksigs : Env.KE
-                → List Source.Signature
-                → Prop where
-  | KIND_SIGS_NIL :
-    ------------------
-    《ksigs》ke ⊢ [] ▪
-
-  | KIND_SIGS_CONS :
-    《ksig》  ke ⊢ sig ▪ →
-    《ksigs》 ke ⊢ sigs ▪ →
-    ----------------------------
-    《ksigs》 ke ⊢ sig :: sigs ▪
 
 set_option quotPrecheck false in
 set_option hygiene false in
@@ -186,21 +229,28 @@ inductive kctDecl : Env.KE
                   → Env.KE
                   → Prop where
   | KIND_DATA :
-    《kctx》 _ ⊢ cx ▪ →
-    (∀ conDecl ∈  cons,《kconDecl》 _ ⊢ conDecl ▪) →
+     κ = SemTy.kind_fun_list κs →
+     List.length κs = List.length us →
+    《oplus》ke ⊞ List.zip (List.map (λ u => Env.KE_Name.u u) us) κs ≡ ke'' ▪ →
+    (∀ ca ∈ cx, 《kclassassertion》 ke'' ⊢ ca ▪)→
+    (∀ conDecl ∈  cons,《kconDecl》 ke'' ⊢ conDecl ▪) →
     -----------------------------------------------------------
-    《kctDecl》 ke ⊢ (Source.ClassOrType.ct_data cx S us cons) ፥ [⟨Env.KE_Name.T _,κ⟩] ▪
+    《kctDecl》 ke ⊢ (Source.ClassOrType.ct_data cx S us cons) ፥ [⟨Env.KE_Name.T (QType_Name.Unqualified S),κ⟩] ▪
 
   | KIND_TYPE :
-    《ktype》 _ ⊢ t ፥ κ ▪ →
+     List.length κs = List.length us →
+    《oplus》ke ⊞ List.zip (List.map (λ u => Env.KE_Name.u u) us) κs ≡ ke'' ▪ →
+    《ktype》 ke'' ⊢ t ፥ κ ▪ →
+    κ_res = SemTy.kind_fun_list (κs ++ [κ]) →
     ------------------------------------------------------
-    《kctDecl》ke ⊢ Source.ClassOrType.ct_type S us t ፥ [⟨Env.KE_Name.T _,_⟩] ▪
+    《kctDecl》ke ⊢ Source.ClassOrType.ct_type S us t ፥ [⟨Env.KE_Name.T (QType_Name.Unqualified S),κ_res⟩] ▪
 
   | KIND_CLASS :
-    《kctx》_ ⊢ cx ▪ →
-    《ksigs》_ ⊢ sigs ▪ →
+    《oplus》ke ⊞ [⟨Env.KE_Name.u u,κ⟩] ≡ ke' ▪ →
+    (∀ ca ∈ cx, 《kclassassertion》ke' ⊢ ca ▪ )→
+    (∀ sig ∈ sigs, 《ksig》ke' ⊢ sig ▪ ) →
     -----------------------------------------------------------
-    《kctDecl》ke ⊢ Source.ClassOrType.ct_class cx B u sigs b ፥ [⟨Env.KE_Name.C _,κ⟩] ▪
+    《kctDecl》ke ⊢ Source.ClassOrType.ct_class cx B u sigs b ፥ [⟨Env.KE_Name.C (QClassName.Unqualified B),κ⟩] ▪
 
 
 set_option quotPrecheck false in
@@ -218,8 +268,9 @@ inductive kgroup : Env.KE
                  → Prop where
   | KGROUP :
     Forall2NE class_or_types kes (λ ctDecl keᵢ => 《kctDecl》 ke ⊢ ctDecl ፥ keᵢ ▪) →
+    《oplus*》⊞{ toList kes }≡ ke_res ▪ →
     -----------------------------------
-    《kgroup》ke ⊢ class_or_types ፥ _ ▪
+    《kgroup》ke ⊢ class_or_types ፥ ke_res ▪
 
 
 set_option quotPrecheck false in
@@ -237,10 +288,13 @@ inductive kctDecls : Env.KE
                    → Env.KE
                    → Prop where
   | KCTDECLS :
-    MinKindEnv (λ ke' => 《kgroup》 _ /-Env.oplus ke ke' -/ ⊢ grp ፥ ke' ▪) ke_decls →
-    《kctDecls》 _ /-Env.oplus ke ke_decls -/ ⊢ rest ፥ ke_groups ▪ →
+    MinKindEnv ke_decls (λ ke' => ∃ ke'', 《oplus》ke ⊞ ke' ≡ ke'' ▪ ∧
+                                           《kgroup》 ke'' ⊢ grp ፥ ke' ▪) →
+    《oplus》ke ⊞ ke_decls ≡ ke_res ▪ →
+    《kctDecls》 ke_res ⊢ rest ፥ ke_groups ▪ →
+    《oplus》ke_decls ⊞ ke_groups ≡ ke_final ▪ →
     -----------------------------------------------------
-    《kctDecls》ke ⊢ Source.ClassesAndTypes.decls grp rest ፥ _ /- ke_decls ⊕ ke_groups -/▪
+    《kctDecls》ke ⊢ Source.ClassesAndTypes.decls grp rest ፥ ke_final ▪
 
   | KCTEMPTY :
     -------------------------------------------

@@ -35,23 +35,34 @@ def restrict [BEq name] (env : Env name info) (names : List name) : Env name inf
 def intersect [BEq t] (l l' : List t) : (List t) :=
   List.filter (List.contains l') l
 
-def oplus [BEq name] [BEq info] (env₁ env₂ : Env name info)
-          : intersect (dom env₁) (dom env₂) = empty → Env name info :=
-  λ _ => List.append env₁ env₂
-
 -- ⊕ from Section 2.7 as a ternary relation
 -- asserts that the environments have no overlapping domains
-inductive safe_union : Env k v -> Env k v -> Env k v -> Prop where
+inductive oplus : Env k v -> Env k v -> Env k v -> Prop where
 
-  | SU_nil :
-      safe_union [] E E
+  | Nil :
+    ------------
+    oplus [] E E
 
-  | SU_cons :
-        k ∉ dom E'
-      → safe_union E E' E''
-      → safe_union ((k, v) :: E) E' ((k, v) :: E'')
+  | Cons :
+    k ∉ dom E₂ →
+    oplus E₁ E₂ E₃ →
+    -------------------------------------
+    oplus ((k, v) :: E₁) E₂ ((k, v) :: E₃)
 
-export safe_union (SU_nil SU_cons)
+notation  "《oplus》" e₁ "⊞" e₂ "≡" e₃ "▪"=> oplus e₁ e₂ e₃
+
+inductive oplus_many : List (Env k v) → Env k v → Prop where
+  | Nil :
+    ----------------
+    oplus_many [] []
+
+  | Cons :
+    oplus_many es e' →
+    oplus e e' e'' →
+    ------------------------
+    oplus_many (e :: es) e''
+
+notation  "《oplus*》⊞{" es "}≡" e "▪"=> oplus_many es e
 
 def oplusbar [BEq name] (env env' : Env name info) (_ : (restrict env (dom env') = restrict env' (dom env))) : (Env name info) :=
   List.append env env'

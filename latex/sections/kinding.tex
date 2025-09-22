@@ -1,0 +1,18 @@
+\begin{itemize}
+    \item Contexts are lists of class assertions, so replace kinding judgement for contexts by one for class assertions.
+    \item Delete ksigs judgement.
+\end{itemize}
+
+\begin{center}
+  \begin{tabular}{ccc}
+    \toprule
+    \citet{Faxen2002staticsemantics} & Lean formalization & Remark \\
+    \midrule
+    $\kappa_1 \prec \kappa_2$ & $\jkindord{\kappa_1}{\kappa_2}$ & todo \\
+    $\fktype{ke}{t}{\kappa}$ & $\jktype{ke}{t}{\kappa}$ & todo \\
+    $\fkindsig{ke}{sig}$ & $\jkindsig{ke}{sig}$ & \\
+    $\fkindsigs{ke}{sigs}$ &  & Expressed using combinator \\
+    $\fkindctx{ke}{cx}$ & & todo \\
+    \bottomrule
+  \end{tabular}
+\end{center}

@@ -1,0 +1,12 @@
+%% Macros for kinding judgements
+
+%% Lean Versions
+\newcommand{\jktype}[3]{\jdgmtname{ktype} #1 \vdash #2 \specialcolon #3\ \sqcdot}
+\newcommand{\jkindord}[2]{\jdgmtname{kindord} #1 \leq #2 \sqcdot}
+\newcommand{\jkindsig}[2]{\jdgmtname{ksig} #1 \vdash #2\ \sqcdot}
+
+%% Faxen Versions
+\newcommand{\fktype}[3]{ #1 \vdash^{\text{ktype}} #2 : #3}
+\newcommand{\fkindsig}[2]{#1 \vdash^{\text{ksig}} #2}
+\newcommand{\fkindsigs}[2]{#1 \vdash^{\text{ksigs}} #2}
+\newcommand{\fkindctx}[2]{#1 \vdash^{\text{kctx}} #2}

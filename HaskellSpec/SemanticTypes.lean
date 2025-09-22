@@ -18,7 +18,8 @@ inductive Kind : Type where
   | Fun : Kind → Kind → Kind
   deriving BEq
 
-deriving instance BEq for Kind
+def kind_fun_list (kes : List Kind) : Kind := sorry
+
 
 export Kind (Star Fun)
 

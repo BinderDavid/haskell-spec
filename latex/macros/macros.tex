@@ -1,0 +1,12 @@
+\newcommand{\jdgmtname}[1]{\llangle\mathtt{#1}\rrangle}
+\newcommand{\specialcolon}{:}
+
+% Cp.: https://tex.stackexchange.com/questions/273034/square-version-of-cdot-small-black-square
+\makeatletter
+\DeclareRobustCommand{\sqcdot}{\mathbin{\mathpalette\morphic@sqcdot\relax}}
+\newcommand{\morphic@sqcdot}[2]{%
+  \sbox\z@{$\m@th#1\centerdot$}%
+  \ht\z@=.33333\ht\z@
+  \vcenter{\box\z@}%
+}
+\makeatother
