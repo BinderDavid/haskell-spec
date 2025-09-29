@@ -225,9 +225,21 @@ mutual
       --------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.do_block s ⇝ e ፥ τ ▪
 
+      /--
+      A constructor `K` has a typescheme `∀αs,θ => τ` in the environment due to datatype contexts.
+      We therefore have to create a typeclass dictionary `ed` for the instance `θ[τs/αs]` even though
+      this dictionary is not used in the elaboration.
+
+      We elaborate the constructor by applying it to appropriate type arguments: `K τs`.
+      -/
     | CON :
+      ge = ⟨ce,te,⟨de₁,de₂⟩⟩ →
+      ⟨K,⟨K,χ,SemTy.TypeScheme.Forall αs θ τ⟩⟩ ∈ de₁ →
+      Env.dom τsForαs = αs →
+      《dict》ie ⊢ ed ፥ SemTy.Substitute.substitute τsForαs θ ▪ →
+      e_target = Target.typ_app_ (Target.Expression.constr K) (Env.rng τsForαs) →
       ------------------------------------------------------
-      《exp》ge,ie,ve ⊢ Source.Expression.constr _ ⇝ _ ፥ _ ▪
+      《exp》ge,ie,ve ⊢ Source.Expression.constr K ⇝ e_target ፥ SemTy.Substitute.substitute τsForαs τ ▪
 
     | UPD :
       ---------------------------------------------------------
