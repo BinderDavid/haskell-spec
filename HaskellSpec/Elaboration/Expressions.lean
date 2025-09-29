@@ -134,12 +134,17 @@ mutual
       /--
       A variable `x` with a type scheme `∀ αs. θ => τ` that has been introduced at a variable binding site or as a
       record field access.
+
+      We need to find a substitution `[τs/αs]` which maps type variables `αs` to concrete types `τs`.
+      We create a typeclass dictionary `ed` for the constraint `θ[τs/αs]` and elaborate the variable `x`
+      by applying it to the types and the dictionary: `x τs ed`.
+      The resulting expression has the type `τ[τs/αs]`.
       -/
     | VAR_1 :
       ⟨x, (Env.VE_Item.Ordinary x (SemTy.TypeScheme.Forall αs θ τ))⟩ ∈ ve →
       Env.dom τsForαs = αs →
-      《dict》 ie ⊢ e ፥ SemTy.Substitute.substitute τsForαs θ ▪ →
-      e_target = Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (Env.rng τsForαs)) e →
+      《dict》 ie ⊢ ed ፥ SemTy.Substitute.substitute τsForαs θ ▪ →
+      e_target = Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (Env.rng τsForαs)) ed →
       ---------------------------------------------------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.var x ⇝ e_target ፥ SemTy.Substitute.substitute τsForαs τ ▪
 
