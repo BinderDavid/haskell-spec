@@ -86,6 +86,13 @@ inductive pat : Env.GE → Env.IE
     -----------------------------------------------------------------------------------------------------------------
     《pat》ge,ie ⊢ Source.Pattern.var x ⇝ Target.Pattern.var (unqual_var x) σ ፥ [(x, Env.VE_Item.Ordinary x σ)] , τ ▪
 
+  | PAS :
+    《pat》ge,ie ⊢ p ⇝ p' ፥ veₚ , τ ▪ →
+    σ = SemTy.TypeScheme.Forall [] [] τ →
+    《oplus》veₚ ⊞ [⟨v,Env.VE_Item.Ordinary v σ⟩] ≡ ve_res ▪ →
+    -----------
+    《pat》ge,ie ⊢ Source.Pattern.as v p ⇝ Target.Pattern.as v σ p' ፥ ve_res , τ ▪
+
   | PIRR :
     《pat》ge,ie ⊢ p₁ ⇝ p₂ ፥ ve, τ ▪ →
     -----------------------------------------------------------------------
@@ -95,6 +102,14 @@ inductive pat : Env.GE → Env.IE
     --------------------------------------------------------------
     《pat》ge,ie ⊢ Source.Pattern.wildcard ⇝ Target.Pattern.wildcard ፥ [], τ ▪
 
+  | PCON :
+    -------------------------------
+    《pat》ge,ie ⊢ _ ⇝ _ ፥ _ , _ ▪
+
+  | PLAB :
+    -------------------------------
+    《pat》ge,ie ⊢ _ ⇝ _ ፥ _ , _ ▪
+
   | PCHAR :
     -------------------------------------------------------------------------------------------------------
     《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.char c) ⇝ Target.Pattern.char c ፥ [],Prelude.char ▪
@@ -102,7 +117,6 @@ inductive pat : Env.GE → Env.IE
   | PSTRING :
     ---------------------------------------------------------------------------------------------------------------------------------------
     《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.string s) ⇝ Target.Pattern.string s ፥ [], Prelude.mk_list Prelude.char ▪
-
 
   | PINTEGER :
     《literal》 ie ⊢ (Source.Literal.integer i) ⇝ e ፥ τ ▪  →

@@ -73,7 +73,7 @@ mutual
     | var : Variable → SemTy.TypeScheme →  Pattern
     | constructor : QConstructor → List Pattern → Pattern
     | constructor_labelled : QConstructor → List (Variable × Pattern) → Pattern
-    | at : Variable → SemTy.TypeScheme → Pattern → Pattern
+    | as : QVariable → SemTy.TypeScheme → Pattern → Pattern
     | lazy : Pattern → Pattern
     | wildcard : Pattern
     | exp : Expression → Pattern

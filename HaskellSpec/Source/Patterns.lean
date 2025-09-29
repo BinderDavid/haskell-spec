@@ -23,10 +23,10 @@ inductive Pattern : Type where
     -/
   | constructor_labelled : QConstructor → List (Variable × Pattern) → Pattern
     /--
-    An at-pattern.
+    An as-pattern.
     Example: `s @ Student name id`
     -/
-  | at : Variable → Pattern → Pattern
+  | as : QVariable → Pattern → Pattern
     /--
     A lazy pattern.
     Example: `~p`
