@@ -131,26 +131,37 @@ mutual
                 → Target.Expression
                 → SemTy.TypeS
                 → Prop where
+      /--
+      A variable `x` with a type scheme `∀ αs. θ => τ` that has been introduced at a variable binding site or as a
+      record field access.
+      -/
     | VAR_1 :
       ⟨x, (Env.VE_Item.Ordinary x (SemTy.TypeScheme.Forall αs θ τ))⟩ ∈ ve →
-      (τsForαs : SemTy.VarSubst) → (Env.dom τsForαs) = αs →
+      Env.dom τsForαs = αs →
       《dict》 ie ⊢ e ፥ SemTy.Substitute.substitute τsForαs θ ▪ →
-      ---------------------------------------------------------------------------------------
-      exp ge ie ve (Source.Expression.var x)
-        (Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (Env.rng τsForαs)) e)
-        (SemTy.Substitute.substitute τsForαs τ)
+      e_target = Target.Expression.app (Target.typ_app_ (Target.Expression.var x) (Env.rng τsForαs)) e →
+      ---------------------------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.var x ⇝ e_target ፥ SemTy.Substitute.substitute τsForαs τ ▪
 
+      /--
+      A variable `x` that has been introduced as a typeclass method.
+      Typeclass methods have a more complicated type scheme `∀ β, Γ ⇒ ∀ αs, θ => τ`.
+
+      The function  `(>>=)`, for example, has type `∀m, Monad m => ∀a b, m a -> (a -> m b) -> m b`.
+      In this example the context `θ` is empty.
+      -/
     | VAR_2 :
-      ⟨x, (Env.VE_Item.Class x (SemTy.ClassTypeScheme.Forall α Γ (SemTy.TypeScheme.Forall αs θ τ) ))⟩ ∈ ve →
+      ⟨x, (Env.VE_Item.Class x (SemTy.ClassTypeScheme.Forall β Γ (SemTy.TypeScheme.Forall αs θ τ) ))⟩ ∈ ve →
       《dict》 ie ⊢ e1 ፥ [(Γ, τ)] ▪ →
-      (τsForαs : SemTy.VarSubst) →
-      (Env.dom τsForαs) = αs →
+      Env.dom τsForαs = αs →
       《dict》 ie ⊢ e2 ፥ SemTy.Substitute.substitute τsForαs θ ▪ →
+      e_target = Target.Expression.app (Target.typ_app_ (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e1) (Env.rng τsForαs)) e2 →
       --------------------------------------------------------------------------------------
-      exp ge ie ve (Source.Expression.var x)
-        (Target.Expression.app (Target.typ_app_ (Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (singleton τ)) e1) (Env.rng τsForαs)) e2)
-        (SemTy.Substitute.substitute (List.cons (α, τ) τsForαs) τ)
+      《exp》ge,ie,ve ⊢ Source.Expression.var x ⇝ e_target ፥ SemTy.Substitute.substitute (List.cons (β, τ) τsForαs) τ ▪
 
+      /--
+      A literal is elaborated using the judgement form `《literal》`.
+      -/
     | LITERAL :
       《literal》  ie ⊢ lit ⇝ e ፥ τ ▪ →
       ------------------------------------------------------
@@ -192,7 +203,7 @@ mutual
       /--
       When typechecking a list comprehension `[e | quals]` we first check the qualifiers `quals` in order
       to obtain the list of variables `ve_quals` they bring into scope.
-      We then typecheck `e` in the context extended with  `ve_quals` to obtain the type `τ`.
+      We then typecheck `e` in the context extended with `ve_quals` to obtain the type `τ`.
       The entire list comprehension then has type `[τ]`.
       -/
     | LIST_COMP :
@@ -201,6 +212,9 @@ mutual
       -------------------------------------------------------------------------------------------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.listComp e_source quals_source ⇝ Target.Expression.listComp e_target quals_target ፥ Prelude.mk_list τ ▪
 
+      /--
+      A do block `do {stmt₁,…,stmtₙ}` is elaborated using the judgement form `《stmts》`.
+      -/
     | DO :
       《stmts》ge,ie,ve ⊢ s ⇝ e ፥ τ ▪ →
       --------------------------------------------------------
