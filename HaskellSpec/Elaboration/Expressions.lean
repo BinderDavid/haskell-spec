@@ -12,6 +12,13 @@ import HaskellSpec.Elaboration.Patterns
 import HaskellSpec.NonEmpty
 import HaskellSpec.Prelude
 
+/- Prelude!(>>) τ ed ed τ₁ τ₂ e₁ e₂ -/
+def apply_sequence : SemTy.TypeS → Target.Expression → SemTy.TypeS → SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression :=
+  λ τ ed τ₁ τ₂ e₁ e₂ =>
+  let e'   := Target.Expression.typ_app (Target.Expression.var Prelude.sequence) (NonEmpty.mk τ [])
+  let e''  := Target.apps e' [ed]
+  let e''' := Target.Expression.typ_app e'' (NonEmpty.mk τ₁ [τ₂])
+  Target.apps e''' [e₁,e₂]
 
 set_option quotPrecheck false in
 set_option hygiene false in
@@ -43,44 +50,81 @@ notation  "《bind》" ge "," ie "," ve "⊢" bind' "⇝" bind'' "፥" ve' "▪"
 
 mutual
   /--
-  Cp. Fig 40
-  ```text
-  GE, IE, VE ⊢ quals ⇝ quals : VE
-  ```
+  Qualifiers appear on the right side of list comprehensions: `[e | qual₁, …, qualₙ]` and can bring additional
+  variables into scope that can be used in the expression `e` and other qualifiers to the right.
+
+  The judgement `《quals》ge,ie,ve_in ⊢ qual ⇝ qual' ፥ ve_out ▪` means that in the context `ge,ie,ve_in` we can elaborate
+  the source qualifier `qual` to the target qualifier `qual'`.
+
+  The context `ve_in` is the combination of the variable context from without the list comprehension and the bindings
+  introduced by the qualifiers to the left of the one we are currently checking.
+
+  The context `ve_out` only contains those variable bindings introduced by the list of qualifiers, and not the bindings
+  from without the list comprehension.
+
+  (Defined in Fig. 40 of Faxen)
   -/
   inductive quals : Env.GE → Env.IE → Env.VE
                   → Source.Qualifiers
                   → Target.Qualifiers
                   → Env.VE
                   → Prop where
+      /--
+      We typecheck a qualifier `[_ |…, p <- e, qs]`.
+
+      We have to check the expression `e` in the context `ve_in` which has to result in some list type `[τ]`.
+      We then have to check the pattern `p` against the type `τ` and extend the local context bound by the pattern.
+
+      Variables bound in `qs` shadow variables bound in `p`.
+      -/
     | QGEN :
-      《exp》  ge,ie,ve                     ⊢ e  ⇝ e'  ፥ Prelude.mk_list τ ▪ →
-      《pat》  ge,ie                        ⊢ p  ⇝ p'  ፥ ve_p, τ ▪ →
-      《quals》ge,ie,Env.oplusarrow ve ve_p ⊢ qs ⇝ qs' ፥ ve_quals ▪ →
-      -------------------------------------------------------------------------------------------------------------------------------
-      《quals》ge,ie,ve ⊢ Source.Qualifiers.list_bind p e qs ⇝ Target.Qualifiers.list_bind p' e' qs' ፥ Env.oplusarrow ve_p ve_quals ▪
+      《exp》  ge,ie,ve_in     ⊢ e  ⇝ e'  ፥ Prelude.mk_list τ ▪ →
+      《pat》  ge,ie           ⊢ p  ⇝ p'  ፥ ve_pattern, τ ▪ →
+      ve_middle = Env.oplusarrow ve_in ve_pattern →
+      《quals》ge,ie,ve_middle ⊢ qs ⇝ qs' ፥ ve_quals ▪ →
+      ve_out = Env.oplusarrow ve_p ve_quals →
+      ------------------------------------------------------------------------------------------------------------
+      《quals》ge,ie,ve_in ⊢ Source.Qualifiers.list_bind p e qs ⇝ Target.Qualifiers.list_bind p' e' qs' ፥ ve_out ▪
 
+      /--
+      We typecheck a qualifier `[_ |…, let binds, qs]`.
+      -/
     | QLET :
-      《binds》ge,ie,ve ⊢ bs ⇝ bs' ፥ ve_binds ▪ →
-      《quals》ge,ie,Env.oplusarrow ve ve_binds ⊢ qs ⇝ qs' ፥  ve_quals ▪ →
-      -----------------------------------------------------------------------------------------------------------------
-      《quals》ge,ie,ve ⊢ Source.Qualifiers.lbind bs qs ⇝ Target.Qualifiers.lbind bs' qs' ፥ Env.oplusarrow ve ve_binds ▪
+      《binds》ge,ie,ve_in      ⊢ bs ⇝ bs' ፥ ve_binds ▪ →
+      ve_middle = Env.oplusarrow ve_in ve_binds →
+      《quals》ge,ie, ve_middle ⊢ qs ⇝ qs' ፥ ve_quals ▪ →
+      ve_out = Env.oplusarrow ve_binds ve_quals →
+      -------------------------------------------------------------------------------------------------
+      《quals》ge,ie,ve_in ⊢ Source.Qualifiers.lbind bs qs ⇝ Target.Qualifiers.lbind bs' qs' ፥ ve_out ▪
 
+      /--
+      We typecheck a qualifier `[_ | …, e , qs]`.
+
+      We have to check that the expression `e` has type `Bool` in the context `ve_in`.
+      No new variables are brought into scope.
+      -/
     | QFILTER :
-     《exp》  ge,ie,ve ⊢ e  ⇝ e'  ፥ Prelude.bool ▪ →
-     《quals》ge,ie,ve ⊢ qs ⇝ qs' ፥ ve_quals ▪ →
+     《exp》  ge,ie,ve_in ⊢ e  ⇝ e'  ፥ Prelude.bool ▪ →
+     《quals》ge,ie,ve_in ⊢ qs ⇝ qs' ፥ ve_out ▪ →
      -----------------------------------------------------------------------------------------------
-     《quals》 ge,ie,ve ⊢ Source.Qualifiers.guard e qs ⇝ Target.Qualifiers.guard e' qs' ፥ ve_quals ▪
+     《quals》ge,ie,ve_in ⊢ Source.Qualifiers.guard e qs ⇝ Target.Qualifiers.guard e' qs' ፥ ve_out ▪
 
+      /--
+      The output environment `ve_out` should not contain variables introduced in the outer scope.
+      We therefore have to return an empty environment here.
+      -/
     | QEMPTY :
      ----------------------------------------------------------------------------
      《quals》ge,ie,ve ⊢ Source.Qualifiers.empty ⇝ Target.Qualifiers.empty ፥ [] ▪
 
   /--
-  Cp. Fig 36. 38. 39. 42
-  ```text
-  GE, IE, VE ⊢ e ⇝ e : τ
-  ```
+  The central elaboration judgement for expressions.
+
+  The judgement `《exp》ge,ie,ve ⊢ e ⇝ e' ፥ τ` means that in the environment `ge,ie,ve` we can
+  elaborate the source expression `e` to the target expression  `e'` and check that it has the
+  semantic mono-type `τ`.
+
+  (Defined in Fig. 36, 38, 39 and 42 of Faxen)
   -/
   inductive exp : Env.GE → Env.IE → Env.VE
                 → Source.Expression
@@ -118,17 +162,26 @@ mutual
       ---------------------------------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.abs ps e ⇝ Target.Expression.abs ps' e' ፥ _ ▪
 
+      /--
+      In order to check the function application `e₁ e₂` we need to check that `e₁` has
+      a function type `τ' → τ` and that `e₂` has type `τ'`.
+      -/
     | APP :
       《exp》ge,ie,ve ⊢ e₁ ⇝ e₁' ፥ Prelude.mk_funt τ' τ ▪ →
       《exp》ge,ie,ve ⊢ e₂ ⇝ e₂' ፥ τ' ▪ →
       ----------------------------------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.app e₁ e₂ ⇝ Target.Expression.app e₁' e₂' ፥ τ ▪
 
+      /--
+      In order to check the expression `let bs in e` we have to first check the bindings `bs`
+      and compute the extended environment `ve_extended` before checking `e`.
+      -/
     | LET :
-      《binds》ge,ie,ve ⊢ source_binds ⇝ bs ፥ ve_binds ▪ →
-      《exp》ge,ie,Env.oplusarrow ve ve_binds ⊢ e ⇝ e' ፥ τ ▪ →
-      ---------------------------------------------------------------------------------------------------
-      《exp》ge,ie,ve ⊢ Source.Expression.let_bind source_binds e ⇝ Target.Expression.let_bind bs e' ፥ τ ▪
+      《binds》ge,ie,ve ⊢ bs ⇝ bs' ፥ ve_binds ▪ →
+      ve_extended = Env.oplusarrow ve ve_binds →
+      《exp》ge,ie,ve_extended ⊢ e ⇝ e' ፥ τ ▪ →
+      -------------------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.let_bind bs e ⇝ Target.Expression.let_bind bs' e' ፥ τ ▪
 
     | CASE :
       《exp》ge,ie,ve ⊢ e ⇝ e' ፥ τ' ▪ →
@@ -136,6 +189,12 @@ mutual
       -----------------------------------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.case e ms ⇝ Target.Expression.case e' ms' ፥ τ ▪
 
+      /--
+      When typechecking a list comprehension `[e | quals]` we first check the qualifiers `quals` in order
+      to obtain the list of variables `ve_quals` they bring into scope.
+      We then typecheck `e` in the context extended with  `ve_quals` to obtain the type `τ`.
+      The entire list comprehension then has type `[τ]`.
+      -/
     | LIST_COMP :
       《quals》ge,ie,ve                         ⊢ quals_source ⇝ quals_target ፥ ve_quals ▪ →
       《exp》  ge,ie,Env.oplusarrow ve ve_quals ⊢ e_source     ⇝ e_target     ፥ τ ▪ →
@@ -159,28 +218,44 @@ mutual
       -----------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.recConstr _ _ ⇝ _ ፥ _ ▪
 
+      /--
+      For the arithmetic sequence `[e₁,e₂..e₃]` we check that `e₁`, `e₂` and `e₃` have some common type `τ`.
+      We then generate a dictionary `ed` for `Enum τ` and elaborate the expression to `enumFromThenTo τ ed e₁ e₂ e₃`.
+      -/
     | ENUM_FROM_THEN_TO :
       《exp》ge,ie,ve ⊢ e₁ ⇝ e₁' ፥ τ ▪ →
       《exp》ge,ie,ve ⊢ e₂ ⇝ e₂' ፥ τ ▪ →
       《exp》ge,ie,ve ⊢ e₃ ⇝ e₃' ፥ τ ▪ →
-      《dict》     ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
-      ------------------------------------------------------------------------------------------------------------------------------
-      《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ (some e₂) (some e₃) ⇝ apply_enumFromThenTo τ e e₁' e₂' e₃' ፥ Prelude.mk_list τ ▪
+      《dict》     ie ⊢ ed ፥ [⟨Prelude.enum, τ⟩] ▪ →
+      -------------------------------------------------------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ (some e₂) (some e₃) ⇝ apply_enumFromThenTo τ ed e₁' e₂' e₃' ፥ Prelude.mk_list τ ▪
 
+      /--
+      For the arithmetic sequence `[e₁..e₂]` we check that `e₁` and `e₂` have some common type `τ`.
+      We then generate a dictionary `ed` for `Enum τ` and elaborate the expression to `enumFromTo τ ed e₁ e₂`.
+      -/
     | ENUM_FROM_TO :
       《exp》ge,ie,ve ⊢ e₁ ⇝ e₁' ፥ τ ▪ →
       《exp》ge,ie,ve ⊢ e₂ ⇝ e₂' ፥ τ ▪ →
-      《dict》     ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
-      ------------------------------------------------------------------------------------------------------------------
-      《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ none (some e₂) ⇝ apply_enumFromTo τ e e₁' e₂' ፥ Prelude.mk_list τ ▪
+      《dict》     ie ⊢ ed ፥ [⟨Prelude.enum, τ⟩] ▪ →
+      -------------------------------------------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ none (some e₂) ⇝ apply_enumFromTo τ ed e₁' e₂' ፥ Prelude.mk_list τ ▪
 
+      /--
+      For the arithmetic sequence `[e₁,e₂..]` we check that `e₁` and `e₂` have some common type `τ`.
+      We then generate a dictionary `ed` for `Enum τ` and elaborate the expression to `enumFromThen τ ed e₁ e₂`.
+      -/
     | ENUM_FROM_THEN :
       《exp》ge,ie,ve ⊢ e₁ ⇝ e₁' ፥ τ ▪ →
       《exp》ge,ie,ve ⊢ e₂ ⇝ e₂' ፥ τ ▪ →
-      《dict》     ie ⊢ e ፥ [⟨Prelude.enum, τ⟩]  ▪ →
-      --------------------------------------------------------------------------------------------------------------------
-      《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ (some e₂) none ⇝ apply_enumFromThen τ e e₁' e₂' ፥ Prelude.mk_list τ ▪
+      《dict》     ie ⊢ ed ፥ [⟨Prelude.enum, τ⟩]  ▪ →
+      ---------------------------------------------------------------------------------------------------------------------
+      《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ (some e₂) none ⇝ apply_enumFromThen τ ed e₁' e₂' ፥ Prelude.mk_list τ ▪
 
+      /--
+      For the arithmetic sequence `[e₁..]` we check that `e₁` has some type `τ`.
+      We then generate a dictionary `ed` for `Enum τ` and elaborate the expression to `enumFrom τ ed e₁`.
+      -/
     | ENUM_FROM :
       《exp》ge,ie,ve ⊢ e₁ ⇝ e₁' ፥ τ ▪ →
       《dict》     ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
@@ -188,16 +263,21 @@ mutual
       《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ none none ⇝ apply_enumFrom τ e e₁' ፥ Prelude.mk_list τ ▪
 
   /--
-  Cp. Fig 41
-  ```text
-  GE, IE, VE ⊢ stmts ⇝ e : τ
-  ```
+  Statements appear within do blocks `do { stmt₁ ; … ; stmtₙ }`.
+
+  The judgement `《stmts》ge,ie,ve ⊢ s ⇝ e ፥ τ` says that in the environment `ge,ie,ve` the source
+  statements `s` can be elaborated to the target expression `e` of (monadic) type `τ`.
+
+  (Defined in Fig. 41 of Faxen)
   -/
   inductive stmts : Env.GE → Env.IE → Env.VE
                   → Source.Statements
                   → Target.Expression
                   → SemTy.TypeS
                   → Prop where
+      /--
+      We typecheck a statement `do {… p <- e ; s}`.
+      -/
     | SBIND :
       《exp》 ge,ie,ve ⊢ e ⇝ e₁ ፥ SemTy.TypeS.App τ τ₁ ▪ →
       《pat》    ge,ie ⊢ p ⇝ p' ፥ veₚ,  τ₁ ▪ →
@@ -206,22 +286,35 @@ mutual
       -----------------------------------------------------------------------------
       《stmts》ge,ie,ve ⊢ Source.Statements.mbind p e s ⇝ _ ፥ SemTy.TypeS.App τ τ₂ ▪
 
+      /--
+      We typecheck a statement `do {… let bs ; s}`.
+      -/
     | SLET :
       《binds》ge,ie,ve ⊢ bs ⇝ bs' ፥ ve_binds ▪ →
       《stmts》ge,ie,Env.oplusarrow ve ve_binds ⊢ s ⇝ e ፥ τ ▪ →
       ----------------------------------------------------------------------------------------
       《stmts》ge,ie,ve ⊢ Source.Statements.lbind bs s ⇝ Target.Expression.let_bind bs' e ፥ τ ▪
 
+      /--
+      We typecheck a statement `do {… e ; s}`.
+      -/
     | STHEN :
       《exp》  ge,ie,ve ⊢ e ⇝ e₁ ፥ SemTy.TypeS.App τ τ₁ ▪ →
       《stmts》ge,ie,ve ⊢ s ⇝ e₂ ፥ SemTy.TypeS.App τ τ₂ ▪ →
       《dict》       ie ⊢ ed ፥ [⟨Prelude.monad, τ⟩] ▪ →
+      e' = apply_sequence τ ed τ₁ τ₂ e₁ e₂ →
       --------------------------------------------------------------------------
-      《stmts》ge,ie,ve ⊢ Source.Statements.seq e s ⇝ _ ፥ SemTy.TypeS.App τ τ₂ ▪
+      《stmts》ge,ie,ve ⊢ Source.Statements.seq e s ⇝ e' ፥ SemTy.TypeS.App τ τ₂ ▪
 
+      /--
+      We typecheck a statement `do {… ; e}`.
+
+      Note that this rule enforces a monad constraint but doesn't use the dictionary in the elaboration.
+      GHC, on the other hand, allows to typecheck expressions like `do { 2 + 2 }` using a pure type like `Int`.
+      -/
     | SRET :
       《exp》ge,ie,ve ⊢ e ⇝ e' ፥ SemTy.TypeS.App τ τ₁ ▪ →
-      《dict》     ie ⊢ _ ፥ [⟨Prelude.monad, τ⟩] ▪ →
+      《dict》     ie ⊢ ed ፥ [⟨Prelude.monad, τ⟩] ▪ →
       -------------------------------------------------------------------
       《stmts》ge,ie,ve ⊢ Source.Statements.last e ⇝ e' ፥ SemTy.TypeS.App τ τ₁ ▪
 
