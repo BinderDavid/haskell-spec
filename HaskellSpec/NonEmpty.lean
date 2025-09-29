@@ -1,6 +1,7 @@
 structure NonEmpty (α : Type) where
   head : α
   tail : List α
+  deriving Repr
 
 instance instMembershipNonEmpty : Membership α (NonEmpty α) where
   mem ys x := (x = ys.head) ∨ x ∈ ys.tail

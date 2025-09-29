@@ -3,10 +3,17 @@ import HaskellSpec.Environments
 import HaskellSpec.SemanticTypes
 
 
+def make_tuple_constructor(n : Nat) : Target.Expression :=
+  Target.Expression.constr (QConstructor.Special (Special_Data_Constructor.Tuple n))
+
 def make_tuple (es : List Target.Expression) : Target.Expression :=
-  sorry
+  let constructor := make_tuple_constructor es.length
+  es.foldl Target.Expression.app constructor
 
-
+def make_type_app (x : QVariable)(τs : List SemTy.TypeS)(e: Target.Expression) : Target.Expression :=
+  match τs with
+  | [] => Target.Expression.app (Target.Expression.var x) e
+  | (τ :: τs) => Target.Expression.app (Target.Expression.typ_app (Target.Expression.var x) (NonEmpty.mk τ τs)) e
 
 set_option quotPrecheck false in
 set_option hygiene false in
@@ -35,9 +42,7 @@ mutual
       (τsForαs : SemTy.VarSubst) → (Env.dom τsForαs) = αs →
       《dict》ie ⊢ e ፥ (SemTy.Substitute.substitute τsForαs θ) ▪ →
       τs = Env.rng τsForαs →
-      e_target = (Target.Expression.app (match τs with
-                                         | [] => Target.Expression.var x
-                                         | (t :: ts)  => Target.Expression.typ_app (Target.Expression.var x) (NonEmpty.mk t ts)) e) →
+      e_target = make_type_app x τs e →
       -------------------------------------------------------------------------------------------------------------------------------
       《dict-single》ie ⊢ e_target ፥ ⟨Γ, τs.foldl SemTy.TypeS.App (SemTy.TypeS.TypeConstructor χ)⟩ ▪
 

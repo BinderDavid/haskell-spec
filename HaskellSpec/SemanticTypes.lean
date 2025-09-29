@@ -16,7 +16,7 @@ namespace SemTy
 inductive Kind : Type where
   | Star : Kind
   | Fun : Kind → Kind → Kind
-  deriving BEq
+  deriving BEq, Repr
 
 def kind_fun_list (kes : List Kind) : Kind := sorry
 
@@ -34,7 +34,7 @@ class HasKind (α : Type) where
 structure SClass_Name : Type where
   name : OClass_Name
   kind : Kind
-  deriving BEq
+  deriving BEq, Repr
 
 instance instHasKindSClass_Name : HasKind SClass_Name where
   get n := n.kind
@@ -46,7 +46,7 @@ instance instHasKindSClass_Name : HasKind SClass_Name where
 -/
 inductive Type_Constructor : Type where
   | Mk : OType_Name → Kind → Type_Constructor
-  deriving BEq
+  deriving BEq, Repr
 
 instance instHasKindType_Constructor : HasKind Type_Constructor where
   get x := match x with
@@ -59,8 +59,8 @@ instance instHasKindType_Constructor : HasKind Type_Constructor where
 -/
 inductive Type_Variable : Type where
   | Mk : Type_Variable → Kind → Type_Variable
+  deriving BEq, Repr
 
-deriving instance BEq for Type_Variable
 instance instHasKindType_Variable : HasKind Type_Variable where
   get x := match x with
            | Type_Variable.Mk _ kind => kind
@@ -76,7 +76,7 @@ inductive TypeS : Type where
   | Variable : Type_Variable → TypeS
   | TypeConstructor : Type_Constructor → TypeS
   | App : TypeS → TypeS → TypeS
-  deriving BEq
+  deriving BEq, Repr
 
 /--
 ```text
@@ -93,7 +93,7 @@ abbrev Context := List (SClass_Name × TypeS)
 -/
 inductive TypeScheme : Type where
   | Forall : List Type_Variable → Context → TypeS → TypeScheme
-  deriving BEq
+  deriving BEq, Repr
 
 /--
 This is written as follows in the paper:
