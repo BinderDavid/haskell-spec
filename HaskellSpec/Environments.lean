@@ -330,10 +330,18 @@ def KE : Type :=
 Cp. section 2.7.7
 -/
 structure SE : Type where
-  cs : Unit
-  ts : Unit
-  ds : Unit
-  vs : Unit
+  cs : List (Class_Name × Module_Name)
+  ts : List (QType_Name × Module_Name)
+  ds : List (Unit × Module_Name)
+  vs : List (Unit × Module_Name)
+
+def class_names_for_module (se: SE)(m : Module_Name) : List Class_Name :=
+  let filtered := se.cs.filter (λ x => x.snd == m)
+  filtered.map (λ x => x.fst)
+
+def type_names_for_module (se: SE)(m : Module_Name) : List QType_Name :=
+  let filtered := se.ts.filter (λ x => x.snd == m)
+  filtered.map (λ x => x.fst)
 
 /--
 ### Global Environment

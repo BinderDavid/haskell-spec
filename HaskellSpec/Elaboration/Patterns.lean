@@ -12,57 +12,32 @@ def unqual_var (var : QVariable) : Variable :=
 
 /- Prelude.== τ ed e -/
 def apply_equals : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression := λ τ ed e =>
-  Target.Expression.app
-    (Target.Expression.app
-      (Target.Expression.typ_app
-        (Target.Expression.var Prelude.equals)
-        (NonEmpty.mk τ []))
-    ed)
-    e
+  let e' := Target.Expression.typ_app (Target.Expression.var Prelude.equals) (NonEmpty.mk τ [])
+  Target.apps e' [ed, e]
 
 /- Prelude!enumFromThenTo τ e e1' e2' e3' -/
 def apply_enumFromThenTo : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression  → Target.Expression → Target.Expression :=
   λ τ e e1' e2' e3' =>
-  Target.Expression.app
-    (Target.Expression.app
-      (Target.Expression.app
-        (Target.Expression.app
-          (Target.Expression.typ_app (Target.Expression.var Prelude.enum_from_then_to) (NonEmpty.mk τ []))
-        e)
-      e1')
-    e2')
-  e3'
+  let e' := Target.Expression.typ_app (Target.Expression.var Prelude.enum_from_then_to) (NonEmpty.mk τ [])
+  Target.apps e' [e, e1', e2', e3']
 
 /- Prelude!enumFromTo τ e e1' e2' -/
 def apply_enumFromTo : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression → Target.Expression :=
   λ τ e e1' e2' =>
-  Target.Expression.app
-    (Target.Expression.app
-      (Target.Expression.app
-        (Target.Expression.typ_app (Target.Expression.var Prelude.enum_from_to) (NonEmpty.mk τ []))
-      e)
-    e1')
-  e2'
+  let e' := Target.Expression.typ_app (Target.Expression.var Prelude.enum_from_to) (NonEmpty.mk τ [])
+  Target.apps e' [e, e1', e2']
 
 /- Prelude!enumFromThen τ e e1' e2' -/
 def apply_enumFromThen : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression → Target.Expression :=
   λ τ e e1' e2' =>
-  Target.Expression.app
-    (Target.Expression.app
-      (Target.Expression.app
-        (Target.Expression.typ_app (Target.Expression.var Prelude.enum_from_then) (NonEmpty.mk τ []))
-      e)
-    e1')
-  e2'
+  let e' := Target.Expression.typ_app (Target.Expression.var Prelude.enum_from_then) (NonEmpty.mk τ [])
+  Target.apps e' [e, e1', e2']
 
 /- Prelude!enumFrom τ e e1' -/
 def apply_enumFrom : SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression :=
   λ τ e e1' =>
-  Target.Expression.app
-    (Target.Expression.app
-      (Target.Expression.typ_app (Target.Expression.var Prelude.enum_from) (NonEmpty.mk τ []))
-    e)
-  e1'
+  let e' := Target.Expression.typ_app (Target.Expression.var Prelude.enum_from) (NonEmpty.mk τ [])
+  Target.apps e' [e, e1']
 
 
 set_option quotPrecheck false in
@@ -111,16 +86,18 @@ mutual
 
     | PCON :
       ge = ⟨ce,te,⟨de₁,de₂⟩⟩ →
-      ⟨K,⟨K,χ,σ⟩⟩ ∈ de₁ →
+      ⟨K,⟨K,χ,SemTy.TypeScheme.Forall αs θ _⟩⟩ ∈ de₁ →
       《pats》ge,ie ⊢ ps ⇝ ps' ፥ ves , τs ▪ →
       《oplus*》⊞{ ves }≡ ve_res ▪ →
-      《dict》ie ⊢ e ፥ _ ▪ →
+      《dict》ie ⊢ e ፥ θ ▪ → -- TODO: subst for datatype contexts
+      τ = SemTy.type_apps (SemTy.TypeS.TypeConstructor χ) τs' →
       ------------------------------------------------------------
-      《pat》ge,ie ⊢ Source.Pattern.constructor c ps ⇝ Target.Pattern.constructor c ps' ፥ ve_res , _ ▪
+      《pat》ge,ie ⊢ Source.Pattern.constructor c ps ⇝ Target.Pattern.constructor c ps' ፥ ve_res , τ ▪
 
     | PLAB :
+      ge = ⟨ce,te,⟨de₁,de₂⟩⟩ →
       -------------------------------
-      《pat》ge,ie ⊢ _ ⇝ _ ፥ _ , _ ▪
+      《pat》ge,ie ⊢ Source.Pattern.constructor_labelled c lps ⇝ Target.Pattern.constructor_labelled c lps' ፥ _ , _ ▪
 
     | PCHAR :
       -------------------------------------------------------------------------------------------------------
@@ -149,4 +126,13 @@ mutual
                  → List Env.VE
                  → List SemTy.TypeS
                  → Prop where
+  | NIL :
+    ----------------------------------
+    《pats》ge,ie ⊢ [] ⇝ [] ፥ [], [] ▪
+
+  | CONS :
+    《pat》ge,ie ⊢ p ⇝ p' ፥ ve, τ ▪ →
+    《pats》ge,ie ⊢ ps ⇝ ps' ፥ ves, τs ▪ →
+    --------------------------------------------------
+    《pats》ge,ie ⊢ p::ps ⇝ p'::ps' ፥ ve::ves, τ::τs ▪
 end

@@ -220,6 +220,9 @@ mutual
     deriving Repr
 end
 
+def apps (e : Expression)(es : List Expression) : Expression :=
+  es.foldl Expression.app e
+
 -- A helper to handle the case of an empty list in a typ_app
 def typ_app_ (e : Expression) (ts : List SemTy.TypeS) : Expression :=
   (Option.elim (fromList ts) e (Target.Expression.typ_app e))
