@@ -15,6 +15,7 @@ import HaskellSpec.Elaboration.Modules
 import HaskellSpec.Elaboration.ImportExport
 import HaskellSpec.Elaboration.Bindings
 import HaskellSpec.Elaboration.Expressions
+import HaskellSpec.Elaboration.Literals
 import HaskellSpec.Elaboration.Dictionary
 import HaskellSpec.Lexer.Columnizer
 import HaskellSpec.Lexer.Haskell.Tokens

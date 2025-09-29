@@ -71,8 +71,8 @@ mutual
   -/
   inductive Pattern : Type where
     | var : Variable → SemTy.TypeScheme →  Pattern
-    | constr_pat : QConstructor → List Pattern → Pattern
-    | constr_fieldPat : QConstructor → List (Variable × Pattern) → Pattern
+    | constructor : QConstructor → List Pattern → Pattern
+    | constructor_labelled : QConstructor → List (Variable × Pattern) → Pattern
     | at : Variable → SemTy.TypeScheme → Pattern → Pattern
     | lazy : Pattern → Pattern
     | wildcard : Pattern

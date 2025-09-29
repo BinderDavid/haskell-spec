@@ -7,56 +7,10 @@ import HaskellSpec.Target.Lang
 import HaskellSpec.SemanticTypes
 import HaskellSpec.Elaboration.Bindings
 import HaskellSpec.Elaboration.Dictionary
+import HaskellSpec.Elaboration.Literals
 import HaskellSpec.NonEmpty
 import HaskellSpec.Prelude
 
-def fromRationalAfterRatio (n d : Int) : Target.Expression :=
-  Target.Expression.app
-   (Target.Expression.var Prelude.fromrational)
-   (Target.Expression.app
-     (Target.Expression.app
-       (Target.Expression.var Prelude.ratio_percent)
-       (Target.Expression.lit (Target.Literal.integer n))
-     )
-     (Target.Expression.lit (Target.Literal.integer d)))
-
-def fromInteger (i : Int) : Target.Expression :=
-  Target.Expression.app
-    (Target.Expression.var Prelude.frominteger)
-    (Target.Expression.lit (Target.Literal.integer i))
-
-set_option quotPrecheck false in
-set_option hygiene false in
-notation  "《literal》" ie "⊢" l "⇝" e "፥" t "▪"=> literal ie l e t
-
-/--
-Cp. Fig 37
-```text
-IE ⊢ literal ⇝ e : τ
-```
--/
-inductive literal : Env.IE
-                  → Source.Literal
-                  → Target.Expression
-                  → SemTy.TypeS
-                  → Prop where
-  | LIT_CHAR :
-    -------------------------------------------------------------------------------------------------------
-    《literal》 ie ⊢ Source.Literal.char c ⇝ Target.Expression.lit (Target.Literal.char c) ፥ Prelude.char ▪
-
-  | LIT_STRING :
-    --------------------------------------------------------------------------------------------------------------------------------------------
-    《literal》 ie ⊢ (Source.Literal.string s) ⇝ (Target.Expression.lit (Target.Literal.string s)) ፥ Prelude.mk_list Prelude.char ▪
-
-  | LIT_INTEGER :
-    《dict》 ie ⊢ fromInteger i ፥ [⟨Prelude.num, τ⟩] ▪ →
-    ---------------------------------------------------------------
-    《literal》 ie ⊢ Source.Literal.integer i ⇝ fromInteger i ፥ τ ▪
-
-  | LIT_FLOAT :
-    《dict》 ie ⊢ fromRationalAfterRatio n d ፥ [⟨Prelude.fractional, τ⟩] ▪ →
-    ----------------------------------------------------------------------------
-    《literal》 ie ⊢ Source.Literal.float n d ⇝ fromRationalAfterRatio n d ፥ τ ▪
 
 def unqual_var (var : QVariable) : Variable :=
   match var with
@@ -152,24 +106,24 @@ inductive pat : Env.GE → Env.IE
 
   | PCHAR :
     -------------------------------------------------------------------------------------------------------
-    《pat》ge,ie ⊢ Source.Pattern.lit (Source.Literal.char c) ⇝ Target.Pattern.char c ፥ [],Prelude.char ▪
+    《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.char c) ⇝ Target.Pattern.char c ፥ [],Prelude.char ▪
 
   | PSTRING :
     ---------------------------------------------------------------------------------------------------------------------------------------
-    《pat》ge,ie ⊢ Source.Pattern.lit (Source.Literal.string s) ⇝ Target.Pattern.string s ፥ [], Prelude.mk_list Prelude.char ▪
+    《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.string s) ⇝ Target.Pattern.string s ፥ [], Prelude.mk_list Prelude.char ▪
 
 
   | PINTEGER :
     《literal》 ie ⊢ (Source.Literal.integer i) ⇝ e ፥ τ ▪  →
     《dict》 ie ⊢ ed ፥ [⟨Prelude.eq, τ⟩] ▪ →
     -----------------------------------------------------------------------------------------------------------------
-    《pat》ge,ie ⊢ Source.Pattern.lit (Source.Literal.integer i) ⇝ Target.Pattern.exp (apply_equals τ ed e) ፥ [], τ ▪
+    《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.integer i) ⇝ Target.Pattern.exp (apply_equals τ ed e) ፥ [], τ ▪
 
   | PFLOAT :
     《literal》 ie ⊢ (Source.Literal.float n d) ⇝ e ፥ τ ▪ →
     《dict》 ie ⊢ ed ፥ [⟨Prelude.eq, τ⟩] ▪ →
     -----------------------------------------------------------------------------------------------------------------
-    《pat》ge,ie ⊢ Source.Pattern.lit (Source.Literal.float n d) ⇝ Target.Pattern.exp (apply_equals τ ed e) ፥ [], τ ▪
+    《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.float n d) ⇝ Target.Pattern.exp (apply_equals τ ed e) ፥ [], τ ▪
 
 set_option quotPrecheck false in
 set_option hygiene false in
