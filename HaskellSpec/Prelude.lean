@@ -106,6 +106,12 @@ def fromrational : QVariable :=
 def equals : QVariable :=
   QVariable.Qualified hs_prelude (Variable.Mk "(==)")
 
+def bind : QVariable :=
+  QVariable.Qualified hs_prelude (Variable.Mk "(>>=)")
+
+def sequence : QVariable :=
+  QVariable.Qualified hs_prelude (Variable.Mk "(>>)")
+
 /-
 ## Names of Constructors
 -/

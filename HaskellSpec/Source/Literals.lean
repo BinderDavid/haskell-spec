@@ -29,7 +29,7 @@ inductive Literal : Type where
     -/
   | integer : Int → Literal
     /--
-    A floating literal.
+    A floating point literal.
     Example: `2.3`
     Floating literals are overloaded and have type `Fractional a => a`.
     -/

@@ -4,25 +4,43 @@ import HaskellSpec.Source.Literals
 namespace Source
 
 /--
-```text
-  p ∈ Pattern       → x
-                    | K p₁ … pₙ      k ≥ 0
-                    | K {fp₁ … fpₙ}  k ≥ 0
-                    | v@p
-                    | ~p
-                    | _
-                    | literal
-  fp ∈ FieldPattern → x = p
-```
-NOTE: n+k patterns have been removed from the formalization.
---/
+### Patterns
+**Note:** `n+k`-patterns are part of Haskell 98 but have been removed from the formalization.
+-/
 inductive Pattern : Type where
+    /--
+    A variable pattern.
+    -/
   | var : QVariable → Pattern
-  | constr_pat : QConstructor → List Pattern → Pattern
-  | constr_fieldPat : QConstructor → List (Variable × Pattern) → Pattern
-  | at : Variable → Pattern → Pattern
+    /--
+    A constructor pattern.
+    Example: `Student name id`
+    -/
+  | constructor : QConstructor → List Pattern → Pattern
+    /--
+    A labelled constructor pattern.
+    Example: `Student { name = name, id = id }`
+    -/
+  | constructor_labelled : QConstructor → List (Variable × Pattern) → Pattern
+    /--
+    An as-pattern.
+    Example: `s @ Student name id`
+    -/
+  | as : QVariable → Pattern → Pattern
+    /--
+    A lazy pattern.
+    Example: `~p`
+    -/
   | lazy : Pattern → Pattern
+    /--
+    A wildcard pattern.
+    Example: `_`
+    -/
   | wildcard : Pattern
-  | lit : Literal → Pattern
+    /--
+    A literal pattern.
+    Examples: `5`, `"hello world"`, `'c'`
+    -/
+  | literal : Literal → Pattern
 
 end Source

@@ -71,9 +71,9 @@ mutual
   -/
   inductive Pattern : Type where
     | var : Variable → SemTy.TypeScheme →  Pattern
-    | constr_pat : QConstructor → List Pattern → Pattern
-    | constr_fieldPat : QConstructor → List (Variable × Pattern) → Pattern
-    | at : Variable → SemTy.TypeScheme → Pattern → Pattern
+    | constructor : QConstructor → List Pattern → Pattern
+    | constructor_labelled : QConstructor → List (Variable × Pattern) → Pattern
+    | as : QVariable → SemTy.TypeScheme → Pattern → Pattern
     | lazy : Pattern → Pattern
     | wildcard : Pattern
     | exp : Expression → Pattern
@@ -220,6 +220,9 @@ mutual
     deriving Repr
 end
 
+def apps (e : Expression)(es : List Expression) : Expression :=
+  es.foldl Expression.app e
+
 -- A helper to handle the case of an empty list in a typ_app
 def typ_app_ (e : Expression) (ts : List SemTy.TypeS) : Expression :=
   (Option.elim (fromList ts) e (Target.Expression.typ_app e))
@@ -227,25 +230,22 @@ def typ_app_ (e : Expression) (ts : List SemTy.TypeS) : Expression :=
 /--
 ```text
 instDecl ∈ InstanceDecl → instance cx => C t where bind₁; …; bindₙ    n ≥ 0
-```
--/
-inductive InstanceDecl : Type where
-  | instDecl : Context → Class_Name → Type_Expression → List Binding → InstanceDecl
-  deriving Repr
-
-/--
-```text
 instDecls ∈ InstanceDecls → instDecl₁; …; instDeclₙ   n ≥ 0
 ```
 -/
-inductive InstanceDecls : Type where
-  | instDecls : List InstanceDecl → InstanceDecls
+structure InstanceDecl : Type where
+  context : Context
+  className : Class_Name
+  instance_head : TypeExpression
+  binds : List Binding
   deriving Repr
+
 
 /--
 ```text
 conDecl ∈ ConstructorDecl → J t₁ … tₙ                 k ≥ 0
                           | J { v₁ ∷ t₁ … vₙ ∷ tₙ }   k ≥ 0
+conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
 ```
 -/
 inductive ConstructorDecl : Type where
@@ -255,31 +255,13 @@ inductive ConstructorDecl : Type where
 
 /--
 ```text
-conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
-```
--/
-inductive ConstructorDecls : Type where
-    | conDecls : NonEmpty ConstructorDecl → ConstructorDecls
-    deriving Repr
-
-/--
-```text
 sig ∈ Signature → v :: cx => t
+sigs ∈ Signatures → sig₁; …; sigₙ   n ≥ 0
 ```
 -/
 inductive Signature : Type where
   | sig : QVariable → Context → TypeExpression → Signature
   deriving Repr
-
-/--
-```text
-sigs ∈ Signatures → sig₁; …; sigₙ   n ≥ 0
-```
--/
-inductive Signatures : Type where
-  | sigs : List Signature → Signatures
-  deriving Repr
-
 
 /--
 ```text
@@ -298,13 +280,13 @@ inductive ClassOrType : Type where
       Context
     → Type_Name
     → List Type_Variable
-    → ConstructorDecls
+    → NonEmpty ConstructorDecl
     → ClassOrType
   | ct_class :
       Context
     → Class_Name
     → Type_Variable
-    → Signatures
+    → List Signature
     → List Binding
     → ClassOrType
   deriving Repr
@@ -327,7 +309,7 @@ body ∈ Module body → ctDecls; instDecls; binds
 -/
 structure ModuleBody : Type where
   ctDecls : ClassesAndTypes
-  instDecls : InstanceDecls
+  instDecls : List InstanceDecl
   binds : Binds
   deriving Repr
 
@@ -348,20 +330,12 @@ inductive TypeDeclaration : Type where
 /--
 ```text
 typeDecls ∈ TypeDeclarations → typeDecl₁; …; typeDeclₙ    n ≥ 0
-```
--/
-inductive TypeDeclarations : Type where
-  | typeDecls : List TypeDeclaration -> TypeDeclarations
-  deriving Repr
-
-/--
-```text
 mod ∈ Module → module M where typeDecls; binds
 ```
 -/
 structure Module : Type where
   name : Module_Name -- Use QModule:Name in the future?
-  decls : List TypeDeclarations
+  decls : List TypeDeclaration
   deriving Repr
 
 end Target

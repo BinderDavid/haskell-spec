@@ -79,6 +79,12 @@ inductive TypeS : Type where
   deriving BEq, Repr
 
 /--
+Builds the type `τ τ₁ … τₙ`
+-/
+def type_apps(τ : TypeS)(τs : List TypeS) : TypeS :=
+  τs.foldl TypeS.App τ
+
+/--
 ```text
 θ ∈ Context → (Γ₁ τ₁, … , Γₙ τₙ)
 ```

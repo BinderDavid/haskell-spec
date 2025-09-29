@@ -73,17 +73,20 @@ Cp. Fig 12
 FE, SE ⊢ ent : FE
 ```
 -/
-inductive Export : Env.FE → Env.SE
+inductive Export : Env.FE
+                 → Env.SE
                  → Source.Entity
                  → Env.FE
                  → Prop where
   | EXPORT_MODULE :
-    -- Cs = {C | C : M ∈ CS} →
-    -- Ts = {T | T : M ∈ TS} →
+    cs = Env.class_names_for_module se m →
+    ts = Env.type_names_for_module se m →
+    xs = _ → -- xs = {x | x : M ∈ VS} ∪ {x | x : M ∈ DS} →
     -- Ks = {K | K : M ∈ KS} →
-    -- xs = {x | x : M ∈ VS} ∪ {x | x : M ∈ DS} →
-    -- fe = … →
-    Export ⟨ce, te, de, ie, ve⟩ _ (Source.Entity.module m) fe
+
+    fe = Env.FE.mk (Env.restrict ce _) ⟨(Env.restrict te₁ _),_⟩ _ ie (Env.restrict ve xs) →
+    ---------------------------------------------------------
+    Export ⟨ce, ⟨te₁,te₂⟩, de, ie, ve⟩ se (Source.Entity.module m) fe
 
   | EXPORT_ENTITY :
     Entity ⟨ce, te, de, ve⟩ ent ⟨ce', te', de', ve'⟩ →
