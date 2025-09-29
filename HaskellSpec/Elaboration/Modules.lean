@@ -377,13 +377,13 @@ GE, IE, VE ⊢ instDecls ⇝ binds : IE
 -/
 inductive instDecls : Env.GE → Env.IE → Env.VE
                     → Source.InstanceDecls
-                    → Target.InstanceDecls
+                    → List Target.InstanceDecl
                     → Env.IE
                     → Prop where
   | INST_DECLS :
     Forall3 inst_decls bs ies (λ instDeclᵢ bindᵢ ieᵢ => 《instdecl》ge,ie,ve ⊢ instDeclᵢ ⇝ bindᵢ ፥ ieᵢ ▪) →
     ----------------------------------------------------------------------------------------------------------
-    《instdecls》ge,ie,ve ⊢ inst_decls ⇝ (Target.InstanceDecls.instDecls bs) ፥ (ies.foldl List.append []) ▪
+    《instdecls》ge,ie,ve ⊢ inst_decls ⇝ bs ፥ (ies.foldl List.append []) ▪
 
 
 set_option quotPrecheck false in
