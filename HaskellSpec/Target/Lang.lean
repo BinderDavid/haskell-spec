@@ -19,6 +19,7 @@ inductive Literal : Type where
   | char : Char → Literal
   | string : String → Literal
   | integer : Int → Literal
+  deriving Repr
 
 
 /--
@@ -32,6 +33,7 @@ inductive TypeExpression : Type where
   | var      : Type_Variable → TypeExpression
   | typename : Type_Name → TypeExpression
   | app      : TypeExpression → TypeExpression → TypeExpression
+  deriving Repr
 
 /--
 ```text
@@ -42,6 +44,7 @@ structure ClassAssertion : Type where
   name : Class_Name
   var : Type_Variable
   args : List TypeExpression
+  deriving Repr
 
 /--
 ```text
@@ -50,6 +53,7 @@ cx ∈ Context → (class₁,...,classₖ)
 ```
 -/
 def Context : Type := List ClassAssertion
+  deriving Repr
 
 mutual
   /--
@@ -75,6 +79,7 @@ mutual
     | exp : Expression → Pattern
     | char : Char → Pattern -- Seems to be omitted in Faxen?
     | string : String → Pattern -- Seems to be omitted in Faxen?
+    deriving Repr
 
   /--
   ```text
@@ -85,6 +90,7 @@ mutual
   inductive Binds : Type where
     | recursive : List Binding → Binds
     | non_recursive : List Binding → Binds
+    deriving Repr
 
   /--
   ```text
@@ -95,6 +101,7 @@ mutual
   inductive Binding : Type where
     | bind_match : QVariable → NonEmpty Match → Binding
     | bind_pat : Pattern → GuardedExprs → Binding
+    deriving Repr
 
   /--
   ```text
@@ -104,6 +111,7 @@ mutual
   structure Match : Type where
     patterns : NonEmpty Pattern
     gdes : GuardedExprs
+    deriving Repr
 
   /--
   ```text
@@ -113,6 +121,7 @@ mutual
   structure GuardedExprs : Type where
     gdes : NonEmpty GuardedExp
     binds : Binds
+    deriving Repr
 
 
   /--
@@ -123,6 +132,7 @@ mutual
   structure GuardedExp : Type where
     guard : Expression
     body : Expression
+    deriving Repr
 
   /--
   ```text
@@ -153,6 +163,7 @@ mutual
     | recConstr : Expression → List FieldBinding → Expression
     | typ_app : Expression → NonEmpty SemTy.TypeS → Expression
     | typ_abs : NonEmpty Type_Variable → Expression → Expression
+    deriving Repr
 
   /--
   ```text
@@ -182,6 +193,7 @@ mutual
       -/
     | seq : Expression → Statements → Statements
     | last : Expression → Statements
+    deriving Repr
 
   /--
   ```text
@@ -196,6 +208,7 @@ mutual
     | lbind : Binds → Qualifiers → Qualifiers
     | guard : Expression → Qualifiers → Qualifiers
     | empty : Qualifiers
+    deriving Repr
 
   /--
   ```text
@@ -204,6 +217,7 @@ mutual
   -/
   inductive FieldBinding : Type where
     | fb_bind : QVariable → Expression → FieldBinding
+    deriving Repr
 end
 
 -- A helper to handle the case of an empty list in a typ_app
@@ -217,6 +231,7 @@ instDecl ∈ InstanceDecl → instance cx => C t where bind₁; …; bindₙ    
 -/
 inductive InstanceDecl : Type where
   | instDecl : Context → Class_Name → Type_Expression → List Binding → InstanceDecl
+  deriving Repr
 
 /--
 ```text
@@ -225,6 +240,7 @@ instDecls ∈ InstanceDecls → instDecl₁; …; instDeclₙ   n ≥ 0
 -/
 inductive InstanceDecls : Type where
   | instDecls : List InstanceDecl → InstanceDecls
+  deriving Repr
 
 /--
 ```text
@@ -235,6 +251,7 @@ conDecl ∈ ConstructorDecl → J t₁ … tₙ                 k ≥ 0
 inductive ConstructorDecl : Type where
   | poscon: Constructor → List TypeExpression → ConstructorDecl
   | labcon: Constructor → List (QVariable × TypeExpression) → ConstructorDecl
+  deriving Repr
 
 /--
 ```text
@@ -243,6 +260,7 @@ conDecls ∈ ConstructorDecls → conDecl₁ | … | conDeclₙ   n ≥ 1
 -/
 inductive ConstructorDecls : Type where
     | conDecls : NonEmpty ConstructorDecl → ConstructorDecls
+    deriving Repr
 
 /--
 ```text
@@ -251,6 +269,7 @@ sig ∈ Signature → v :: cx => t
 -/
 inductive Signature : Type where
   | sig : QVariable → Context → TypeExpression → Signature
+  deriving Repr
 
 /--
 ```text
@@ -259,6 +278,7 @@ sigs ∈ Signatures → sig₁; …; sigₙ   n ≥ 0
 -/
 inductive Signatures : Type where
   | sigs : List Signature → Signatures
+  deriving Repr
 
 
 /--
@@ -287,6 +307,7 @@ inductive ClassOrType : Type where
     → Signatures
     → List Binding
     → ClassOrType
+  deriving Repr
 
 /--
 ```text
@@ -297,6 +318,7 @@ ctDecls ∈ Classes and types → [ctDecl₁;...;ctDeclₙ then ctDecls]
 inductive ClassesAndTypes : Type where
   | empty
   | decls : NonEmpty ClassOrType → ClassesAndTypes → ClassesAndTypes
+  deriving Repr
 
 /--
 ```text
@@ -307,6 +329,7 @@ structure ModuleBody : Type where
   ctDecls : ClassesAndTypes
   instDecls : InstanceDecls
   binds : Binds
+  deriving Repr
 
 /--
 ```text
@@ -320,6 +343,7 @@ inductive TypeDeclaration : Type where
       -- List Alphas ->
       NonEmpty ConstructorDecl ->
       TypeDeclaration
+  deriving Repr
 
 /--
 ```text
@@ -328,6 +352,7 @@ typeDecls ∈ TypeDeclarations → typeDecl₁; …; typeDeclₙ    n ≥ 0
 -/
 inductive TypeDeclarations : Type where
   | typeDecls : List TypeDeclaration -> TypeDeclarations
+  deriving Repr
 
 /--
 ```text
@@ -337,5 +362,6 @@ mod ∈ Module → module M where typeDecls; binds
 structure Module : Type where
   name : Module_Name -- Use QModule:Name in the future?
   decls : List TypeDeclarations
+  deriving Repr
 
 end Target
