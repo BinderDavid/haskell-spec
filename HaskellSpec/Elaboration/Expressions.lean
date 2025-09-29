@@ -273,10 +273,10 @@ mutual
                    → SemTy.TypeS
                    → Prop where
     | MATCH :
-      Forall3NE pats pats' ves (λ p p' ve' => 《pat》ge,ie ⊢ p ⇝ p' ፥ ve',τ ▪) →
+      Forall3NE patts patts' ves (λ p p' ve' => 《pat》ge,ie ⊢ p ⇝ p' ፥ ve',τ ▪) →
       《gdes》ge,ie,_  ⊢ gs ⇝ gs' ፥ τ ▪ →
       -----------------------------------------------------------------------------
-      《match》ge,ie,ve ⊢ Source.Match.mk pats gs ⇝ Target.Match.mk pats' gs' ፥ _ ▪
+      《match》ge,ie,ve ⊢ Source.Match.mk patts gs ⇝ Target.Match.mk patts' gs' ፥ _ ▪
 
   /--
   Cp. Fig 34

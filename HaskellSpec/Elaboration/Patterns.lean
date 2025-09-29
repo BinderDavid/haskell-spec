@@ -69,63 +69,84 @@ set_option quotPrecheck false in
 set_option hygiene false in
 notation  "《pat》" ge "," ie "⊢" s "⇝" t "፥" ve "," τ "▪" => pat ge ie s t ve τ
 
-/--
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《pats》" ge "," ie "⊢" ss "⇝" ts "፥" ve "," τ "▪" => pats ge ie ss ts ve τ
+
+/-
 Cp. Fig 43. 44.
 ```
 GE, IE ⊢ p ⇝ p : VE, τ
 ```
 -/
-inductive pat : Env.GE → Env.IE
-              → Source.Pattern
-              → Target.Pattern
-              → Env.VE
-              → SemTy.TypeS
-              → Prop where
-  | PVAR :
-    σ = (SemTy.TypeScheme.Forall [] [] τ) →
-    -----------------------------------------------------------------------------------------------------------------
-    《pat》ge,ie ⊢ Source.Pattern.var x ⇝ Target.Pattern.var (unqual_var x) σ ፥ [(x, Env.VE_Item.Ordinary x σ)] , τ ▪
 
-  | PAS :
-    《pat》ge,ie ⊢ p ⇝ p' ፥ veₚ , τ ▪ →
-    σ = SemTy.TypeScheme.Forall [] [] τ →
-    《oplus》veₚ ⊞ [⟨v,Env.VE_Item.Ordinary v σ⟩] ≡ ve_res ▪ →
-    -----------
-    《pat》ge,ie ⊢ Source.Pattern.as v p ⇝ Target.Pattern.as v σ p' ፥ ve_res , τ ▪
+mutual
+  inductive pat : Env.GE
+                → Env.IE
+                → Source.Pattern
+                → Target.Pattern
+                → Env.VE
+                → SemTy.TypeS
+                → Prop where
+    | PVAR :
+      σ = (SemTy.TypeScheme.Forall [] [] τ) →
+      -----------------------------------------------------------------------------------------------------------------
+      《pat》ge,ie ⊢ Source.Pattern.var x ⇝ Target.Pattern.var (unqual_var x) σ ፥ [(x, Env.VE_Item.Ordinary x σ)] , τ ▪
 
-  | PIRR :
-    《pat》ge,ie ⊢ p₁ ⇝ p₂ ፥ ve, τ ▪ →
-    -----------------------------------------------------------------------
-    《pat》ge,ie ⊢ Source.Pattern.lazy p₁ ⇝ Target.Pattern.lazy p₂ ፥ ve, τ ▪
+    | PAS :
+      《pat》ge,ie ⊢ p ⇝ p' ፥ veₚ , τ ▪ →
+      σ = SemTy.TypeScheme.Forall [] [] τ →
+      《oplus》veₚ ⊞ [⟨v,Env.VE_Item.Ordinary v σ⟩] ≡ ve_res ▪ →
+      -----------
+      《pat》ge,ie ⊢ Source.Pattern.as v p ⇝ Target.Pattern.as v σ p' ፥ ve_res , τ ▪
 
-  | PWILD :
-    --------------------------------------------------------------
-    《pat》ge,ie ⊢ Source.Pattern.wildcard ⇝ Target.Pattern.wildcard ፥ [], τ ▪
+    | PIRR :
+      《pat》ge,ie ⊢ p₁ ⇝ p₂ ፥ ve, τ ▪ →
+      -----------------------------------------------------------------------
+      《pat》ge,ie ⊢ Source.Pattern.lazy p₁ ⇝ Target.Pattern.lazy p₂ ፥ ve, τ ▪
 
-  | PCON :
-    -------------------------------
-    《pat》ge,ie ⊢ _ ⇝ _ ፥ _ , _ ▪
+    | PWILD :
+      --------------------------------------------------------------
+      《pat》ge,ie ⊢ Source.Pattern.wildcard ⇝ Target.Pattern.wildcard ፥ [], τ ▪
 
-  | PLAB :
-    -------------------------------
-    《pat》ge,ie ⊢ _ ⇝ _ ፥ _ , _ ▪
+    | PCON :
+      ge = ⟨ce,te,⟨de₁,de₂⟩⟩ →
+      ⟨K,⟨K,χ,σ⟩⟩ ∈ de₁ →
+      《pats》ge,ie ⊢ ps ⇝ ps' ፥ ves , τs ▪ →
+      《oplus*》⊞{ ves }≡ ve_res ▪ →
+      《dict》ie ⊢ e ፥ _ ▪ →
+      ------------------------------------------------------------
+      《pat》ge,ie ⊢ Source.Pattern.constructor c ps ⇝ Target.Pattern.constructor c ps' ፥ ve_res , _ ▪
 
-  | PCHAR :
-    -------------------------------------------------------------------------------------------------------
-    《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.char c) ⇝ Target.Pattern.char c ፥ [],Prelude.char ▪
+    | PLAB :
+      -------------------------------
+      《pat》ge,ie ⊢ _ ⇝ _ ፥ _ , _ ▪
 
-  | PSTRING :
-    ---------------------------------------------------------------------------------------------------------------------------------------
-    《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.string s) ⇝ Target.Pattern.string s ፥ [], Prelude.mk_list Prelude.char ▪
+    | PCHAR :
+      -------------------------------------------------------------------------------------------------------
+      《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.char c) ⇝ Target.Pattern.char c ፥ [],Prelude.char ▪
 
-  | PINTEGER :
-    《literal》 ie ⊢ (Source.Literal.integer i) ⇝ e ፥ τ ▪  →
-    《dict》 ie ⊢ ed ፥ [⟨Prelude.eq, τ⟩] ▪ →
-    -----------------------------------------------------------------------------------------------------------------
-    《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.integer i) ⇝ Target.Pattern.exp (apply_equals τ ed e) ፥ [], τ ▪
+    | PSTRING :
+      ---------------------------------------------------------------------------------------------------------------------------------------
+      《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.string s) ⇝ Target.Pattern.string s ፥ [], Prelude.mk_list Prelude.char ▪
 
-  | PFLOAT :
-    《literal》 ie ⊢ (Source.Literal.float n d) ⇝ e ፥ τ ▪ →
-    《dict》 ie ⊢ ed ፥ [⟨Prelude.eq, τ⟩] ▪ →
-    -----------------------------------------------------------------------------------------------------------------
-    《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.float n d) ⇝ Target.Pattern.exp (apply_equals τ ed e) ፥ [], τ ▪
+    | PINTEGER :
+      《literal》 ie ⊢ (Source.Literal.integer i) ⇝ e ፥ τ ▪  →
+      《dict》 ie ⊢ ed ፥ [⟨Prelude.eq, τ⟩] ▪ →
+      -----------------------------------------------------------------------------------------------------------------
+      《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.integer i) ⇝ Target.Pattern.exp (apply_equals τ ed e) ፥ [], τ ▪
+
+    | PFLOAT :
+      《literal》 ie ⊢ (Source.Literal.float n d) ⇝ e ፥ τ ▪ →
+      《dict》 ie ⊢ ed ፥ [⟨Prelude.eq, τ⟩] ▪ →
+      -----------------------------------------------------------------------------------------------------------------
+      《pat》ge,ie ⊢ Source.Pattern.literal (Source.Literal.float n d) ⇝ Target.Pattern.exp (apply_equals τ ed e) ፥ [], τ ▪
+
+  inductive pats : Env.GE
+                 → Env.IE
+                 → List Source.Pattern
+                 → List Target.Pattern
+                 → List Env.VE
+                 → List SemTy.TypeS
+                 → Prop where
+end
