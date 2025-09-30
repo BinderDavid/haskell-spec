@@ -231,7 +231,11 @@ def CE_init : CE := []
 ### Update Environment
 -/
 
-abbrev UE : Type := Env  QVariable SemTy.TypeS
+abbrev UE : Type := Env QVariable SemTy.TypeS
+
+instance instSubstituteUE : SemTy.Substitute UE where
+  substitute := sorry
+
 
 /-
 ### Label Environment

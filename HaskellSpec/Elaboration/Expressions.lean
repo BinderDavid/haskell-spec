@@ -12,6 +12,31 @@ import HaskellSpec.Elaboration.Patterns
 import HaskellSpec.NonEmpty
 import HaskellSpec.Prelude
 
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《lcon》" ie "," φ "⊢" τ_old "," ue "," τ_new "▪" => lcon ie φ τ_old ue τ_new
+
+/--
+Cp. Fig 22
+```text
+IE, φ ⊢ τ_old, UE, τ_new
+```
+-/
+inductive lcon : Env.IE
+               → Env.LabelInfo
+               → SemTy.TypeS
+               → Env.UE
+               → SemTy.TypeS
+               → Prop where
+  | LCON :
+    Env.dom τsForαs = αs →
+    Env.dom τ'sForαs = αs →
+     SemTy.Substitute.substitute τsForαs ue = Env.oplusarrow (SemTy.Substitute.substitute τ'sForαs ue) ue' →
+    《dict》ie ⊢ _ ፥ SemTy.Substitute.substitute τsForαs θ  ▪ →
+    《dict》ie ⊢ _ ፥ SemTy.Substitute.substitute τ'sForαs θ ▪ →
+    ------------------------------------------------------
+    《lcon》ie , Env.LabelInfo.mk αs θ ue τ ⊢ SemTy.Substitute.substitute τsForαs τ , ue' , SemTy.Substitute.substitute τ'sForαs τ ▪
+
 /- Prelude!(>>) τ ed ed τ₁ τ₂ e₁ e₂ -/
 def apply_sequence : SemTy.TypeS → Target.Expression → SemTy.TypeS → SemTy.TypeS → Target.Expression → Target.Expression → Target.Expression :=
   λ τ ed τ₁ τ₂ e₁ e₂ =>
@@ -22,7 +47,11 @@ def apply_sequence : SemTy.TypeS → Target.Expression → SemTy.TypeS → SemTy
 
 set_option quotPrecheck false in
 set_option hygiene false in
-notation  "《exp》" ge "," ie "," ve "⊢" e "⇝" e' "፥" t "▪" => exp ge ie ve e e' t
+notation  "《exp》" ge "," ie "," ve "⊢" e "⇝" e' "፥" τ "▪" => exp ge ie ve e e' τ
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《exps》" ge "," ie "," ve "⊢" es "⇝" es' "፥" τs "▪" => exps ge ie ve es es' τs
 
 set_option quotPrecheck false in
 set_option hygiene false in
@@ -245,9 +274,17 @@ mutual
       ---------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.recUpd _ _ ⇝  _ ፥ _ ▪
 
+      /--
+      A constructor with labelled arguments `K { lab₁ = e₁, … , labₙ = eₙ }`
+      -/
     | LABCON :
+      ge = ⟨ce,te,⟨de₁,de₂⟩⟩ →
+      《exps》ge,ie,ve ⊢ bs.map (λ x => x.snd) ⇝ es' ፥ τs ▪ →
+      ⟨K,⟨K,χ,σ⟩⟩ ∈ de₁ →
+      《lcon》ie,φ ⊢ _,_,τ ▪ →
+      ∀ lab ∈ bs.map (λ x => x.fst), ⟨lab,⟨lab,_,le⟩⟩ ∈ de₂ →
       -----------------------------------------------------------
-      《exp》ge,ie,ve ⊢ Source.Expression.recConstr _ _ ⇝ _ ፥ _ ▪
+      《exp》ge,ie,ve ⊢ Source.Expression.recConstr K bs ⇝ Target.Expression.recConstr _ _ ፥ _ ▪
 
       /--
       For the arithmetic sequence `[e₁,e₂..e₃]` we check that `e₁`, `e₂` and `e₃` have some common type `τ`.
@@ -292,6 +329,12 @@ mutual
       《dict》     ie ⊢ e ፥ [⟨Prelude.enum, τ⟩] ▪ →
       --------------------------------------------------------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.listRange e₁ none none ⇝ apply_enumFrom τ e e₁' ፥ Prelude.mk_list τ ▪
+
+  inductive exps : Env.GE → Env.IE → Env.VE
+                 → List Source.Expression
+                 → List Target.Expression
+                 → List SemTy.TypeS
+                 → Prop where
 
   /--
   Statements appear within do blocks `do { stmt₁ ; … ; stmtₙ }`.
