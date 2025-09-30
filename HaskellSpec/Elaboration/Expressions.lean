@@ -270,9 +270,16 @@ mutual
       ------------------------------------------------------
       《exp》ge,ie,ve ⊢ Source.Expression.constr K ⇝ e_target ፥ SemTy.Substitute.substitute τsForαs τ ▪
 
+      /--
+      A record update `e { lab₁ = e₁, … , labₙ = eₙ }`
+      -/
     | UPD :
+      ge = ⟨ce,te,⟨de₁,de₂⟩⟩ →
+      《exp》ge,ie,ve ⊢ e ⇝ e' ፥ τ_old ▪ →
+      《exps》ge,ie,ve ⊢ ups.map (λ x => x.snd) ⇝ es' ፥ τs ▪ →
+      《lcon》ie,_ ⊢ τ_old,_,τ_new ▪ →
       ---------------------------------------------------------
-      《exp》ge,ie,ve ⊢ Source.Expression.recUpd _ _ ⇝  _ ፥ _ ▪
+      《exp》ge,ie,ve ⊢ Source.Expression.recUpd e ups ⇝  Target.Expression.recUpd e' _ ፥ τ_new ▪
 
       /--
       A constructor with labelled arguments `K { lab₁ = e₁, … , labₙ = eₙ }`
