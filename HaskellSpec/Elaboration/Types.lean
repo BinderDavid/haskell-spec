@@ -117,5 +117,6 @@ inductive sigs : Env.GE
   | SIGS_CONS :
     《sig》 ge ⊢ s  ፥ ve ▪ →
     《sigs》ge ⊢ ss ፥ ves ▪ →
-    -------------------------------------------
-    《sigs》ge ⊢ s :: ss ፥ List.append ve ves ▪
+    《oplus》ve ⊞ ves ≡ ve_res ▪ →
+    ------------------------------
+    《sigs》ge ⊢ s :: ss ፥ ve_res ▪
