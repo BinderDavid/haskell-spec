@@ -161,46 +161,7 @@ inductive condecl : Env.TE
     《condecl》te,θ,τ ⊢ Source.ConstructorDecl.labcon J _ ⇝ Target.ConstructorDecl.labcon J _ ፥ de,ve,le,θ' ▪
 
 
-set_option quotPrecheck false in
-set_option hygiene false in
-notation  "《class》" ce "," te "," h "⊢" cls "፥" Γ "," τ "▪" => classR ce te h cls Γ τ
 
-/--
-Cp. Fig 25
-```text
-CE, TE, h ⊢ class : Γ τ
-```
--/
-inductive classR : Env.CE → Env.TE → Int
-                 → Source.ClassAssertion
-                 → SemTy.SClass_Name
-                 → SemTy.TypeS
-                 → Prop where
-  | CLASS :
-    (_, Env.CEEntry.mk Γ h' x C ie) ∈ ce →
-    h' < h →
-    《type》te, h'' ⊢ List.foldl Source.TypeExpression.app (Source.TypeExpression.var u) ts ፥ τ ▪ →
-    ------------------------------------------------------------------------------------------------
-    《class》ce,te,h ⊢ Source.ClassAssertion.mk C u ts ፥ Γ , τ ▪
-
-set_option quotPrecheck false in
-set_option hygiene false in
-notation  "《context》" ce "," te "," h "⊢" cx "፥" θ "▪" => context ce te h cx θ
-
-/--
-Cp. Fig 25
-```text
-CE, TE, h ⊢ cx : θ
-```
--/
-inductive context : Env.CE → Env.TE → Int
-                  → Source.Context
-                  → SemTy.Context
-                  → Prop where
-  | CONTEXT :
-    Forall3 class_assertions Γs τs (λ classᵢ Γᵢ τᵢ => 《class》ce,te,h ⊢ classᵢ ፥ Γᵢ ,τᵢ ▪) →
-    -----------------------------------------------------------------------------------------
-    《context》ce,te,h ⊢ class_assertions ፥ _ ▪
 
 set_option quotPrecheck false in
 set_option hygiene false in

@@ -3,6 +3,7 @@ import HaskellSpec.Source.Module
 import HaskellSpec.Target.Lang
 import HaskellSpec.Environments
 import HaskellSpec.SemanticTypes
+import HaskellSpec.Forall2
 
 /-- A typename `T` applied to a list of arguments:
 ```text
@@ -78,6 +79,47 @@ end
 
 set_option quotPrecheck false in
 set_option hygiene false in
+notation  "《class》" ce "," te "," h "⊢" cls "፥" Γ "," τ "▪" => classR ce te h cls Γ τ
+
+/--
+Cp. Fig 25
+```text
+CE, TE, h ⊢ class : Γ τ
+```
+-/
+inductive classR : Env.CE → Env.TE → Int
+                 → Source.ClassAssertion
+                 → SemTy.SClass_Name
+                 → SemTy.TypeS
+                 → Prop where
+  | CLASS :
+    (_, Env.CEEntry.mk Γ h' x C ie) ∈ ce →
+    h' < h →
+    《type》te, h'' ⊢ List.foldl Source.TypeExpression.app (Source.TypeExpression.var u) ts ፥ τ ▪ →
+    ------------------------------------------------------------------------------------------------
+    《class》ce,te,h ⊢ Source.ClassAssertion.mk C u ts ፥ Γ , τ ▪
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《context》" ce "," te "," h "⊢" cx "፥" θ "▪" => context ce te h cx θ
+
+/--
+Cp. Fig 25
+```text
+CE, TE, h ⊢ cx : θ
+```
+-/
+inductive context : Env.CE → Env.TE → Int
+                  → Source.Context
+                  → SemTy.Context
+                  → Prop where
+  | CONTEXT :
+    Forall3 class_assertions Γs τs (λ classᵢ Γᵢ τᵢ => 《class》ce,te,h ⊢ classᵢ ፥ Γᵢ ,τᵢ ▪) →
+    -----------------------------------------------------------------------------------------
+    《context》ce,te,h ⊢ class_assertions ፥ _ ▪
+
+set_option quotPrecheck false in
+set_option hygiene false in
 notation  "《sig》" ge "⊢" sign "፥" ve "▪" => sig ge sign ve
 
 /--
@@ -93,8 +135,9 @@ inductive sig : Env.GE
   | SIG :
     ke = Env.kindsOf ce te →
     《type》_,_ ⊢ _ ፥ _ ▪ →
+    《context》_,_,_ ⊢ cx ፥ θ ▪ →
     ---------------------------------------------------------
-    《sig》⟨ce,te,de⟩ ⊢ (Source.Signature.mk v _ _) ፥ [⟨v,_⟩] ▪
+    《sig》⟨ce,te,de⟩ ⊢ (Source.Signature.mk v cx _) ፥ [⟨v,_⟩] ▪
 
 set_option quotPrecheck false in
 set_option hygiene false in
