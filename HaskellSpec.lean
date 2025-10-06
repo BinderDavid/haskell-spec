@@ -18,6 +18,7 @@ import HaskellSpec.Elaboration.Expressions
 import HaskellSpec.Elaboration.Literals
 import HaskellSpec.Elaboration.Patterns
 import HaskellSpec.Elaboration.Dictionary
+import HaskellSpec.Elaboration.Types
 import HaskellSpec.Lexer.Columnizer
 import HaskellSpec.Lexer.Haskell.Tokens
 import HaskellSpec.Lexer.Haskell.Literals

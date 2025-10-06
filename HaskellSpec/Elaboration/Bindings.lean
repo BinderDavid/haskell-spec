@@ -1,6 +1,7 @@
 import HaskellSpec.Environments
 import HaskellSpec.Source.Lang
 import HaskellSpec.Target.Lang
+import HaskellSpec.Elaboration.Types
 
 def concat_target_binds (n m: Target.Binds): Target.Binds :=
   -- TODO Looks like Target.Binds isn't completely
@@ -26,8 +27,9 @@ inductive bindG : Env.GE → Env.IE → Env.VE
                 → Env.VE
                 → Prop where
   | BINDG :
+    《sigs》ge ⊢ _ ፥ _ ▪ →
     -------------------------------
-    《bindG》_,_,_ ⊢ _ ; _ ⇝ _ ፥ _ ▪
+    《bindG》ge,_,_ ⊢ _ ; _ ⇝ _ ፥ _ ▪
 
 
 set_option quotPrecheck false in
