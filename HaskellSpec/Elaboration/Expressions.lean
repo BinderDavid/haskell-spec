@@ -526,6 +526,7 @@ mutual
                   → Prop where
     | BINDG :
       《sigs》ge ⊢ _ ፥ _ ▪ →
+      《monobinds》 _,_,_ ⊢ _ ⇝ _ ፥ _ ▪ →
       -------------------------------
       《bindG》ge,_,_ ⊢ _ ; _ ⇝ _ ፥ _ ▪
 
