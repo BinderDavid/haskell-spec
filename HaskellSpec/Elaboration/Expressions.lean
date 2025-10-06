@@ -5,10 +5,10 @@ import HaskellSpec.Source.Patterns
 import HaskellSpec.Source.Literals
 import HaskellSpec.Target.Lang
 import HaskellSpec.SemanticTypes
-import HaskellSpec.Elaboration.Bindings
 import HaskellSpec.Elaboration.Dictionary
 import HaskellSpec.Elaboration.Literals
 import HaskellSpec.Elaboration.Patterns
+import HaskellSpec.Elaboration.Types
 import HaskellSpec.NonEmpty
 import HaskellSpec.Prelude
 
@@ -45,6 +45,21 @@ def apply_sequence : SemTy.TypeS → Target.Expression → SemTy.TypeS → SemTy
   let e''' := Target.Expression.typ_app e'' (NonEmpty.mk τ₁ [τ₂])
   Target.apps e''' [e₁,e₂]
 
+def concat_target_binds (n m: Target.Binds): Target.Binds :=
+  -- TODO Looks like Target.Binds isn't completely
+  -- defined yet. But when it is, we should define
+  -- this.
+  sorry
+
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《bindG》" ge "," ie "," ve "⊢" sgs ";" bs "⇝" bs' "፥" ve' "▪" => bindG ge ie ve sgs bs bs' ve'
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《binds》" ge "," ie "," ve "⊢" bs "⇝" bs' "፥" ve' "▪" => binds ge ie ve bs bs' ve'
+
 set_option quotPrecheck false in
 set_option hygiene false in
 notation  "《exp》" ge "," ie "," ve "⊢" e "⇝" e' "፥" τ "▪" => exp ge ie ve e e' τ
@@ -76,6 +91,10 @@ notation  "《match》" ge "," ie "," ve "⊢" match' "⇝" match'' "፥" τ "�
 set_option quotPrecheck false in
 set_option hygiene false in
 notation  "《bind》" ge "," ie "," ve "⊢" bind' "⇝" bind'' "፥" ve' "▪" => bind ge ie ve bind' bind'' ve'
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation  "《monobinds》" ge "," ie "," ve "⊢" bs "⇝" bs' "፥" ve' "▪" => monobinds ge ie ve bs bs' ve'
 
 mutual
   /--
@@ -477,24 +496,58 @@ mutual
       《gdes》ge,ie,ve ⊢ gdes_source ⇝ gedes_target ፥ τ ▪ →
       bind ge ie ve (Source.Binding.bind_pat p_source gdes_source) (Target.Binding.bind_pat p_target gdes_target) veₚ
 
+  /--
+  Cp. Fig 34
+  ```text
+  GE, IE, VE ⊢ bindG ⇝ binds : VE
+  ```
+  -/
+  inductive monobinds : Env.GE → Env.IE → Env.VE
+                      → List Source.Binds
+                      → Target.Binds
+                      → Env.VE
+                      → Prop where
+    | MONOBINDS :
+      -- Forall3 bs bs' ves (λ b b' veᵢ => 《bind》ge,ie,ve ⊢ b ⇝ b' ፥ veᵢ ▪ ) →
+      ------------------------------------
+      《monobinds》ge,ie,ve ⊢ _ ⇝ _ ፥ _ ▪
+
+  /--
+  Cp. Fig 30
+  ```text
+  GE, IE, VE ⊢ sigs;bindG ⇝ binds : VE
+  ```
+  -/
+  inductive bindG : Env.GE → Env.IE → Env.VE
+                  → List Source.Signature
+                  → List Source.Binds
+                  → Target.Binds
+                  → Env.VE
+                  → Prop where
+    | BINDG :
+      《sigs》ge ⊢ _ ፥ _ ▪ →
+      -------------------------------
+      《bindG》ge,_,_ ⊢ _ ; _ ⇝ _ ፥ _ ▪
+
+  /--
+  Cp. Fig. 29
+  ```text
+  GE, IE, VE ⊢ binds ⇝ binds : VE
+  ```
+  -/
+  inductive binds : Env.GE → Env.IE → Env.VE
+                  → Source.Binds
+                  → Target.Binds
+                  → Env.VE
+                  → Prop where
+    | BINDS :
+      《bindG》ge,ie, ve                         ⊢ sgs ; bnds ⇝ binds' ፥ ve_bindg ▪ →
+      《binds》ge,ie, Env.oplusarrow ve ve_bindg ⊢ bnds' ⇝ binds'' ፥ ve_binds ▪ →
+      《oplus》ve_bindg ⊞ be_binds ≡ ve_res ▪ →
+      --------------------------------------------------------------------------------------------------------------------------------------
+      《binds》ge,ie,ve ⊢ Source.Binds.cons sgs bnds bnds' ⇝ concat_target_binds binds' binds'' ፥ ve_res ▪
+
+    | EMPTY_BINDS :
+      ------------------------------------------------------------------
+      《binds》ge,ie,ve ⊢ Source.Binds.empty ⇝ Target.Binds.non_recursive [] ፥ [] ▪
 end
-
-set_option quotPrecheck false in
-set_option hygiene false in
-notation  "《monobinds》" ge "," ie "," ve "⊢" bs "⇝" bs' "፥" ve' "▪" => monobinds ge ie ve bs bs' ve'
-
-/--
-Cp. Fig 34
-```text
-GE, IE, VE ⊢ bindG ⇝ binds : VE
-```
--/
-inductive monobinds : Env.GE → Env.IE → Env.VE
-                    → List Source.Binds
-                    → Target.Binds
-                    → Env.VE
-                    → Prop where
-  | MONOBINDS :
-    Forall3 bs bs' ves (λ b b' veᵢ => 《bind》ge,ie,ve ⊢ b ⇝ b' ፥ veᵢ ▪ ) →
-    ------------------------------------
-    《monobinds》ge,ie,ve ⊢ _ ⇝ _ ፥ _ ▪
