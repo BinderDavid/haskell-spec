@@ -1,15 +1,5 @@
 {"version": "1.1.0",
  "packagesDir": ".lake/packages",
- "packages":
- [{"url": "https://github.com/haskell-spec/veriflex.git",
-   "type": "git",
-   "subDir": null,
-   "scope": "",
-   "rev": "c43a469e941b4cf1374396e8cf2b9da69023ced9",
-   "name": "veriflex",
-   "manifestFile": "lake-manifest.json",
-   "inputRev": "c43a469e941b4cf1374396e8cf2b9da69023ced9",
-   "inherited": false,
-   "configFile": "lakefile.toml"}],
+ "packages": [],
  "name": "«haskell-spec»",
  "lakeDir": ".lake"}
